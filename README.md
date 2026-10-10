@@ -129,5 +129,5 @@ measurements remain unchanged in `research/`.
 
 ## License
 
-GPL-3.0; see [LICENSE](LICENSE). The bundled `signalsmith-linear` FFT is MIT
+MIT; see [LICENSE](LICENSE). The bundled `signalsmith-linear` FFT is MIT
 licensed ([third_party/README.md](third_party/README.md)).

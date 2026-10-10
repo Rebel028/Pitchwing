@@ -20,7 +20,7 @@ engine there. Keep this repository focused on the reusable engine and its
 consumer contract; the external plug-in remains outside this project's scope.
 The consumer is the sibling `../ShiftKey` project. Its requirements now inform
 the engine API and build packaging; changes to the plug-in itself remain in
-that separate project. The engine is licensed GPL-3.0 (2026-10-10); ShiftKey
+that separate project. The engine is licensed MIT (2026-10-10, relicensed from GPL-3.0 the same day); ShiftKey
 consumes it as an optional, auto-detected dependency and default engine.
 
 Low-register guitar performance and latency are co-primary requirements.

@@ -1355,7 +1355,7 @@ Changes:
 - `master` fast-forwarded to `engine-quality` (b0f1925); branches
   `engine-quality` / `worktree-engine-quality-work` and the stale worktree
   removed. `.agents/` and `__pycache__/` are untracked and ignored.
-- Licence: GPL-3.0 (`LICENSE`); the bundled Signalsmith FFT stays MIT.
+- Licence: GPL-3.0 chosen first, then relicensed to MIT the same day (`LICENSE`) so a public ShiftKey binary built from the private Pitchwing repo carries no source-disclosure duty; the bundled Signalsmith FFT stays MIT.
   Recorded in `PROJECT.md` and the README.
 - README: "How it works" (one screen, links to the maths in
   `docs/live-engine.md` and `docs/native-core.md`), figures, project structure
