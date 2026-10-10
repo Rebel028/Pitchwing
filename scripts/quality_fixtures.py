@@ -317,8 +317,42 @@ def bend(out):
     out["bend"] = {"pass": "informational: compare builds", **res}
 
 
+def bend_model(out):
+    """Bent E2 and E2+G#2 (+2 nd harmonics): output residual re the ideally shifted partials.
+
+    Per 20 ms block the output is fitted by least squares to cos/sin of r times each
+    input partial's phase; the residual (dB re block energy) catches mistuning,
+    beat-rate FM and stale long-frame frequencies on split dyads alike."""
+    t = t_axis(3.0)
+    semis = np.interp(t, [0, 1.0, 1.3, 2.0, 2.3, 3.0], [0, 0, 2, 2, 0, 0])
+    bendf = 2 ** (semis / 12)
+    res = {}
+    for name, roots in (("single_E2", [82.41]), ("dyad_E2_G#2", [82.41, 103.83])):
+        phases = [2 * np.pi * np.cumsum(h * f0 * bendf) / FS for f0 in roots for h in (1, 2)]
+        amps = [0.3 / len(roots), 0.15 / len(roots)] * len(roots)
+        x = sum(a * np.sin(p) for a, p in zip(amps, phases))
+        res[name] = {}
+        for shift in (-7, 7):
+            y = render(f"bendm_{name}_{shift}", x, shift)
+            basis = np.column_stack([f(ratio(shift) * p) for p in phases for f in (np.cos, np.sin)])
+            n = int(0.02 * FS)
+            err = []
+            for i in range(int(0.5 * FS), int(2.8 * FS) - n, n):
+                sol, *_ = np.linalg.lstsq(basis[i:i + n], y[i:i + n], rcond=None)
+                e = y[i:i + n] - basis[i:i + n] @ sol
+                err.append(db(np.sum(e * e), np.sum(y[i:i + n] ** 2)))
+            err = np.array(err)
+            tt = np.arange(int(0.5 * FS), int(2.8 * FS) - n, n) / FS
+            windows = {"hold_0.5_1.0": (0.5, 1.0), "bend_up_1.0_1.5": (1.0, 1.5),
+                       "hold_1.6_2.0": (1.6, 2.0), "bend_down_2.0_2.5": (2.0, 2.5)}
+            res[name][f"{shift:+d}"] = {k: {"median_db": r(np.median(err[(tt >= a) & (tt < b)]), 1),
+                                            "worst_db": r(err[(tt >= a) & (tt < b)].max(), 1)}
+                                        for k, (a, b) in windows.items()}
+    out["bend_model"] = {"pass": "informational: residual re ideally shifted partials, compare builds", **res}
+
+
 FIXTURES = {"unity": unity, "sidebands": sidebands, "churn": churn, "warble": warble,
-            "dc": dc_lowbin, "hf": hf_junk, "bend": bend}
+            "dc": dc_lowbin, "hf": hf_junk, "bend": bend, "bend_model": bend_model}
 
 
 def main():

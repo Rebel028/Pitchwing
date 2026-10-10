@@ -1,0 +1,86 @@
+{
+ "rate": 48000,
+ "H": 96,
+ "L": 384,
+ "latency_D": 479,
+ "block": 32,
+ "bend_model": {
+  "pass": "informational: residual re ideally shifted partials, compare builds",
+  "single_E2": {
+   "-7": {
+    "hold_0.5_1.0": {
+     "median_db": -18.9,
+     "worst_db": -17.3
+    },
+    "bend_up_1.0_1.5": {
+     "median_db": -19.3,
+     "worst_db": -17.3
+    },
+    "hold_1.6_2.0": {
+     "median_db": -19.4,
+     "worst_db": -17.1
+    },
+    "bend_down_2.0_2.5": {
+     "median_db": -18.8,
+     "worst_db": -16.7
+    }
+   },
+   "+7": {
+    "hold_0.5_1.0": {
+     "median_db": -17.5,
+     "worst_db": -16.0
+    },
+    "bend_up_1.0_1.5": {
+     "median_db": -18.5,
+     "worst_db": -17.0
+    },
+    "hold_1.6_2.0": {
+     "median_db": -18.3,
+     "worst_db": -17.4
+    },
+    "bend_down_2.0_2.5": {
+     "median_db": -18.1,
+     "worst_db": -17.0
+    }
+   }
+  },
+  "dyad_E2_G#2": {
+   "-7": {
+    "hold_0.5_1.0": {
+     "median_db": -52.0,
+     "worst_db": -40.2
+    },
+    "bend_up_1.0_1.5": {
+     "median_db": -27.8,
+     "worst_db": -16.6
+    },
+    "hold_1.6_2.0": {
+     "median_db": -30.1,
+     "worst_db": -26.5
+    },
+    "bend_down_2.0_2.5": {
+     "median_db": -28.9,
+     "worst_db": -19.1
+    }
+   },
+   "+7": {
+    "hold_0.5_1.0": {
+     "median_db": -52.0,
+     "worst_db": -44.5
+    },
+    "bend_up_1.0_1.5": {
+     "median_db": -23.9,
+     "worst_db": -15.3
+    },
+    "hold_1.6_2.0": {
+     "median_db": -20.6,
+     "worst_db": -16.2
+    },
+    "bend_down_2.0_2.5": {
+     "median_db": -28.3,
+     "worst_db": -18.1
+    }
+   }
+  }
+ }
+}

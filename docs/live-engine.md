@@ -137,6 +137,19 @@ unchanged. E2+G#2 at ±7: lines within 0.1 % of the required spacing (was
 50 %/−33 %), outer beat sidebands −26/−17 → −86/−90 dB, output residual
 re an ideal two-tone −51 dB.
 
+Lobe ownership (all regions, step 6). A partial whose 3-bin lobe fit leaves
+≤ 2 % residual and whose centre is ≥ 1 bin owns its fitted lobe over ±24 bins
+(window skirts included), transported with its own `w`; its image term goes
+conjugated to the mirrored bins as for components. Every bin-owning entry
+(plain region, split residual) renders `X − model` in its bins, where `model`
+is the sum of all transported lobes; bin 0's remainder `X[0] − model[0]` is
+the DC term. The sum over entries is still exactly `X`. Before, a partial's
+skirt outside its own region was translated with the neighbour's `delta`
+(−19 dB lines at f ± (f2−f1)(r−1) for a 3.5-bin pair) and its image term by
+`+delta` (low-tone gain −0.7…−0.9 dB, fit 0.984–0.99). Sub-bin regions (a DC
+lobe) keep bins only, and when lowest their fitted bin-0 share as before
+(rendering a lobe there made pure DC +7 lose 25 %).
+
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
 channel relations without mixing samples between channels. A silent channel

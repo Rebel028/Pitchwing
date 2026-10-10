@@ -24,6 +24,8 @@ constexpr double longLimitHz = 700.0;      // long peaks are searched below this
 constexpr std::size_t maxSplit = 4;        // components per split region
 constexpr std::size_t maxEntries = maxRegions + 16;
 constexpr double minSplitBins = 0.35;      // short-bin spacing below which a split is ill-conditioned
+constexpr std::size_t lobeSpan = 24;       // bins each side a fitted lobe is transported with its partial
+constexpr double lobeQuality = 0.02;       // max residual/energy of a 3-bin fit that earns a lobe
 using Complex = std::complex<double>;
 using Transform = signalsmith::linear::SplitFFT<double>;
 
@@ -107,9 +109,11 @@ bool validBuffers(const Sample* left, const Sample* right, Sample* outLeft,
 }  // namespace
 
 struct LiveEngine::Impl {
-    // A transport entry: a plain region (its bins), the residual of a split
-    // region (its bins minus the fitted component lobes that follow it), or one
-    // fitted component lobe restricted to the region's bins.
+    // A transport entry. Well-fitted partials own their whole lobe (+-lobeSpan
+    // bins, image on the mirrored bins) so their window skirts move with them;
+    // Plain and Residual entries own their bins minus every lobe there. Plain:
+    // a region (lobe if its fit is good); Residual: a split group's bins, no
+    // lobe; Component: one fitted lobe of a split group, no bins.
     enum class Kind { Plain, Residual, Component };
     struct Region {
         std::size_t peak = 0;
@@ -119,7 +123,8 @@ struct LiveEngine::Impl {
         double rotation = 0.0;
         Kind kind = Kind::Plain;
         std::size_t components = 0;          // Residual: count of following components
-        std::array<Complex, 2> amplitude{};  // Component: per-channel lobe amplitude
+        std::array<Complex, 2> amplitude{};  // per-channel lobe amplitude
+        bool lobe = false;
     };
 
     explicit Impl(const LiveConfig& config)
@@ -146,6 +151,7 @@ struct LiveEngine::Impl {
             output[channel].resize(ringSize);
             spectrum[channel].resize(n);
             longSpectrum[channel].resize(nLong);
+            model[channel].resize(bins);
         }
         // Both windows: sine rise to N - L/2, cosine fall over the last L/2.
         auto makeWindow = [this](std::vector<double>& window, std::vector<Complex>& table, double& sum) {
@@ -313,19 +319,21 @@ struct LiveEngine::Impl {
         return 0.5 * (low + high);
     }
 
-    double fitOmega(std::size_t peak) noexcept {
+    double fitOmega(std::size_t peak, std::array<Complex, 2>& amplitude, bool& good) noexcept {
         // The range reaches 0 so a DC lobe fits as an untranslated w = 0 tone.
         const auto found = searchCentre(peak <= 1 ? 0.0 : static_cast<double>(peak) - 0.6,
                                         static_cast<double>(peak) + 0.6, 5, 13,
                                         [&](double c) { return lobeFitCost(peak, c); });
         const auto centre = std::clamp(found, 0.0, 0.5 * static_cast<double>(n) - 0.5);
-        if (peak == peaks[0]) {
-            // Lowest region: split bin 0 into the fitted tone's share (translated
-            // with the region) and the true DC residual (rendered untranslated).
-            lobeFitCost(peak, centre, &lowestAmplitude);
-            lowestImage = lobeAt(centre);
-            lowestPositive = lobeAt(-centre);
+        auto energy = 0.0;
+        for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+            for (auto bin = peak - 1; bin <= peak + 1; ++bin) {
+                energy += std::norm(spectrum[channel][bin]);
+            }
         }
+        // Below one bin (a DC lobe) the positive/image split of the lobe is
+        // ill-conditioned; such regions keep bins only and bin 0 stays DC.
+        good = lobeFitCost(peak, centre, &amplitude) <= lobeQuality * energy && centre >= 1.0;
         return centre * binWidth;
     }
 
@@ -701,16 +709,13 @@ struct LiveEngine::Impl {
             }
             return first <= last;
         };
+        std::array<Complex, 2> amplitude{};
+        auto good = false;
         auto emitPlain = [&](std::size_t index) {
             const auto peak = peaks[index];
-            const auto omega = fitOmega(peak);
-            regions[entries++] = Region{peak, beginOf(index), endOf(index), omega, inherit(omega), Kind::Plain, 0, {}};
-            if (index == 0) {
-                for (auto channel = std::size_t{0}; channel < 2; ++channel) {
-                    const auto& a = lowestAmplitude[channel];
-                    binZeroShare[channel] = (a * lowestPositive + std::conj(a) * lowestImage).real();
-                }
-            }
+            const auto omega = fitOmega(peak, amplitude, good);
+            regions[entries++] = Region{peak, beginOf(index), endOf(index), omega, inherit(omega), Kind::Plain, 0,
+                                        amplitude, good};
         };
         for (std::size_t index = 0; index < count;) {
             // An unresolved pair can show as two short peaks (phase dependent);
@@ -738,28 +743,54 @@ struct LiveEngine::Impl {
                 continue;
             }
             const auto peak = peaks[strongest];
-            const auto omega = fitOmega(peak);
-            regions[entries++] = Region{peak, begin, end, omega, inherit(omega), Kind::Residual, split, {}};
+            const auto omega = fitOmega(peak, amplitude, good);
+            regions[entries++] = Region{peak, begin, end, omega, inherit(omega), Kind::Residual, split, {}, false};
             for (std::size_t c = 0; c < split; ++c) {
                 const auto component = centres[c] * binWidth;
                 regions[entries++] = Region{peak, begin, end, component, inherit(component), Kind::Component, 0,
-                                            {amplitudes[0][c], amplitudes[1][c]}};
-                if (begin == 0) {
-                    for (auto channel = std::size_t{0}; channel < 2; ++channel) {
-                        binZeroShare[channel] += part(regions[entries - 1], channel, 0).real();
-                    }
-                }
+                                            {amplitudes[0][c], amplitudes[1][c]}, true};
             }
             index = last + 1;
         }
         regionCount = entries;
+        // Sum of all transported lobes; owners render X - model in their bins and
+        // the bin-0 remainder X[0] - model[0] is the untranslated DC term.
+        for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+            std::fill(model[channel].begin(), model[channel].end(), Complex{});
+        }
+        for (std::size_t index = 0; index < entries; ++index) {
+            const auto& region = regions[index];
+            if (!region.lobe) {
+                continue;
+            }
+            const auto centre = region.omega / binWidth;
+            std::size_t first = 0, last = 0;
+            lobeBins(centre, first, last);
+            for (auto bin = first; bin < last; ++bin) {
+                const auto k = static_cast<double>(bin);
+                const auto p = lobeAt(k - centre);
+                const auto m = lobeAt(k + centre);
+                for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                    const auto& a = region.amplitude[channel];
+                    model[channel][bin] += a * p + std::conj(a) * m;
+                }
+            }
+        }
+        binZeroShare = {model[0][0].real(), model[1][0].real()};
+        if (entries > 0 && regions[0].kind == Kind::Plain && !regions[0].lobe) {
+            // A lobe-less lowest region (a DC lobe) keeps its fitted bin-0 share.
+            const auto centre = regions[0].omega / binWidth;
+            for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                const auto& a = regions[0].amplitude[channel];
+                binZeroShare[channel] += (a * lobeAt(-centre) + std::conj(a) * lobeAt(centre)).real();
+            }
+        }
     }
 
-    // A component's fitted lobe (positive term and image) at a short bin.
-    Complex part(const Region& region, std::size_t channel, std::size_t bin) const noexcept {
-        const auto centre = region.omega / binWidth;
-        const auto& a = region.amplitude[channel];
-        return a * lobeAt(static_cast<double>(bin) - centre) + std::conj(a) * lobeAt(static_cast<double>(bin) + centre);
+    void lobeBins(double centre, std::size_t& first, std::size_t& last) const noexcept {
+        const auto base = static_cast<std::size_t>(centre);
+        first = base > lobeSpan ? base - lobeSpan : 0;
+        last = std::min(n / 2, base + lobeSpan + 2);
     }
 
     void prepareFrame() noexcept {
@@ -845,7 +876,14 @@ struct LiveEngine::Impl {
         const auto end = region.end;
         const auto delta = region.omega * frameRatioMinusOne;
         const auto guard = 2.0 * binWidth;
-        for (auto bin = begin; bin < end; ++bin) {
+        const auto centre = region.omega / binWidth;
+        std::size_t lobeFirst = 0, lobeLast = 0;
+        if (region.lobe) {
+            lobeBins(centre, lobeFirst, lobeLast);
+        }
+        const auto taperFirst = region.lobe ? std::min(begin, lobeFirst) : begin;
+        const auto taperLast = region.lobe ? std::max(end, lobeLast) : end;
+        for (auto bin = taperFirst; bin < taperLast; ++bin) {
             const auto destination = binOmega[bin] + delta;
             // Destinations below zero fold to |destination| through the real
             // part: the conjugate reflection of a real signal's lobe, not a loss.
@@ -877,34 +915,28 @@ struct LiveEngine::Impl {
         }
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             std::fill(inverseSpectrum.begin(), inverseSpectrum.end(), Complex{});
-            if (region.kind == Kind::Component) {
-                // The fitted lobe's image term is the negative-frequency partial's
-                // leakage: put it on the mirrored bins (conjugated) so the
-                // modulator moves it by -delta with its partial, not by +delta
-                // (which left f - delta lines at -31 dB on the warble dyad).
-                const auto centre = region.omega / binWidth;
+            if (region.lobe) {
+                // The image term conj(a)*A(k+w) is the negative-frequency partial's
+                // leakage: conjugated on the mirrored bins the modulator moves it
+                // by -delta with its partial (as positive content it left f - delta
+                // lines at -31 dB on the warble dyad). Bin 0 carries 2*a*A(-w),
+                // whose real part is the whole bin-0 share.
                 const auto& a = region.amplitude[channel];
-                for (auto bin = std::max<std::size_t>(begin, 1); bin < end; ++bin) {
+                for (auto bin = lobeFirst; bin < lobeLast; ++bin) {
                     const auto k = static_cast<double>(bin);
-                    inverseSpectrum[bin] = 2.0 * a * lobeAt(k - centre) * taper[bin];
-                    inverseSpectrum[n - bin] = 2.0 * a * std::conj(lobeAt(k + centre)) * taper[bin];
-                }
-            }
-            for (auto bin = region.kind == Kind::Component ? end : begin; bin < end; ++bin) {
-                auto value = spectrum[channel][bin];
-                if (region.kind == Kind::Residual) {
-                    for (std::size_t c = 1; c <= region.components; ++c) {
-                        value -= part(regions[index + c], channel, bin);
+                    inverseSpectrum[bin] += 2.0 * a * lobeAt(k - centre) * taper[bin];
+                    if (bin > 0) {
+                        inverseSpectrum[n - bin] += 2.0 * a * std::conj(lobeAt(k + centre)) * taper[bin];
                     }
                 }
-                inverseSpectrum[bin] = 2.0 * value * taper[bin];
             }
-            if (begin == 0) {
-                // Bin 0 carries the fitted tone shares (positive term); the rest is
-                // the untranslated DC term rendered in prepareFrame.
-                const auto& a = region.kind == Kind::Plain ? lowestAmplitude[channel] : region.amplitude[channel];
-                const auto positive = region.kind == Kind::Plain ? lowestPositive : lobeAt(-region.omega / binWidth);
-                inverseSpectrum[0] = region.kind == Kind::Residual ? Complex{} : 2.0 * a * positive * taper[0];
+            if (region.kind == Kind::Plain && !region.lobe && begin == 0) {
+                inverseSpectrum[0] += 2.0 * region.amplitude[channel] * lobeAt(-centre) * taper[0];
+            }
+            if (region.kind != Kind::Component) {
+                for (auto bin = std::max<std::size_t>(begin, 1); bin < end; ++bin) {
+                    inverseSpectrum[bin] += 2.0 * (spectrum[channel][bin] - model[channel][bin]) * taper[bin];
+                }
             }
             fft.ifft(inverseSpectrum.data(), inverseTime.data());
             auto destination = frameOutputStart;
@@ -964,9 +996,7 @@ struct LiveEngine::Impl {
     std::vector<double> longOmega;  // fitted, in long bins; NaN until needed this frame
     double analysisSum = 0.0;
     double longSum = 0.0;
-    std::array<Complex, 2> lowestAmplitude{};
-    Complex lowestPositive{};
-    Complex lowestImage{};
+    std::array<std::vector<Complex>, 2> model;
     std::array<Region, maxEntries> regions{};
     std::array<Region, maxEntries> previousRegions{};
     std::array<double, 2> binZeroShare{};

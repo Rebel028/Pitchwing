@@ -1016,3 +1016,32 @@ unchanged. New fixture `bend` (E2 + 2nd harmonic, +2 st over 300 ms and back,
 fundamental IF error): unchanged vs the old build (−7 max 4.5/10.8/2.0/14.6 c
 per window); at +7 the holds show 62 c excursions in both builds — the −19 dB
 skirt-slice lines of the 2nd harmonic (next defect). Tests green.
+
+Lobe ownership (step 6). New fixture `bend_model` (`scripts/quality_fixtures.py`:
+bent E2 and E2+G#2 with 2nd harmonics, per-20 ms least-squares residual of the
+output against the ideally shifted partials; old build vs split build in
+[docs/results/2026-10-10-bend-model-step4.json](docs/results/2026-10-10-bend-model-step4.json) /
+[step5](docs/results/2026-10-10-bend-model-step5.json)) showed (a) a single E2+H2
+note has a −18…−19 dB residual in every build — the skirt-slice defect is much
+larger than the hop_sidebands line level suggested; (b) the split dyad's hold
+after the bend was only −30/−21 dB because the merge test flipped (long-peak gap
+11 vs 12 long bins), clipping components to different bins each frame and
+handing their skirts to residuals with jumping `w` (103↔127 Hz). One mechanism
+fixes both: every well-fitted partial owns its whole lobe (±24 bins, image on
+mirrored bins), bin owners render `X − Σ lobes` (`docs/live-engine.md`).
+First attempt regressed pure DC at +7 (mean 0.21 → 0.15): the DC lobe's
+positive/image split is ill-defined; lobes now need centre ≥ 1 bin, and a
+lobe-less lowest region keeps its bin-0 share (dropping it double-counted DC,
+mean 0.30).
+
+Results ([full matrix](docs/results/2026-10-10-live-step6-lobes-full.json),
+[fixtures](docs/results/2026-10-10-fixtures-step6-lobes.json), vs step 5):
+every low tone B0–E2 at ±1/±7 now gain −0.03…0.00 dB and fit 1.000 (was
+−0.7…−0.9 dB, 0.984–0.99), cents ≤ 0.03; hop_sidebands worst line −45…−50 →
+−58…−60 dB, non-line residual −17 → −35 dB (3.5-bin pair) and −47 → −56 dB;
+bend +7 holds 62 → 3.3 c, sweeps 70/62 → 15/14 c (−7 unchanged within 1.5 c);
+bend_model single E2 −19 → −23…−25 dB, dyad holds −52 → −56 dB, post-bend hold
+−30/−21 → −41/−34 dB; B0 gate env gain 0.80/0.89 → 0.84/0.93; DC, dyads
+(informational), churn, unity, warble unchanged or better. Regression:
+hf_junk wet/dry > 2 kHz at +12 4.49 → 4.88× (+0.4 dB; unexplained). The
+remaining −23 dB single-note residual is not yet analysed.
