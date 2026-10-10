@@ -729,3 +729,85 @@ unresolved-dyad treatment), then prototype one change at a time against the
 baseline JSON and the `06/minus7` listening excerpt. Session handoff is planned
 once the three agents report, because the conversation context is near the
 user's 250k limit.
+
+Stretch baseline reported (see
+[docs/quality/2026-10-10-stretch-baseline.md](docs/quality/2026-10-10-stretch-baseline.md),
+`experiments/stretch-baseline/`, `docs/results/2026-10-10-stretch-*.json`):
+Signalsmith Stretch 1.3.2 at 480/96 (10.0 ms) and 512/64 (10.667 ms), tonality
+limit 0, is outside its operating range: low tones land 190–1030 cents off with
+fit share ≤ 0.06, A4 off by 4–43 cents, DC AC ripple 0.09–0.18, late chord fit
+0.002–0.35; the same tool at Stretch's 120 ms default transposes correctly, so
+the harness is sound. Pitchwing at 479 samples is far ahead on low tones, DC and
+attacks. One lead for Pitchwing: on the real DI at +12 its >2 kHz wet/dry energy
+over loud seconds is median 21.8× / max 1136× versus Stretch 1.4× / 8.4×. Part of
+that is legitimate upward transposition (Stretch barely transposes at 10 ms), so
+treat it as a candidate upward-shift artefact (alias taper, noise-floor regions
+translated into the treble) to measure against a synthetic +12 fixture, not a
+confirmed defect. Stretch excerpts are in `/tmp/pitchwing-chord/`; no listening
+yet. Nothing from Stretch is vendored into the engine.
+
+Research-options synthesis reported
+([docs/quality/2026-10-10-research-options.md](docs/quality/2026-10-10-research-options.md),
+425 lines, sources: Laroche–Dolson 1999 full text, PVDR, Rubber Band R3 sources
+read-only, Stretch design notes/tags, onset and close-sinusoid literature; no
+2023–2026 guitar-specific low-latency papers beyond Polak–Erkut 2025). Notable
+inference from existing numbers: the E2 errors (+7.03 cents at −7, −4.71 at
++7, ratio −1.49) match the (r−1)/r signature of a region-frequency-estimate
+bias (~−14 cents, 0.03 bin), i.e. an estimator problem (parabolic fit on the
+asymmetric lobe or phase-difference gate fallback), not a transport fault —
+unverified against the code path. Ranked candidates, all at zero added delay:
+(1) gated ancestry with birth/death hysteresis and per-region confidence;
+(2) window-matched frequency estimator; (3) soft cos² region boundaries at
+magnitude valleys to stop θ jumps on bin reassignment; (4) alias guard from the
+control snapshot's maximum ratio plus mirroring; (5) explicit DC policy (fixed
+untranslated sub-25 Hz region, or a 5 Hz high-pass with DC out of scope);
+(6) past-only onset score (FFT 512 spectral flux, ~+2 % CPU) with region-local
+θ re-anchor, never global or dry-mixed; (7) low-band zoom estimator (decimate by
+8, 341 ms, 2.9 Hz bins) feeding parametric resynthesis of unresolved low
+regions — highest potential against the dyad failure, 100–170 ms settling risk,
+B0/C1 explicitly not reachable; (8) cheaper synthesis: direct oscillator
+evaluation over the 384-sample support (flat in region count) or single-IFFT
+Laroche–Dolson translation (~60× cheaper, loses sample-accurate control,
+−51 dBc interpolation sidebands at 75 % overlap); (9) per-channel ω refinement;
+(10) tonality limit as a named option. Not-to-do list with evidence: serial STN,
+universal transient bypass, global/periodic phase resets, PVDR drop-in, raising
+N alone, time-stretch+resampler pipelines, Ocean quantisation, envelope
+time-rescaling of unresolved regions, random residual phases. All CPU figures
+are flop arithmetic; all gains are hypotheses gated by the listed tests.
+
+Code-caveat audit reported
+([docs/quality/2026-10-10-code-caveats.md](docs/quality/2026-10-10-code-caveats.md),
+280 lines, read-only reasoning on `src/LiveEngine.cpp`, no numeric runs).
+Ranked mechanisms: (1) unresolved low regions share one ω whose estimate
+wobbles with beat phase (IF gate accepts 2-bin jumps) → beat-rate warble/FM;
+(2) region-boundary churn from peak births/deaths (noise above the 1e-4 floor
+in decay tails, 64-cap re-ranking, merges/splits) gives bins a phase step
+θ_A−θ_B → crackle at lobe-skirt level; ungated inheritance lets new noise
+peaks free-run; (3) brick-wall region partitions cannot represent the
+192-sample falling window edge and S=Hann/(4A) amplifies the tail (1/A up to
+122×) → predicted hop-rate buzz scaling with |r−1|, consistent with the 3–4 %
+non-line energy on B0/E1 (unverified, cheap fixture); (4) 64-region cap drops
+partials onto neighbours' δ (≈60-cent ghosts) on dense chords; (5) nonunity →
+exact-unity transition mixes rotated and unrotated copies, up to a 6 ms null
+per partial when the target lands exactly on 0 for ≥ L samples; (6) DC path:
+S is not a partition of unity (sum 1.10–1.15, ±2.3 % hop-rate ripple;
+predicted AC RMS 0.0033 for 0.2 DC matches the measured 0.0036), sub-bin-3
+fundamentals get an unshifted ghost — fix with input HPF + dc·Hann/4; (7) hard
+drop of sub-zero destinations at −12 toggles a skirt bin (≈−25 dB clicks on
+low E) — 1-bin low-side taper; (8) onset lag; (9) IF-gate toggles; (10) alias
+taper from the newest control only. Verified consistent: hopArea,
+negativeSuffix, recurrence re-anchoring, ring disjointness, scheduler
+completion, region coverage; only oddity is an up-to-500-element sort per
+frame on the audio thread. Top five fixtures to run first: unity-transition
+dip, 3.5-bin vs 30-bin tone pair at +12/−2 for hop-rate sidebands, noisy
+decaying chord for churn crackle, E2+G#2 warble, DC buzz and low-bin toggle
+at −12. Fixture thresholds are reasoning-based and need tuning once rendered.
+
+Handoff point: all three reports are in the repository. Resume by reading the
+three `docs/quality/2026-10-10-*.md` files, then run the five fixtures above
+through `tools/pitchwing_live_render` + `scripts/artifact_scan.py` to confirm
+which mechanisms are real before any fix; gauntlet the design choices (soft
+region boundaries / direct-oscillator synthesis / gated tracking / DC policy /
+low-band zoom estimator); fix one mechanism at a time with before/after runs of
+`evaluate.py --native` and the preserved baseline JSON; keep the `06/minus7`
+excerpt as the listening reference and re-render it after each change.
