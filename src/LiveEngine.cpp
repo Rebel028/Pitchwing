@@ -27,6 +27,7 @@ constexpr std::size_t maxEntries = maxRegions + 16;
 constexpr double minSplitBins = 0.35;      // short-bin spacing below which a split is ill-conditioned
 constexpr std::size_t lobeSpan = 24;       // bins each side a fitted lobe is transported with its partial
 constexpr double lobeQuality = 0.02;       // max residual/energy of a 3-bin fit that earns a lobe
+constexpr double credibleQuality = 0.3;    // ... that is removed from neighbours before their refit
 using Complex = std::complex<double>;
 using Transform = signalsmith::linear::SplitFFT<double>;
 
@@ -164,6 +165,7 @@ struct LiveEngine::Impl {
             spectrum[channel].resize(n);
             longSpectrum[channel].resize(nDecimated);
             model[channel].resize(bins);
+            cleaned[channel].resize(bins);
         }
         // Both windows: sine rise to N - L/2, cosine fall over the last L/2.
         auto makeWindow = [](std::vector<double>& window, std::vector<Complex>& table, double& sum,
@@ -365,22 +367,111 @@ struct LiveEngine::Impl {
         return 0.5 * (low + high);
     }
 
-    double fitOmega(std::size_t peak, std::array<Complex, 2>& amplitude, bool& good) noexcept {
-        // The range reaches 0 so a DC lobe fits as an untranslated w = 0 tone.
-        const auto found = searchCentre(peak <= 1 ? 0.0 : static_cast<double>(peak) - 0.6,
-                                        static_cast<double>(peak) + 0.6, 5, 13,
-                                        [&](double c) { return lobeFitCost(peak, c); });
-        const auto centre = std::clamp(found, 0.0, 0.5 * static_cast<double>(n) - 0.5);
+    struct PeakFit {
+        double centre = 0.0;  // bins
+        std::array<Complex, 2> amplitude{};
+        bool good = false;
+        bool credible = false;  // a looser gate: worth removing from neighbours' bins
+    };
+
+    // Successive parabolic steps from x with initial spacing h (the cost is
+    // quadratic near its minimum); 3 evaluations per step, h shrinks 4x.
+    template <typename Cost>
+    static double refineParabola(double x, double h, int steps, double low, Cost cost) noexcept {
+        for (int step = 0; step < steps; ++step) {
+            const auto left = cost(std::max(x - h, low));
+            const auto middle = cost(x);
+            const auto right = cost(x + h);
+            const auto curvature = left - 2.0 * middle + right;
+            if (curvature > 0.0) {
+                x += std::clamp(0.5 * h * (left - right) / curvature, -h, h);
+            } else {
+                x += left < right ? -h : (right < left ? h : 0.0);
+            }
+            x = std::max(x, low);
+            h *= 0.25;
+        }
+        return x;
+    }
+
+    // First pass (refine = false): 13-point grid over the peak bin +-0.6, then
+    // parabolic steps; refit: parabolic steps from `start` only.
+    PeakFit fitPeak(const std::array<std::vector<Complex>, 2>& source, std::size_t peak, double start,
+                    bool refine) const noexcept {
+        auto cost = [&](double c) { return lobeFitCost(source, lobe, analysisSum, peak, c); };
+        auto found = start;
+        if (!refine) {
+            // The range reaches 0 so a DC lobe fits as an untranslated w = 0 tone.
+            const auto low = peak <= 1 ? 0.0 : static_cast<double>(peak) - 0.6;
+            const auto high = static_cast<double>(peak) + 0.6;
+            auto best = std::numeric_limits<double>::max();
+            for (int i = 0; i <= 12; ++i) {
+                const auto candidate = low + (high - low) * i / 12.0;
+                const auto value = cost(candidate);
+                if (value < best) {
+                    best = value;
+                    found = candidate;
+                }
+            }
+        }
+        found = refineParabola(found, refine ? 0.15 : 0.1, refine ? 4 : 4, 0.0, cost);
+        PeakFit fit;
+        fit.centre = std::clamp(found, 0.0, 0.5 * static_cast<double>(n) - 0.5);
         auto energy = 0.0;
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             for (auto bin = peak - 1; bin <= peak + 1; ++bin) {
-                energy += std::norm(spectrum[channel][bin]);
+                energy += std::norm(source[channel][bin]);
             }
         }
         // Below one bin (a DC lobe) the positive/image split of the lobe is
         // ill-conditioned; such regions keep bins only and bin 0 stays DC.
-        good = lobeFitCost(peak, centre, &amplitude) <= lobeQuality * energy && centre >= 1.0;
-        return centre * binWidth;
+        const auto residual = lobeFitCost(source, lobe, analysisSum, peak, fit.centre, &fit.amplitude);
+        fit.good = residual <= lobeQuality * energy && fit.centre >= 1.0;
+        fit.credible = residual <= credibleQuality * energy && fit.centre >= 1.0;
+        return fit;
+    }
+
+    // Two passes: the second refits each peak on its three bins with the other
+    // peaks' credible first-pass lobes removed (poor fits, e.g. noise or DC
+    // sidelobes, are not partials; subtracting them broke pure DC at +7). A neighbour's skirt otherwise biases the
+    // fit (~30 cents for a -6 dB partial 3.5 bins away) and fails the quality
+    // gate, so that partial lost its lobe and its skirt moved with the
+    // neighbour's shift (E2's 2nd harmonic: a -14 dB line at h2 + delta(h1)).
+    void fitPeaks(std::size_t count) noexcept {
+        for (std::size_t i = 0; i < count; ++i) {
+            fits[i] = fitPeak(spectrum, peaks[i], 0.0, false);
+        }
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto peak = peaks[i];
+            refits[i] = fits[i];
+            for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                for (auto bin = peak - 1; bin <= peak + 1; ++bin) {
+                    cleaned[channel][bin] = spectrum[channel][bin];
+                }
+            }
+            auto neighbours = false;
+            for (std::size_t j = 0; j < count; ++j) {
+                const auto distance = peaks[j] > peak ? peaks[j] - peak : peak - peaks[j];
+                if (j == i || distance > lobeSpan || !fits[j].credible) {
+                    continue;
+                }
+                neighbours = true;
+                for (auto bin = peak - 1; bin <= peak + 1; ++bin) {
+                    const auto k = static_cast<double>(bin);
+                    const auto p = lobeAt(k - fits[j].centre);
+                    const auto m = lobeAt(k + fits[j].centre);
+                    for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                        const auto& a = fits[j].amplitude[channel];
+                        cleaned[channel][bin] -= a * p + std::conj(a) * m;
+                    }
+                }
+            }
+            if (neighbours) {
+                // The neighbour shifts the estimate by well under 0.15 bin.
+                refits[i] = fitPeak(cleaned, peak, fits[i].centre, true);
+            }
+        }
+        std::copy_n(refits.begin(), count, fits.begin());
     }
 
     // Joint least squares of X[k] = sum_c a_c A(k - w_c) + conj(a_c) A(k + w_c)
@@ -775,13 +866,12 @@ struct LiveEngine::Impl {
             }
             return first <= last;
         };
-        std::array<Complex, 2> amplitude{};
-        auto good = false;
+        fitPeaks(count);
         auto emitPlain = [&](std::size_t index) {
-            const auto peak = peaks[index];
-            const auto omega = fitOmega(peak, amplitude, good);
-            regions[entries++] = Region{peak, beginOf(index), endOf(index), omega, inherit(omega), Kind::Plain, 0,
-                                        amplitude, good};
+            const auto& fit = fits[index];
+            const auto omega = fit.centre * binWidth;
+            regions[entries++] = Region{peaks[index], beginOf(index), endOf(index), omega, inherit(omega),
+                                        Kind::Plain, 0, fit.amplitude, fit.good};
         };
         for (std::size_t index = 0; index < count;) {
             // An unresolved pair can show as two short peaks (phase dependent);
@@ -809,7 +899,7 @@ struct LiveEngine::Impl {
                 continue;
             }
             const auto peak = peaks[strongest];
-            const auto omega = fitOmega(peak, amplitude, good);
+            const auto omega = fits[strongest].centre * binWidth;
             regions[entries++] = Region{peak, begin, end, omega, inherit(omega), Kind::Residual, split, {}, false};
             for (std::size_t c = 0; c < split; ++c) {
                 const auto component = centres[c] * binWidth;
@@ -1066,6 +1156,9 @@ struct LiveEngine::Impl {
     double analysisSum = 0.0;
     double longSum = 0.0;
     std::array<std::vector<Complex>, 2> model;
+    std::array<std::vector<Complex>, 2> cleaned;
+    std::array<PeakFit, maxRegions> fits{};
+    std::array<PeakFit, maxRegions> refits{};
     std::array<Region, maxEntries> regions{};
     std::array<Region, maxEntries> previousRegions{};
     std::array<double, 2> binZeroShare{};

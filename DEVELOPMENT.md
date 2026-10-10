@@ -1059,3 +1059,30 @@ spacing): 48 kHz block 64 358 µs, 96 kHz block 32 21–28 misses
 Quality equivalent to step 6 ([matrix](docs/results/2026-10-10-live-step7-decimated-full.json),
 [fixtures](docs/results/2026-10-10-fixtures-step7-decimated.json); only warble
 −7 IF p-p 8.5 → 12.7 c, below its 17.8 c static two-tone reference).
+
+Neighbour-cleaned peak fits (step 8). The −23 dB single E2+H2 residual after
+step 6 was h2 content moved by the fundamental's δ (a −14 dB line at 138 Hz at
+−7; h2 0.15 → 0.13): the fundamental's skirt 3.5 bins away failed h2's 2 %
+lobe-quality gate, so h2 had no lobe and its skirt went with the fundamental.
+Peaks are now refitted on their three bins with the credible neighbours'
+first-pass lobes removed (`fitPeaks`, `docs/live-engine.md`). Attempts: removing
+all neighbours broke pure DC at +7 (mean 0.15) via DC-lobe sidelobe "peaks";
+removing only lobe-quality neighbours missed h2 (−40…−47 dB); a looser
+credibility gate (30 %) restores −54 dB with DC intact. The doubled fits raised
+96 kHz block-32 misses to 250/1500; replacing the nested 5×13 grid by a 13-point
+grid + 4 parabolic steps (refit: 4 steps from 0.15 bin; 0.05 bin cost 3 dB
+because it could not reach the bias) brought timing below step 3
+([timing](docs/results/2026-10-10-timing-step8.txt): 48 kHz block 64 345 µs,
+96 kHz block 32 26/1500 misses, WSL diagnostic).
+
+Results vs step 7 ([matrix](docs/results/2026-10-10-live-step8-refit-full.json),
+[fixtures](docs/results/2026-10-10-fixtures-step8-refit.json)): bend_model single
+E2+H2 holds −23 → −54 dB, bends −22…−25 → −36…−46 dB; bend fixture max error
+≤ 7 c everywhere (was 12–15 c in sweeps); hop_sidebands 3.5-bin pair non-line
+residual −35 → −52 dB; tones, DC, dyads, temporal unchanged within noise.
+Churn: one borderline 4×-median event appears in one variant between runs
+(noisy input or noise-on-output) and does not reproduce over the full render;
+flux ratios 0.87–0.98 (pass ±0.2). hf_junk +12 4.88 → 5.2× (+0.3 dB,
+cumulative +0.6 dB since step 5; unexplained, open). The split dyad's bends
+remain the weakest case (−17…−20 dB worst blocks): long-frame lag on moving
+partials.

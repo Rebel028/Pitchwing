@@ -155,6 +155,16 @@ skirt outside its own region was translated with the neighbour's `delta`
 lobe) keep bins only, and when lowest their fitted bin-0 share as before
 (rendering a lobe there made pure DC +7 lose 25 %).
 
+Peak fits run in two passes (step 8). Pass 1: 13-point grid over the peak bin
+±0.6 (from 0 at bin 1), then four parabolic steps (spacing 0.1 bin, shrinking
+4×; 25 cost evaluations instead of 65). Pass 2, for peaks with a credible
+neighbour (3-bin fit residual ≤ 30 %, centre ≥ 1 bin) within ±24 bins: the
+neighbours' pass-1 lobes are subtracted from the peak's three bins and the fit
+is repeated by four parabolic steps from the pass-1 centre (spacing 0.15 bin —
+0.05 could not reach the bias and cost 3 dB). Lobe ownership uses the pass-2
+quality (≤ 2 %). Subtracting non-credible fits (DC-lobe sidelobes) broke pure
+DC at +7.
+
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
 channel relations without mixing samples between channels. A silent channel

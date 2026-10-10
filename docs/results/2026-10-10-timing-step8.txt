@@ -1,0 +1,12 @@
+WSL timing probe, step 8 (two-pass parabolic peak fits), automation off, diagnostic only.
+rate block: mean_us p95_us misses/calls
+44100 32 mean 196 p95 304 miss 0 / 689
+44100 64 mean 394 p95 480 miss 0 / 344
+44100 128 mean 790 p95 947 miss 0 / 172
+48000 32 mean 173 p95 261 miss 0 / 750
+48000 64 mean 345 p95 431 miss 0 / 375
+48000 128 mean 703 p95 843 miss 0 / 187
+96000 32 mean 171 p95 295 miss 26 / 1500
+96000 64 mean 329 p95 446 miss 0 / 750
+96000 128 mean 660 p95 805 miss 0 / 375
+Two-pass with nested 5x13 grids (not committed): 48000 64 mean 403 p95 528; 96000 32 misses 250/1500.
