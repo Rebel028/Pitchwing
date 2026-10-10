@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="260" viewBox="0 0 900 260" font-family="sans-serif" font-size="13">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#444"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: #f3f6fa; stroke: #4a6fa5; stroke-width: 1.5; }
+    .io { fill: #fff3e8; stroke: #d1762b; stroke-width: 1.5; }
+    .t { fill: #222; text-anchor: middle; }
+    .s { fill: #555; text-anchor: middle; font-size: 11px; }
+    .a { stroke: #444; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+  </style>
+
+  <rect rx="6" class="io"  x="10"  y="90" width="70"  height="60"/>
+  <text class="t" x="45" y="116">input</text>
+  <text class="s" x="45" y="134">L / R</text>
+
+  <rect rx="6" class="box" x="110" y="80" width="130" height="80"/>
+  <text class="t" x="175" y="108">STFT analysis</text>
+  <text class="s" x="175" y="126">2048 window, past-heavy</text>
+  <text class="s" x="175" y="142">96-sample hop (48 kHz)</text>
+
+  <rect rx="6" class="box" x="270" y="80" width="130" height="80"/>
+  <text class="t" x="335" y="108">peak fit / ridge</text>
+  <text class="s" x="335" y="126">sinusoid lobes per peak,</text>
+  <text class="s" x="335" y="142">split low chords, 1 % ridge</text>
+
+  <rect rx="6" class="box" x="430" y="80" width="110" height="80"/>
+  <text class="t" x="485" y="108">pitch map</text>
+  <text class="s" x="485" y="126">each partial ×ratio,</text>
+  <text class="s" x="485" y="142">phase-continuous</text>
+
+  <rect rx="6" class="box" x="570" y="80" width="140" height="80"/>
+  <text class="t" x="640" y="108">Taylor-term resynthesis</text>
+  <text class="s" x="640" y="126">whole-bin shift + 4 terms,</text>
+  <text class="s" x="640" y="142">8 IFFTs per hop</text>
+
+  <rect rx="6" class="box" x="740" y="80" width="80" height="80"/>
+  <text class="t" x="780" y="112">overlap-</text>
+  <text class="t" x="780" y="130">add</text>
+
+  <rect rx="6" class="io"  x="840" y="90" width="55"  height="60"/>
+  <text class="t" x="867" y="124">output</text>
+
+  <path class="a" d="M80,120 L110,120"/>
+  <path class="a" d="M240,120 L270,120"/>
+  <path class="a" d="M400,120 L430,120"/>
+  <path class="a" d="M540,120 L570,120"/>
+  <path class="a" d="M710,120 L740,120"/>
+  <path class="a" d="M820,120 L840,120"/>
+
+  <!-- pitch control enters the pitch map from above -->
+  <path class="a" d="M485,40 L485,80"/>
+  <text class="t" x="485" y="32">pitch control (±49 st, per sample)</text>
+
+  <!-- latency bracket under the chain -->
+  <path d="M45,195 L45,205 L867,205 L867,195" stroke="#d1762b" stroke-width="1.5" fill="none"/>
+  <text class="t" x="456" y="225" fill="#d1762b">fixed delay 479 samples @ 48 kHz = about 10 ms (439 @ 44.1 kHz)</text>
+  <text class="s" x="456" y="245">synthesis support 384 samples; analysis looks mostly into the past, not ahead</text>
+</svg>
