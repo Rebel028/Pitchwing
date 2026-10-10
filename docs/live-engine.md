@@ -109,6 +109,34 @@ longer dropped: `Re(z*e^{j*delta*n})` folds them to `|destination|`, which is
 the conjugate reflection of a real signal's lobe; low-tone gain loss at −7 fell
 from −1.1…−1.5 dB to −0.7…−0.9 dB (E2: −0.23 dB).
 
+Unresolved low partials are split, not re-analysed
+(`docs/quality/2026-10-10-multires-gauntlet.md`). A second past-heavy analysis
+of `4n` samples (same window construction, closed-form window spectrum) runs
+whenever the frame is not exact unity and supplies frequencies only; it is
+never transported, so latency, bloom and the short frame's time resolution are
+unchanged. Its peaks below 700 Hz (floor `1e-4` re the short maximum scaled by
+the window sums, skirt peaks dropped with its own lobe table) are counted per
+short region. Neighbouring short regions whose long peaks are < 3 short bins
+apart are merged first (an unresolved pair shows one or two short peaks
+depending on the beat phase). A group is split when it holds 2–4 long peaks
+within 2.5 short bins of its short peaks and ≥ −40 dB re the strongest of them
+(weaker ones are long-window skirt ripple), spaced ≥ 0.35 short bin: the long
+peaks' frequencies are refined jointly (coordinate descent, amplitudes solved
+jointly over the cluster's long bins; single-lobe fits are biased ~14 cents
+p-p by the neighbour), then the short frame fits only the complex amplitudes of
+all component lobes over the group's bins (`jointFit`, Cholesky with a 1e-12
+ridge). The group is rendered as one residual entry (bins minus all fitted
+lobes, merged short `w`) plus one entry per component (its fitted lobe, own `w`
+and inherited rotation). Each component's image term `conj(a)*A(k+w)` is
+placed conjugated on the mirrored bins `n-k`, so the modulator moves it by
+`-delta` with its partial (as positive content it left `f - delta` lines at
+−31 dB). Bin 0 of a split lowest group: components carry `2*a*A(-w)`, the
+residual nothing, and the DC term is `X[0]` minus all component shares. The
+parts plus the residual equal the group's bins, so the untranslated sum is
+unchanged. E2+G#2 at ±7: lines within 0.1 % of the required spacing (was
+50 %/−33 %), outer beat sidebands −26/−17 → −86/−90 dB, output residual
+re an ideal two-tone −51 dB.
+
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
 channel relations without mixing samples between channels. A silent channel

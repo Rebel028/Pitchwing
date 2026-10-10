@@ -973,3 +973,46 @@ bend fixture and the window-study Q3 chord-onset fixture; then the resolved-
 neighbour skirt-slice lines (−19 dB) — candidates: identity-locked per-bin
 phase for skirt bins or boundary placement at the predicted skirt crossing;
 then profiling (`line 418` clear, audio-thread sort) and stereo refinement.
+
+Unresolved low dyads: estimation-only multi-resolution split (session 3).
+Gauntlet of the multi-resolution plan (formalist + historian, condensed in
+[docs/quality/2026-10-10-multires-gauntlet.md](docs/quality/2026-10-10-multires-gauntlet.md)):
+both converged that the soft crossover between two transported partitions
+re-creates the rejected soft-mask notch/ghost; historian recommended
+multi-resolution for estimation only with a short-frame amplitude split
+(Dressler; Keiler & Marchand; Virtanen & Klapuri). Probes
+(`experiments/quality/twolobe_probe.py`, `split_probe.py`): the short-frame
+amplitude fit is well conditioned (cond 1.8 at 0.9 bin, ≤ 4 at 0.45 bin);
+frequencies from the short frame alone fail with harmonics (134 c p-p); from a
+4n frame with single-lobe fits 14 c p-p, with a joint cluster fit 2–5 c p-p
+(1 s decay ≤ 7 c); 2n frames fail. The transported long band was not built.
+
+Implementation (`src/LiveEngine.cpp`, `docs/live-engine.md` "Linked stereo
+analysis"): history ring 4n, long FFT per channel per non-unity hop, long peak
+search below 700 Hz, region merging, gated split, joint fits, residual and
+component transport entries (`Region::Kind`), mirrored image bins for
+components, bin-0 shares per entry. Window lobe tables now come from a closed
+form (`windowSpectrum`) instead of a direct sum (needed for the 8192-sample
+window). Debugging on the way (instrumented renders): (a) the dyad shows one
+or two short peaks depending on the beat phase, so the split flipped on and
+off (IF p-p 1380 c) → merge neighbouring regions whose long peaks are < 3 short
+bins apart; (b) components' image term translated by +δ left f−δ lines at
+−31 dB (residual re ideal two-tone −30 dB) → mirrored bins, residual −51 dB;
+(c) long-window skirt ripple (−60…−90 dB) inside wide regions split single
+notes (E1 ghost −76 → −50 dB, single-note bend hold 5 → 11 c) → candidates must
+lie within 2.5 short bins of a short peak and ≥ −40 dB re the strongest.
+
+Results (full matrix
+[docs/results/2026-10-10-live-step5-split-full.json](docs/results/2026-10-10-live-step5-split-full.json),
+fixtures [docs/results/2026-10-10-fixtures-step5-split.json](docs/results/2026-10-10-fixtures-step5-split.json),
+vs step3): warble −7/+7 lines 54.93/69.21 and 123.41/155.64 Hz (required
+55.0/69.3, 123.48/155.57), spacing error 49.9/−33.2 % → −0.1/+0.4 %, outer beat
+sidebands −26/−17 → −86/−90 dB, IF p-p 435/259 → 11/1.5 c (static two-tone
+reference 18/1.4); hop_sidebands 1000+1703 Hz worst line −44 → −50 dB, non-line
+residual −38/−40 → −47 dB; E1 ghost −76/−83 → −83/−84 dB; DC hop line −148 →
+−166 dBFS; B0 gate late fit 0.77/0.82 → 0.87/0.84; tones, DC, informational
+semitone dyads (B0/C1, E1/F1: 1.8–2.5 Hz, out of reach) and the other fixtures
+unchanged. New fixture `bend` (E2 + 2nd harmonic, +2 st over 300 ms and back,
+fundamental IF error): unchanged vs the old build (−7 max 4.5/10.8/2.0/14.6 c
+per window); at +7 the holds show 62 c excursions in both builds — the −19 dB
+skirt-slice lines of the 2nd harmonic (next defect). Tests green.

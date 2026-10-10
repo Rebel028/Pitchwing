@@ -291,8 +291,34 @@ def hf_junk(out):
                           "energy_above_dbfs": db(p[f > top].sum())}
 
 
+def bend(out):
+    """Multi-resolution risk: omega lag on an E2 bend of +2 st over 300 ms and back."""
+    t = t_axis(3.0)
+    semis = np.interp(t, [0, 1.0, 1.3, 2.0, 2.3, 3.0], [0, 0, 2, 2, 0, 0])
+    f_in = 82.41 * 2 ** (semis / 12)
+    phase = 2 * np.pi * np.cumsum(f_in) / FS
+    x = 0.3 * np.sin(phase) + 0.15 * np.sin(2 * phase)
+    res = {}
+    for shift in (-7, 7):
+        y = render(f"bend_{shift}", x, shift)
+        want = ratio(shift) * f_in
+        lo, hi = ratio(shift) * 70, ratio(shift) * 120  # fundamental only
+        z = analytic(bandpass(y, lo, hi))
+        inst = np.diff(np.unwrap(np.angle(z))) * FS / (2 * np.pi)
+        n = int(0.01 * FS)  # 10 ms median against residual ripple
+        idx = np.arange(int(0.5 * FS), int(2.8 * FS), n // 2)
+        err = np.array([1200 * np.log2(np.median(inst[i:i + n]) / np.median(want[i:i + n])) for i in idx])
+        tt = idx / FS
+        windows = {"hold_0.5_1.0": (0.5, 1.0), "bend_up_1.0_1.5": (1.0, 1.5),
+                   "hold_1.6_2.0": (1.6, 2.0), "bend_down_2.0_2.5": (2.0, 2.5)}
+        res[f"{shift:+d}"] = {k: {"max_abs_cents": r(np.abs(err[(tt >= a) & (tt < b)]).max(), 1),
+                                  "mean_cents": r(err[(tt >= a) & (tt < b)].mean(), 1)}
+                              for k, (a, b) in windows.items()}
+    out["bend"] = {"pass": "informational: compare builds", **res}
+
+
 FIXTURES = {"unity": unity, "sidebands": sidebands, "churn": churn, "warble": warble,
-            "dc": dc_lowbin, "hf": hf_junk}
+            "dc": dc_lowbin, "hf": hf_junk, "bend": bend}
 
 
 def main():
