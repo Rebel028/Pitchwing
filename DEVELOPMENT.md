@@ -1324,3 +1324,6 @@ for ShiftKey, to size the remaining headroom on Windows/MSVC (WSL gcc numbers
 are diagnostic only). Remaining CPU work: split prepareFrame's analysis
 (FFTs, fitPeaks, splitRegion/jointFit) across the hop so no callback carries
 the whole analysis (96 kHz small blocks), then cheaper fitPeaks.
+ShiftKey rebuilt with step 12 (`build.bat Release`, BUILD OK, VST3 installed;
+the C4456 warning disappeared with the oscillator code). Awaiting the user's
+live test.
