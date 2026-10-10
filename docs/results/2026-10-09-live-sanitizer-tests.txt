@@ -1,0 +1,12 @@
+PASS configuration and full consumer range
+PASS unity delay at 44.1/48/96 kHz and all sample phases
+PASS automation command and callback partition equivalence
+PASS linked stereo invariants and duplicated mono
+PASS sub-hop commands and eventual unity return
+PASS double in-place and transactional rejection
+PASS float in-place and transactional rejection
+PASS float/double callback changes at common sample bound
+PASS float/double parity and extreme live targets
+PASS lifecycle moves reset and terminal drain
+PASS no realtime allocations including first call
+11/11 checks passed

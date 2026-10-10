@@ -1,0 +1,646 @@
+# Pitchwing development record
+
+Record development work, decisions, findings, validation, and next steps here.
+Link larger task-specific artifacts instead of duplicating them. Earlier
+research history remains in [research/DECISIONS.txt](research/DECISIONS.txt) and
+[research/Pitch_Research_Handoff.txt](research/Pitch_Research_Handoff.txt).
+
+## 2026-10-08 — Project scope and working requirements
+
+Request: make low-pitched guitars a primary requirement alongside latency;
+consider bass; document all development and findings; use subagents; minimize
+drive I/O; record WSL and ask before installing missing tools or dependencies.
+
+Changes: created `PROJECT.md` as the current scope, `AGENTS.md` as instructions
+for future agents, and this durable development record.
+
+Decisions and rationale:
+
+- Low-register guitar quality is co-primary with latency, so early evaluation
+  must include low polyphonic cases and attack/settling behavior.
+- Bass remains a likely extension. The user's tentative wording does not fix
+  a guaranteed bass range or a lowest supported tuning.
+- All project-relevant development knowledge, including subagent findings and
+  failed experiments, must be saved in repository artifacts before handoff.
+- Subagents should perform bounded independent work with coordinated I/O and
+  file ownership. Delegation must not multiply expensive disk activity.
+- WSL and the `/mnt/d` checkout require deliberate I/O planning. Prefer `/tmp`
+  for disposable work and preserve compact results in the repository.
+- Installation approval applies to both system and project-local dependencies,
+  including implicit installation by a command.
+- Keep the imported research checkpoint intact and record evolving scope at the
+  project root, preserving the checkpoint's existing measurements and hashes.
+
+Findings: the existing research already identifies low-note tuning failures and
+unresolved close-tone behavior as risks. The new scope elevates low-register
+guitar performance to an explicit primary requirement. No existing root project
+scope or agent instructions were present.
+
+Validation: checked the requirements mapping against all five user requests.
+An independent read-only subagent review confirmed the scope distinctions and
+working rules, including tentative bass coverage, an unspecified minimum tuning,
+and the distinction between WSL checks and target-native validation. Its findings
+are incorporated in the scope and agent instructions. No DSP experiments, builds,
+or installations were run for this documentation change.
+
+Next: apply these requirements to subsequent development. Establish the lowest
+guitar tunings, representative DI corpus, and desired bass coverage during DSP
+evaluation; no arbitrary range guarantee has been added.
+
+## 2026-10-08 — Engine-only deliverable
+
+Request: develop only the pitch-shifting engine, not a VST plug-in.
+
+Changes: updated `PROJECT.md` to define a reusable engine as the deliverable and
+exclude VST plug-in development, packaging, and integration. Added the matching
+working rule to `AGENTS.md`.
+
+Decision and rationale: the user's clarification supersedes the older VST3
+delivery plans in `research/`. Preserve that checkpoint unchanged as historical
+evidence. DSP validation still precedes native C++ implementation. Stereo,
+parameter changes, variable processing blocks, sample rates, and callback
+deadlines remain relevant to the engine; they do not require a plug-in wrapper.
+Competitor plug-in references remain valid quality references.
+
+Validation and limitations: reviewed the three edited documents for consistent
+engine-only scope and removal of active VST3 delivery plans. This documentation
+change required no DSP runs, builds, tests, installations, or research edits.
+
+Next: discuss and implement the DSP validation slice within this engine-only
+scope. The engine API and packaging format remain implementation decisions.
+
+Implementation discussion in progress: the proposed first slice is a streaming
+and offline evaluation harness plus minimal coherent spectral-region transport,
+using the existing reconstruction scaffold. Compare with a symmetric baseline
+at matched delay and test low tones, close dyads, and chord attacks before the
+native engine port. These are proposals, not completed implementation or proof
+of quality. The existing Ocean and WOLA material provides the starting evidence.
+
+The user selected guitar tunings below F#1 for the first evaluation set.
+`PROJECT.md` now records that requirement. The exact minimum supported tuning
+is still open; bass remains exploratory. Use E1 and B0 as initial engineering
+stress cases, not as an agreed or validated supported floor.
+
+Workflow note: the discuss-phase skill was consulted, but this repository has
+no GSD phase roadmap. Continue the implementation discussion against the existing
+project scope and this log; no GSD phase workflow was run.
+
+Implementation starting: build the minimal streaming research prototype and
+an in-memory evaluator outside the preserved `research/` checkpoint. Compare
+asymmetric and symmetric windows at matched scheduled delay. Use the existing
+Python/NumPy environment if available, standard-library tests, and no automatic
+installation. Save compact metrics rather than large audio corpora; no native
+performance or production-quality claim follows from this initial experiment.
+
+Environment finding: system Python is 3.8.10, with neither NumPy nor SciPy.
+The user explicitly approved an isolated NumPy installation. Created
+`/tmp/pitchwing-env` with `venv --without-pip` (system `ensurepip` is absent),
+then used the existing pip to install the compatible binary NumPy 1.24.4 wheel
+into that environment; its download cache is also under `/tmp`. No system
+packages or SciPy were installed. The temporary environment is disposable and
+must be recreated with user approval if missing in a later session.
+
+Delegation: `transport_engine` owns the experimental processing module and its
+design notes; `transport_evaluation` owns synthetic measurements and metric
+definitions; the main agent owns interface tests, integration, and this record.
+The codebase-design skill informs a small processing interface with a shared
+test surface. Experimental code goes in `experiments/transport/`.
+
+Audio evaluation discussion: real dry DI clips are useful for numeric artifact
+analysis and controlled renders; those metrics cannot establish natural sound
+or playing feel. Requested examples are low sustained notes, bends/vibrato,
+palm mutes, attacks, close intervals, dense chords, and ringing changes, with
+tuning/sample-rate metadata and silence around the performance. Preserve the
+original level and avoid prior gate/compression/distortion/normalization. Human
+listening and live playing remain required; no real DI clips have been supplied
+in this session yet.
+
+Initial implementation checks: the new streaming module passed all eight
+interface tests under Python 3.8.10 / NumPy 1.24.4 (7.85 s wall time, not an audio
+deadline measurement). Coverage includes 96 impulse phases for each window,
+delayed identity on noise/DC/B0 content, shifted block-partition independence,
+reset and terminal-drain behavior, invalid-input state preservation, and a
+coarse resolved-tone octave sign/phase check. Mono static-ratio processing only;
+low-note quality evaluation is separate and still in progress.
+
+Completed first experiment: see
+[the module guide](experiments/transport/README.md),
+[transport design](experiments/transport/ENGINE_NOTES.md),
+[metric definitions](experiments/transport/METRICS.md), and
+[findings](experiments/transport/FINDINGS.md). The engine uses coherent analytic
+region modulation with explicit phase conventions; both window configurations
+have 383-sample scheduled delay. This is a research implementation, not the
+native product engine.
+
+Review and fixes: an independent subagent found public configuration could be
+mutated while internal windows remained cached. Configuration properties are
+now read-only, with an interface test. Review also identified that preserving
+DFT bin zero does not preserve a constant input waveform under nonzero shifts.
+A focused probe confirmed DC gain/modulation failures; DC cases are now part
+of the evaluator and the misleading comment was corrected. The transport
+algorithm itself was not tuned after seeing the first quality results.
+
+Final verification for this slice: nine interface tests passed in 8.02 seconds;
+five analytic metric tests passed in 0.42 seconds. Strengthened checks cover
+invalid blocks during active processing and resolved-tone gain. Earlier metric
+development used an unjustified condition-number assertion below 10 for close
+chord harmonics, which failed (approximately 21–49); retained that finding and
+documented the finite-window conditioning limit. The final tests check numerical
+stability and accurate reconstruction without pretending to resolve those
+individual harmonics.
+
+The full evaluation ran once after interface fixes: 82 cases in 25.67 seconds,
+all in memory. Saved approximately 101 kB of JSON, with engine/evaluator hashes,
+to [the initial result](experiments/transport/results/2026-10-08-initial.json).
+Scratch output used `/tmp`; no WAV corpus, native build, or old research output
+was written. The shell sandbox rejected creating the result directory on the
+mounted drive, so the normal patch tool persisted the completed small result.
+
+Findings and decision: asymmetric analysis improves isolated B0/E1 tuning
+over the matched short baseline, but close-dyad spacing remains at its original
+value instead of scaling. The original research's critical counterexample is
+reproduced. Chord-fit and DC results also fail. Reject this rigid regional
+translation candidate for production; retain the tested scheduler, harness,
+and failure data. Next work is a different treatment of unresolved mixtures,
+followed by the same low-note/chord tests. Do not begin a C++ port of this failed
+candidate. Human listening and real DI evaluation remain outstanding.
+
+Final artifact review: the independent reviewer checked FINDINGS.md against
+the saved numerical rows and found the claims consistent and the candidate
+rejection justified. Engine/evaluator hashes in the saved JSON match the current
+source files. Result counts total 82. This rejects the tested rigid transport
+method as sufficient; it does not reject every spectral-region architecture.
+
+## 2026-10-08 — User recording intake
+
+The user supplied WAVs in `stems/` (correcting an earlier `sam/` path) and
+explicitly permits cutting them into excerpts. Preserve the original files.
+Initial header-only inspection with already-installed ffprobe found eight
+stereo PCM24 WAVs, all at 44.1 kHz: `01.wav`–`06.wav`, `tapping1.wav`, and
+`tapping2.wav`. Durations range from 7.20 to 51.51 seconds. No installations
+are needed; the approved temporary NumPy environment remains available.
+
+Plan: one combined sequential read per source for a source hash, exact PCM
+decoding, channel/level statistics, and candidate excerpt references. Do not
+copy the corpus or regenerate large output sets. Use a few short excerpts for
+diagnostic renders under `/tmp`; persist compact audit and render metadata in
+the repository. Real recordings do not undo the synthetic rejection of the
+current transport method or establish objective transposition ground truth.
+
+Delegation: the evaluation worker owns the corpus auditor and its decoding/
+selection tests; an independent reviewer checks the excerpt/listening protocol
+without rereading audio; the main agent owns runs, excerpt rendering, and docs.
+The user has been asked for tuning/lowest note, dry-DI versus processed status,
+and optional numbered-clip labels. Those details are not yet established.
+
+User tuning information: the first four or five recordings are G#1 standard
+on a seven-string guitar; the last three are Drop F#1. Using filename/BWF time
+order, record `01`–`04` as G#1 standard, `06`/`tapping1`/`tapping2` as inferred
+Drop F#1 assignments, and leave `05` uncertain. Asked for confirmation of `05`
+and whether any processing is present. These supplied tuning labels reach F#1;
+they do not establish real-input coverage below F#1. Continue the lower
+synthetic stress cases and do not infer an exact minimum played note from the
+open-string tuning alone.
+
+Excerpt protocol review: use original 44.1 kHz input, up to six audition seconds
+plus 0.5 seconds of source preroll, and mono channel selection stated explicitly.
+The fixed 2048/384/96 sample configuration gives 383 samples = 8.6848 ms at this
+rate; its time constants differ from the earlier 48 kHz synthetic run. Render
+static -2 and -7 semitones, preserve full delay/tail, and compare against a dry
+reference delayed by the same 383 samples. Use float32 WAV output to retain
+over-range samples without implicit clipping. Do not normalize, limit, fade,
+or resample. Listen for timbre and artifacts; this is not a live latency test.
+The main agent implemented `experiments/corpus/render_excerpt.py` for this
+bounded workflow. Real polyphonic tuning/beat error needs an appropriate
+reference and must not be inferred from a spectrum peak in these recordings.
+
+User provenance update: the stems were rendered in REAPER; the user suspects
+stereo conversion and some high-quality resampling. Originals are available at
+`D:\Reaper\shiftkey test\Media`, read in WSL as
+`/mnt/d/Reaper/shiftkey test/Media`. Header inspection found nine current
+recordings at mono PCM24/44.1 kHz and one older (2025-06-08) recording at mono
+PCM24/48 kHz. Header rates alone do not prove which render operations occurred.
+The exact stem-to-original edit mapping, `05` tuning, and any FX processing are
+still unconfirmed. Audit the originals in one additional sequential pass
+(approximately 40 MB) to distinguish source endpoint hits from export behavior;
+do not copy or rerender the original corpus.
+
+Completed intake: eight stems total 177.333 seconds / 46,927,962 bytes, all
+44.1 kHz PCM24 with sample-identical L/R. Seven contain exact PCM endpoints.
+The original-source audit covers ten files / 40,010,442 bytes; seven current
+originals also contain endpoint samples. This is not solely an export-created
+condition, but endpoint hits do not diagnose the clipping/limiting mechanism.
+Saved both audits and original header metadata under `experiments/corpus/results/`.
+Original/export edit mappings remain unverified; no source audio was modified.
+
+Validation: the delegated auditor passed ten synthetic tests for PCM sign/
+endpoint decoding, headers, silence, stereo statistics, and excerpt selection.
+The main agent ran each corpus audit once with no errors, using the same reads
+for hashing and decoding. The auditor source hash matches the recorded version.
+Only about 87 MB of source data was read in these two full passes; render reads
+then seek directly to three short intervals instead of rereading the corpus.
+
+Rendered six-second intervals: `02` at 1.8 s, `06` at 9.7 s, and `tapping1` at
+9.0 s, each with 0.5 s preroll and source channel zero. Three variants per
+interval (delay-matched dry, -2, -7) are at
+`/tmp/pitchwing-listening-20261008/`. Nine mono float32 WAVs total 10,411,398
+bytes. ffprobe confirms 44.1 kHz and 289,177 frames per file. Original-rate
+unity checks have maximum errors 3.33e-16 to 4.44e-16 at 383 samples of delay;
+all shifted outputs are finite and have no pre-encoding full-scale exceedances.
+
+Review: the independent reviewer found the render cut/alignment/level protocol
+consistent. It noted metrics describe float64 pre-encoding samples rather than
+the stored float32 values. Added that distinction to the renderer, saved render
+metadata, and [corpus guide](experiments/corpus/README.md). No audio rerender was
+needed for this metadata clarification. Gains are not normalized: full-stream
+RMS falls by approximately 0.59–1.36 dB in the six shifted renders. This is a
+level observation, not a perceptual or polyphonic pitch-accuracy result.
+
+Listening feedback: the user says existing test prototypes "sound pretty nice."
+Asked which files/folder and shift settings were heard. Until clarified, retain
+this as positive informal feedback without assigning it to Ocean, the new
+transport engine, or this particular render set. Preserve liked versions as
+listening baselines once identified. Synthetic failures and human preference
+are complementary evidence; the current transport candidate is still not
+validated for the engine's low-polyphony requirement.
+
+Remaining information is recorded in the corpus guide: `05` tuning, dry/FX
+status, original/export mapping, and the exact prototype behind the listening
+feedback. Lower-than-F#1 real inputs and competitor reference renders remain
+future evaluation needs. Nothing was installed during this intake task.
+
+## 2026-10-08 — First native C++ engine
+
+User decision: all current listening comparisons are good enough; `06/minus7`
+is the preferred pick-attack example, with the caveat that this may depend on
+the recording. The user explicitly requested implementing the engine using
+`cpp-pro` now. Preserve the accepted sound and begin the native port while
+retaining unresolved low-dyad/DC defects. This supersedes the earlier sequence
+requiring those defects to be solved before any C++ work. Updated active scope,
+agent instructions, and experiment/corpus status without changing old evidence.
+
+Implementation uses the local cpp-pro, CMake, C++ testing, and sanitizer skills.
+GCC 9.4 is available; use portable C++17 with a small RAII-owned implementation.
+CMake is missing: asked permission to install it in the existing isolated
+`/tmp/pitchwing-env`; installation remains pending. No new dependencies are
+downloaded as part of configuring/building. The existing MIT-licensed
+Signalsmith FFT header/license were copied into `third_party/`, with provenance.
+
+Division of work: engine worker owns `include/pitchwing/Engine.hpp`,
+`src/Engine.cpp`, and `docs/native-core.md`; test/build worker owns
+`CMakeLists.txt` and `tests/engine_tests.cpp`; evaluation worker owns
+`tools/pitchwing_render.cpp`, `scripts/compare_native.py`, and native validation
+instructions. Parent owns integration, builds/runs, dependency provenance, and
+scope/development records. All agents share the workspace and avoid duplicate
+builds/corpus reads. Builds and raw comparison outputs belong under `/tmp`.
+
+Initial API: mono float/double processing, arbitrary blocks, exact in-place
+support, static pitch per stream, explicit reset and terminal drain. Constructor
+prepares all storage/FFT plans; processing/reset/drain must allocate nothing.
+The default 2048/384/96 schedule retains 383 samples of delay. Stereo and smooth
+live pitch changes remain future work. Numerical parity, lifecycle/input tests,
+sanitizers, and WSL timing will validate this port separately from sound quality.
+
+Tool approval: the user approved isolated Linux CMake installation and reported
+an existing Windows installation at `C:\Program Files\CMake\bin` (WSL path
+`/mnt/c/Program Files/CMake/bin`). Installed CMake 3.31.10 into the already
+approved `/tmp/pitchwing-env`, with its wheel cache under `/tmp`. Use this Linux
+version for WSL GCC builds; Windows CMake availability alone does not establish
+a Windows compiler/SDK or target-native validation. No system installation or
+project-drive package cache was created.
+
+First integration: CMake release and ASan/UBSan configurations build without
+compiler warnings. Release CTest passes all nine contract groups (3.26 s),
+including every hop phase for both windows and global-new allocation checks.
+The first instrumented run also passes all nine groups, but exits unsuccessfully
+because LeakSanitizer cannot inspect a process under the command sandbox's
+ptrace mechanism. An unsandboxed attempt consumed several minutes without
+completion and was terminated; this is retained as an environment limitation,
+not a successful leak check. Retry memory-access/UB checks with leak scanning
+disabled explicitly. No reported memory-access/UB finding was suppressed.
+
+The first parity invocation failed before processing because its relative
+`__file__` was mixed with an absolute repository path in provenance generation.
+The evaluation worker corrected that path handling. The next run completed
+all 21 comparisons: six unity cases agree within 2.8e-16, but all shifted cases
+fail materially, including maximum sample error 0.813 for the preferred excerpt.
+Saved the complete [initial failed run](docs/results/2026-10-08-native-parity-initial.json).
+Do not loosen tolerance or claim sound preservation. Engine worker is checking
+FFT-rounding sensitivity in initially flat spectra and phase inheritance before
+any DSP change. Initial timing overlapped the unsandboxed sanitizer attempt and
+is not a clean performance measurement. No original research output changed.
+
+Diagnosis using the diagnosing-bugs workflow: thirty small synthetic probes
+confirmed flat-spectrum startup ties, rather than a transport sign/index error.
+For phased A4 at -1, changing only the first input sample to zero reduces
+native/Python error from 0.06579 to about 2e-15; adding 96 leading zeros retains
+the failure, while 1 or 97 removes it. A single effective sample on a hop
+boundary gives a flat spectrum; FFT roundoff invents different local maxima,
+which seed different persistent phase histories. An independent equation review
+found no mechanical transport mismatch and noted peak-cap tie ordering as
+another undefined case. [Probe evidence](docs/results/2026-10-08-startup-probes.json)
+and the [native-core diagnosis](docs/native-core.md) retain the reproduction.
+
+Fix: native code uses canonical bin 1 when interior magnitude spread is at most
+1e-12 of the largest magnitude; this is a selection rule, not a relaxed output
+comparison tolerance. A separate `experiments/transport/stable_reference.py`
+implements that rule and deterministic ordering at the 64-peak cap. The accepted
+original `engine.py` and its rendered audio remain unchanged. Native parity now
+targets this explicit deterministic variant, with old-baseline differences
+reported separately. New native listening is required; initial user acceptance
+applies to the original Python examples, not automatically to the corrected port.
+
+Performance review: the initial preferred-excerpt runs suggest substantial
+per-hop work bursts even with average throughput above real time. The reviewer
+identified repeated modulation sine/cosine evaluation as a bounded optimization
+opportunity: use a complex recurrence re-anchored every 64 samples and avoid
+taper cosine outside its transition. First establish parity for the selection
+fix; then measure any optimization separately, without changing persistent
+region/phase logic. The initial timings are contaminated and cannot prove a
+speedup or deadline safety.
+
+The deterministic variant now passes all 30 native/reference comparisons at
+the unchanged 1e-10 tolerance: worst sample error 1.668e-13, preferred excerpt
+1.481e-13. Saved the [pre-optimization stable run](docs/results/2026-10-08-native-parity-stable.json).
+The preferred excerpt differs materially in waveform from the original Python
+baseline (max 1.126, RMS 0.202); this reflects different inherited phases, not a
+measured perceptual judgment. Keep both for listening. The selected raw mono
+input was archived under `/tmp` to reuse in subsequent runs without rereading
+the stem. Clean WSL timing still shows per-hop bursts exceeding short callback
+budgets: for blocks 32/64/128, p95 is 1217/1241/2451 microseconds. Proceed with
+the bounded modulation/taper optimization and recheck parity.
+
+Sanitizer follow-up: a CTest retry with leak detection disabled terminated with
+exit 137 and no diagnostic, so its cause is not established. A bounded direct
+test execution with ASan/UBSan, leak detection disabled, and a 16 MB quarantine
+then passed all nine groups. Leak checking remains unvalidated; address/UB
+checks are enabled and fatal. Preserve this environment/run distinction rather
+than reporting the initial LeakSanitizer failure as an engine defect or a pass.
+
+Completed native slice: static library, offline runner, CMake build, contract
+tests, numerical harness, and documented public interface are implemented.
+Final release CTest passes all nine groups (2.02 s); the final instrumented
+direct executable also passes all nine groups with address/UB checks enabled.
+All 30 final parity cases pass after recurrence/taper optimization, with worst
+absolute sample error 1.667e-13 at tolerance 1e-10. The final real-input cases
+reuse the hash-verified `/tmp` source slice; no additional stem read was needed.
+The original Python engine, original listening renders, and imported research
+remain intact.
+
+Measured throughput improves 1.353–1.408x versus the unoptimized deterministic
+native version. This is not sufficient for callback guarantees: final 32-sample
+blocks exceed their duration in 1895/8882 measured calls; 64-sample blocks in
+6/4441 (including a 9.94 ms maximum); 128-sample blocks in 0/2221. Preserve the
+outlier without assuming its cause. Full commands, environment, timing limits,
+and evidence links are in [native validation results](docs/native-validation-results.md).
+The scheduled delay remains 383 samples, with no added engine adapter/FIFO.
+
+Created one native listening WAV at
+`/tmp/pitchwing-native-listening-20261008/06-minus7.wav`: 44.1 kHz mono float32,
+289177 frames, 1156766 bytes; ffprobe confirms format/count. It preserves the
+same excerpt, preroll, delay, tail, and uncompensated level. Hash and recipe are
+in the final parity report. This corrected native variant needs user listening;
+no claim is made that its sound is identical to the accepted original example.
+
+Review findings persisted: build/test reviewer confirmed scope and command
+consistency; README now uses the installed temporary CMake path and distinguishes
+Python listening acceptance from native evidence. Engine reviewer checked
+lifecycle/runner integration and independently identified phase/peak sensitivity.
+The performance reviewer identified callback bursts and proposed the measured
+bounded optimization. The final build has no compiler warnings or reported
+address/UB errors; leak scanning and target-native Windows validation remain
+unestablished. Next work: listen to the native render, reduce per-hop work,
+address DC/low-dyad quality, then add stereo and smooth live pitch changes.
+
+Final artifact audit: an independent reviewer checked the saved final/build
+JSON against the validation summary and found no material errors in counts,
+error maxima, timing, missed-callback counts, or throughput comparisons. It
+confirmed the distinction between the deterministic reference and original
+listening baseline, and the outstanding listening/leak/deadline limitations.
+The edited native sources and documentation have no trailing-whitespace hits.
+
+## 2026-10-08 — Taking Chances full-track native render
+
+The user requested a more complicated example from
+`stems/02 Taking Chances.m4a`. Header inspection reports stereo AAC at 44.1 kHz,
+187.827 seconds, 3113835 source bytes, plus an embedded cover-art stream. Render
+the complete audio at -7 semitones, matching the earlier preferred shift. The
+engine is currently mono: use explicit `0.5L + 0.5R`, then preserve that same
+decoded input for wet and 383-sample-delayed dry output. No normalization,
+limiting, resampling, or core changes are planned. Output and raw scratch stay
+under `/tmp`; source audio remains unchanged.
+
+The existing native binary and header/source/runner hashes match the recorded
+final validation, so no rebuild or test-suite rerun is needed. A bounded
+read-only subagent reviewed the protocol without reading audio. Its findings:
+decoded PCM frame count is authoritative for AAC, apply decoder priming handling
+only once, retain the full 2527-sample engine drain, and pad dry to the same
+length (383 leading zeros, input, 2144 trailing zeros). Stereo downmix can alter
+phase-canceling material, and integrity/level statistics do not establish
+perceptual quality. Validate float32 output finiteness, rate, frames, peak/RMS,
+and full-scale exceedances; persist the exact commands and render metadata.
+
+Completed: FFmpeg decoded the source once to 8283136 mono float64 frames,
+using explicit equal-weight channel mixing at the original 44.1 kHz. The
+existing native runner rendered the full input at -7 in 75.86 s wall time under
+WSL (offline execution including I/O, not a callback-deadline measurement).
+Wet and dry both contain 8285663 frames. Sample-by-sample verification proves
+dry equals the float32 decode delayed by 383 samples with the documented tail.
+All stored samples are finite; ffprobe confirms mono float32, 44.1 kHz, and
+equal frame counts.
+
+Level finding: unadjusted wet peaks at +3.010 dBFS (3236 samples above absolute
+full scale); unadjusted decoded dry peaks at +1.752 dBFS (149 samples above
+full scale). These float renders remain intact. To avoid playback clipping,
+created a listening pair with the same fixed -6 dB gain on both, retaining
+their relative levels. It is not independent normalization or limiting.
+Listening peaks are -2.990 dBFS wet and -4.248 dBFS dry, with zero over-range
+samples. Measured wet/dry full-stream RMS difference is -1.161 dB; listening
+quality has not been judged.
+
+Deliverables and reproducibility are in the
+[corpus guide](experiments/corpus/README.md) and
+[render record](experiments/corpus/results/2026-10-08-taking-chances-native.json).
+The record includes tool versions, commands, source metadata, decoded-content
+hash, native identity, WAV hashes, alignment, and level checks. Audio stays in
+`/tmp/pitchwing-taking-chances-20261008-ozikic86/`: four WAVs total
+132571064 bytes. Removed only the task-owned raw float64 intermediates after
+verification. No original source, research measurement, or core code changed;
+no tools were installed and no unrelated suites/corpus scans were run. Native
+listening feedback and the existing engine quality/stereo/deadline limitations
+remain outstanding.
+
+Tool warning retained in the render record: FFmpeg reported a container stream
+with an unset timescale, but decoding completed successfully. Raw-PCM encoding
+also emitted duration-estimation/channel-layout notices. Explicit sample rate,
+actual decoded frame counts, exact dry alignment, and final WAV checks were
+used instead of inferring sample timing from those notices.
+
+## 2026-10-08 — Readiness for a separate VST consumer
+
+The user asked whether the engine can be used in a VST they are developing in
+a separate project. Recorded that consumer context in PROJECT.md while keeping
+plug-in implementation outside this repository's scope. Assessment: usable now
+as an experimental mono, fixed-shift source dependency; production/live-use
+readiness is not established. This is an integration assessment, not a new
+listening acceptance or an instruction to build a VST here.
+
+The main agent reviewed current scope, API/build files, and saved validation;
+a bounded read-only subagent checked the consumer contract independently.
+The in-tree static C++17 target is `pitchwing::pitchwing`, with bundled FFT
+dependency and CMake minimum 3.20. There is no install/export package or Windows
+SDK distribution. Compile sources using the consuming project's target
+toolchain; the existing WSL/Linux `.a` cannot serve as a Windows library.
+The current build also adds the offline runner and normally enables tests.
+ELF shared-library consumers need position-independent code on the static
+target; the engine CMake file does not currently enable it itself.
+
+Wrapper responsibilities follow the existing API: prepare/destroy outside the
+audio callback, give each instance exclusive access, check process status, and
+use `latencySamples()` for host latency reporting (383 by default). Configure
+for the actual sample rate; window sizes do not auto-scale. `flush` is a terminal
+offline drain, not a call to make after every host block. Float/double buffers,
+arbitrary blocks, and exact in-place processing are available without processing
+allocations. Audio buffers can exceed full scale; no automatic limiter/gain
+normalization is applied.
+
+Outstanding practical limits: only mono is implemented; independent instances
+do not establish coherent stereo behavior. Pitch changes after processing are
+rejected with `PitchLocked` until reset; resetting discards history and is not
+click-free live automation. WSL tests show missed short-block deadlines and do
+not establish Windows/DAW callback performance. Known DC and close low-dyad
+defects remain. Existing passing contract/parity/sanitizer checks are useful
+evidence, but do not remove those limitations; leak validation remains open.
+Next engine work should address callback bursts and safe live pitch changes,
+then validate the intended channel layouts and target-native use. No builds,
+audio runs, installations, or core/build changes were needed for this review.
+
+## 2026-10-09 — Adapting the engine to ShiftKey
+
+The user authorized inspecting `../ShiftKey` and updating the engine to its
+requirements. Three bounded subagents reviewed the consumer, API/build needs,
+and scheduling invariants; the sibling checkout is read-only and plug-in edits
+remain outside this task. Requirements and rationale are persisted in
+[the consumer requirements](docs/shiftkey-requirements.md) and PROJECT.md.
+ShiftKey needs planar stereo, pitch updates every 1–32 samples without an added
+smoothing ramp, fractional shifts through ±49 (including fine tuning), fixed
+audio delay, and a separately measured curve-clock offset. Formant and quality
+controls are unsupported capabilities, not implied engine features.
+
+Implementation in progress: preserve static Engine and its evidence; add
+LiveEngine with joint stereo tracking, sample-integrated pitch controls and
+regional synthesis work spread across one extra hop. Geometry scales with rate
+and targets about 10 ms total delay. Review found that pending frame snapshots
+must remain immutable, near-cancelling stereo phase cross-products need a
+coherence fallback, unity reacquisition can produce a transient phase/gain dip,
+and frame-end guarding is not a dynamic anti-alias guarantee. These limits are
+recorded instead of treating API coverage as sound-quality acceptance.
+
+Build/package agent added source embedding defaults, position-independent
+static library, install/export configuration and a separate shared-library
+consumer smoke fixture, plus a concrete adapter example in
+[ShiftKey integration](docs/shiftkey-integration.md). Core and test agents own
+separate files; the main agent coordinates all builds/measurements under /tmp.
+No external tools or dependencies are being installed. Validation follows
+once the new core and tests are complete; no live readiness claim yet.
+
+Completed the consumer-facing engine slice. `LiveEngine` now supplies linked
+stereo float/double processing, active fractional ±49 targets, one-sample and
+arbitrary blocks, exact in-place/duplicated-mono input, transactional validation,
+reset/move/drain lifecycle, and fixed rate-scaled latency: 439/479/959 samples at
+44.1/48/96 kHz. It integrates every accepted control sample without an added
+pitch ramp, including commands shorter than a hop. The static Engine, imported
+research and prior listening evidence are preserved. Formant preservation and
+quality selection remain unsupported. Public contract and DSP rationale are in
+[live-engine.md](docs/live-engine.md); concrete consumer adapter/CMake use is in
+[shiftkey-integration.md](docs/shiftkey-integration.md).
+
+Independent core review found that accepting 1e100 in double processing could
+overflow later float callbacks through retained history. Fixed both overloads
+to use a common 1e30 bound and added a mixed-precision delayed-output regression.
+Reviewer confirmed buffer atomicity, crossed in-place reads, immutable pending
+frames and completion before scheduled output. Existing library licensing was
+not inferred from the FFT's MIT notice; that notice is included in staged files.
+
+Optimized synthesis by preweighting shared modulation and calculating only the
+real product needed by each channel. A saved comparison probe checked 144000
+double samples over three rates and automated stereo tones: max difference
+1.110e-16, RMS 1.792e-17, all finite. No original-engine parity or perceptual
+equivalence is claimed for this new live algorithm. Timing benefit from this
+small optimization is not established by the short sequential measurements.
+
+Validation is complete for this slice: warning-enabled release builds pass
+9 static and 11 live groups (3.62 s total), including allocation, all-or-nothing
+failure, block partition, short-control, stereo and sustained-unity invariants.
+Source embedding and staged `find_package` both build a shared consumer and pass
+their smoke test. New live ASan+UBSan passes 11/11 at -O1. Static ASan+UBSan passes
+9/9 with `handle_segv=0`; default-handler attempts repeatedly emitted
+`DEADLYSIGNAL` without establishing a cause. Preserve this qualification and the
+still-disabled leak checking. An unoptimized live sanitizer run hit its time
+cap after nine groups. A stale test object from an edit/compile overlap caused
+two earlier 10-group runs to assert the superseded double limit; explicitly
+rebuilding that object resolved it. Full commands, failed-case evidence and
+successful outputs are linked in [live validation](docs/live-validation.md).
+
+Final diagnostic callback run uses differing-channel low chords, 0.25 s warmup
+and 0.5 s measurement per case. No 32/64/128-sample budget exceedances were
+observed at 44.1/48 kHz. At 96 kHz there were 1/1500 exceedances for automated
+32-sample blocks and 3/750 for static 64-sample blocks. One-sample calls still
+show work bursts; these internal chunks do not each receive an independent
+DAW callback budget. WSL/synthetic/short-run evidence does not establish Windows
+deadlines. The reviewed final timing probe excludes trailing partial blocks;
+the initial report retains its older inclusion behavior explicitly.
+
+The control probe measured 48 valid 220 Hz octave steps at 48 kHz across 12 hop
+phases. Outgoing midpoint offsets after audio-delay subtraction average -0.878
+and +1.232 samples; provisional ShiftKey clock compensation of zero is justified
+for an initial trial. Returns to unity vary more, up to +131.625 samples
+(2.742 ms), so no universal exact control alignment is claimed. The reviewer
+confirmed event splitting/DFT arithmetic and required first-crossing validity
+checks plus the 1024-Hann-window smearing caveat; both are recorded.
+
+All builds, staging and generated binary/audio scratch stayed under /tmp. No
+stems were reread or copied, no ShiftKey files were changed, and no external
+tools were installed. A recursive sanitizer log grew to 1056285420 bytes under
+/tmp; saved bounded failure excerpts/metadata and removed only that task-created
+log. Future diagnostic capture must cap output as well as runtime. Compact
+reports, source hashes and the arithmetic comparison source are durable under
+docs/results; subagent design, review and measurement findings are persisted.
+
+Ready for an external ShiftKey integration trial using the documented adapter.
+Remaining validation: Windows/MSVC and actual host callback loads, new live-engine
+listening including short curves and unity returns, more robust 96 kHz timing,
+and control timing on real low guitars. Existing DC/low-dyad/alias limitations,
+real recordings below F#1, and bass coverage remain unresolved; API coverage
+does not close those sound-quality requirements.
+
+Final evidence audit: an independent subagent verified the saved timing tables,
+exceedance counts, step statistics, validity checks, optimization comparison,
+release/sanitizer outcomes and limitations against the compact reports. Corrected
+the signal description to state that the right channel is detuned by 1.003 and
+uses different harmonic phases; no numerical claims changed. Scoped whitespace
+checks of changed code/build/docs found no trailing whitespace.
+
+## 2026-10-09 — Engine algorithm explanation
+
+The user asked what kind of algorithm the engine uses. Reviewed current scope
+and [the live design](docs/live-engine.md); a bounded read-only subagent checked
+both native implementations. It is a custom FFT/STFT spectral-region transport
+pitch shifter with phase-vocoder-like frequency and phase tracking. It selects
+spectral peaks, assigns neighboring bins to regions, reconstructs each region
+as a complex analytic signal, applies a phase-continuous frequency translation
+of `(ratio - 1) * region_frequency`, and overlap-adds windowed contributions.
+It does not use a time-stretch/resample pipeline or moving delay-line heads.
+The static mono Engine and linked-stereo LiveEngine share this basic design;
+LiveEngine adds shared stereo tracking and sample-integrated pitch controls.
+
+Code review confirmed asymmetric historical analysis and a short synthesis
+window: at 48 kHz, LiveEngine uses a 2048-sample analysis, 96-sample hop,
+384-sample synthesis support, and 479-sample reported delay (about 9.98 ms).
+Historical analysis length is not equivalent to future lookahead. Rigid region
+translation preserves internal frequency spacing, explaining why unresolved
+close low notes can shift incorrectly relative to one another. Known DC,
+aliasing, settling and unity-transition limitations remain; this explanation
+does not establish new sound-quality acceptance. No DSP changes, builds,
+experiments or installations were needed; validation was documentation/source
+inspection. Existing low-register and target-native validation work remains.

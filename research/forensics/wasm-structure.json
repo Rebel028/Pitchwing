@@ -1,0 +1,194 @@
+{
+  "bytes": 1121191,
+  "sha256": "ffff817738e0386eb0f8dc44b331422535f4c6fe762252d99dca7be25a0f1dc1",
+  "sections": [
+    {
+      "id": 1,
+      "name": "Type",
+      "offset": 11,
+      "size": 518,
+      "count": 65
+    },
+    {
+      "id": 2,
+      "name": "Import",
+      "offset": 532,
+      "size": 464,
+      "count": 13
+    },
+    {
+      "id": 3,
+      "name": "Function",
+      "offset": 999,
+      "size": 1157,
+      "count": 1155
+    },
+    {
+      "id": 4,
+      "name": "Table",
+      "offset": 2158,
+      "size": 5,
+      "count": 1
+    },
+    {
+      "id": 6,
+      "name": "Global",
+      "offset": 2165,
+      "size": 19,
+      "count": 3
+    },
+    {
+      "id": 7,
+      "name": "Export",
+      "offset": 2186,
+      "size": 75,
+      "count": 5
+    },
+    {
+      "id": 8,
+      "name": "Start",
+      "offset": 2263,
+      "size": 1,
+      "start_function": 12
+    },
+    {
+      "id": 9,
+      "name": "Element",
+      "offset": 2267,
+      "size": 1402,
+      "count": 1
+    },
+    {
+      "id": 12,
+      "name": "DataCount",
+      "offset": 3671,
+      "size": 1,
+      "count": 3
+    },
+    {
+      "id": 10,
+      "name": "Code",
+      "offset": 3676,
+      "size": 1043073,
+      "count": 1155
+    },
+    {
+      "id": 11,
+      "name": "Data",
+      "offset": 1046753,
+      "size": 74438,
+      "count": 3
+    }
+  ],
+  "imports": [
+    {
+      "module": "env",
+      "name": "memory",
+      "kind": "memory",
+      "minimum_pages_or_elements": 3,
+      "shared": true,
+      "memory64": false,
+      "maximum_pages_or_elements": 32768
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "environ_get",
+      "kind": "function",
+      "signature_index": 2
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "environ_sizes_get",
+      "kind": "function",
+      "signature_index": 2
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_close",
+      "kind": "function",
+      "signature_index": 1
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_fdstat_get",
+      "kind": "function",
+      "signature_index": 2
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_prestat_get",
+      "kind": "function",
+      "signature_index": 2
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_prestat_dir_name",
+      "kind": "function",
+      "signature_index": 5
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_read",
+      "kind": "function",
+      "signature_index": 7
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_seek",
+      "kind": "function",
+      "signature_index": 46
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_write",
+      "kind": "function",
+      "signature_index": 7
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "proc_exit",
+      "kind": "function",
+      "signature_index": 0
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "sched_yield",
+      "kind": "function",
+      "signature_index": 26
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "random_get",
+      "kind": "function",
+      "signature_index": 2
+    }
+  ],
+  "exports": [
+    {
+      "name": "memory",
+      "kind": "memory",
+      "index": 0
+    },
+    {
+      "name": "_initialize",
+      "kind": "function",
+      "index": 13
+    },
+    {
+      "name": "__indirect_function_table",
+      "kind": "table",
+      "index": 0
+    },
+    {
+      "name": "clap_entry",
+      "kind": "global",
+      "index": 2
+    },
+    {
+      "name": "malloc",
+      "kind": "function",
+      "index": 1058
+    }
+  ],
+  "has_custom_sections": false
+}

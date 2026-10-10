@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-08",
+  "environment": {
+    "os": "WSL2 Linux 6.6.87.2-microsoft-standard-WSL2",
+    "cpu": "Intel Core i9-10900KF @ 3.70 GHz",
+    "compiler": "GCC 9.4.0",
+    "cmake": "3.31.10",
+    "generator": "Unix Makefiles",
+    "standard": "C++17"
+  },
+  "artifacts": {
+    "release_library": "/tmp/pitchwing-native-release/libpitchwing.a",
+    "release_runner": "/tmp/pitchwing-native-release/pitchwing_render",
+    "sanitizer_tests": "/tmp/pitchwing-native-sanitize/pitchwing_tests"
+  },
+  "flags": {
+    "release": "-O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic",
+    "sanitizer": "-O1 -g -std=c++17 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+  },
+  "release_tests": {
+    "passed_groups": 9,
+    "total_groups": 9,
+    "ctest_result": "1/1 passed",
+    "seconds": 2.02
+  },
+  "sanitizer_tests": {
+    "passed_groups": 9,
+    "total_groups": 9,
+    "exit_code": 0,
+    "runner": "direct executable under timeout 60s",
+    "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1:quarantine_size_mb=16:thread_local_quarantine_size_kb=64",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1",
+    "leak_validation": "not established: initial LeakSanitizer runtime rejected ptrace; unsandboxed retry terminated after sustained run; later CTest retry exited137 without diagnostic; final bounded direct address/UB checks pass"
+  },
+  "allocation_checks": {
+    "result": "zero global-new allocations during first process, reset, static pitch setting, and flush for both windows",
+    "limitation": "includes aligned new; does not intercept direct malloc/realloc"
+  },
+  "parity": {
+    "passed": true,
+    "cases": 30,
+    "max_absolute_error": 1.6667223157185163e-13,
+    "tolerance": 1e-10,
+    "reference": "StableTransportEngine deterministic startup/peak-cap variant; original prototype remains unchanged",
+    "report": "2026-10-08-native-parity-final.json"
+  },
+  "performance": {
+    "status": "diagnostic only; callback deadlines not established",
+    "preferred_excerpt_blocks": [
+      32,
+      64,
+      128
+    ],
+    "clean_final_parent_workload": true,
+    "remaining_issue": "32-frame callbacks exceed nominal duration; 64-frame run also has6 misses;128-frame run has0 observed misses. WSL sample is not a real-time guarantee."
+  },
+  "source_sha256": {
+    "scripts/compare_native.py": "7c7b6eaf3440791c7ab789813f870005d6778e1a9d6d468842d1b045b58b56f4",
+    "tools/pitchwing_render.cpp": "dccab74529f8c8d84764d4b43ac8549d927d585621be2d99e7d0d25e6ede5375",
+    "include/pitchwing/Engine.hpp": "0abcec10af26f006c0a9d39658bb7b5488f05109d8744d3dac6e44174863fae1",
+    "src/Engine.cpp": "62d9b9e187fd1e665d91dfd32ac4438279949f8a033bd55c1efd790d19683242",
+    "experiments/transport/engine.py": "35794a1cdbbcbb8cc6a0e11e468ec7af859dc2334bb0d41998f062c53aa081c0",
+    "experiments/transport/stable_reference.py": "4bf332387a949800afcf6c3fc3c8ad6ef35d885a8b73495070b1bccc859c6f08",
+    "experiments/corpus/audit_stems.py": "32b4c0ae6cc4b29e23b416ae5de5ab4a4a932d52d0a10b67d8358a70015f6440"
+  }
+}

@@ -1,0 +1,3102 @@
+{
+  "schema_version": 1,
+  "purpose": "synthetic DSP diagnostics; NOT a perceptual or production quality score",
+  "environment": {
+    "python": "3.8.10",
+    "numpy": "1.24.4",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.29",
+    "execution_context": "WSL research run; not target-native real-time performance"
+  },
+  "source_sha256": {
+    "engine.py": "35794a1cdbbcbb8cc6a0e11e468ec7af859dc2334bb0d41998f062c53aa081c0",
+    "evaluate.py": "ffbdeb3dfe15512ebba1d387013dfb820c97f86338ee0a2e6763bbda03c3a1d9"
+  },
+  "sample_rate": 48000,
+  "quick": false,
+  "fixture_metadata": {
+    "tone_duration_s": 1.5,
+    "tone_names": [
+      "B0",
+      "E1",
+      "F#1",
+      "E2",
+      "A4"
+    ],
+    "tone_semitones": [
+      -7,
+      -1,
+      0,
+      1,
+      7
+    ],
+    "dyad_duration_s": 4,
+    "dyad_pairs": [
+      [
+        "B0",
+        "C1"
+      ],
+      [
+        "E1",
+        "F1"
+      ]
+    ],
+    "dyad_and_temporal_semitones": [
+      -7,
+      0,
+      7
+    ],
+    "temporal_duration_s": 1.5,
+    "temporal_harmonics_per_voice": 8,
+    "temporal_harmonic_amplitude": "1 / harmonic**1.3",
+    "target_definition": "frequency ratios scale; amplitude envelope event times stay fixed",
+    "rms_envelope_window_samples": 961,
+    "rms_envelope_centered": true,
+    "notes_hz": {
+      "B0": 30.867706,
+      "C1": 32.703196,
+      "E1": 41.203445,
+      "F1": 43.653529,
+      "F#1": 46.249303,
+      "E2": 82.406889,
+      "A4": 440
+    }
+  },
+  "configurations": {
+    "asymmetric": {
+      "engine_parameters": {
+        "analysis_size": 2048,
+        "synthesis_size": 384,
+        "hop": 96,
+        "window": "asymmetric"
+      },
+      "unity_delay": {
+        "declared_delay_samples": 383,
+        "measured_peak_delay_samples": 383,
+        "measured_energy_centroid_delay_samples": 383,
+        "first_sample_above_1e_minus_9_delay_samples": 383,
+        "maximum_delayed_identity_error": 4.111866435544921e-17
+      },
+      "dc": [
+        {
+          "semitones": -7,
+          "input_dc": 0.2,
+          "declared_delay_samples": 383,
+          "steady_interval_samples": [
+            24000,
+            47000
+          ],
+          "output_mean": 0.27947961714601766,
+          "output_ac_rms": 0.003642579867396402,
+          "maximum_constant_preservation_error": 0.08368797224328844
+        },
+        {
+          "semitones": 0,
+          "input_dc": 0.2,
+          "declared_delay_samples": 383,
+          "steady_interval_samples": [
+            24000,
+            47000
+          ],
+          "output_mean": 0.20000000000000007,
+          "output_ac_rms": 6.060804036213536e-17,
+          "maximum_constant_preservation_error": 1.1102230246251565e-16
+        },
+        {
+          "semitones": 7,
+          "input_dc": 0.2,
+          "declared_delay_samples": 383,
+          "steady_interval_samples": [
+            24000,
+            47000
+          ],
+          "output_mean": 0.023373461702132357,
+          "output_ac_rms": 0.0012958883704252682,
+          "maximum_constant_preservation_error": 0.17829786901320885
+        }
+      ],
+      "tones": [
+        {
+          "fixture": "B0",
+          "semitones": -7,
+          "input_hz": 30.867706,
+          "target_hz": 20.601722087801747,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 20.601678866759936,
+          "strongest_line_cents_error": -0.0036320176240068193,
+          "rms_gain_db": -1.1658363561182339,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              20.601722087801747
+            ],
+            "amplitudes": [
+              0.2582781146856748
+            ],
+            "dc": 0.00012503476508914273,
+            "fitted_ac_energy_fraction": 0.9622480395613422,
+            "residual_rms": 0.036080542203110404,
+            "residual_to_ac_rms_db": -14.23060490774283,
+            "design_condition_number": 1.419095990764624
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": -1,
+          "input_hz": 30.867706,
+          "target_hz": 29.135234784810585,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 29.125714424255538,
+          "strongest_line_cents_error": -0.5657982824773113,
+          "rms_gain_db": -1.0865501294445794,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              29.135234784810585
+            ],
+            "amplitudes": [
+              0.26106708497823194
+            ],
+            "dc": 0.0001322791854424033,
+            "fitted_ac_energy_fraction": 0.9697645298735404,
+            "residual_rms": 0.03257249930152329,
+            "residual_to_ac_rms_db": -15.194832742305264,
+            "design_condition_number": 1.4152770385201177
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": 0,
+          "input_hz": 30.867706,
+          "target_hz": 30.867706,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 30.867646300901516,
+          "strongest_line_cents_error": -0.0033482634549426675,
+          "rms_gain_db": 1.928654933106574e-15,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              30.867706
+            ],
+            "amplitudes": [
+              0.29999999999999977
+            ],
+            "dc": -1.7196254224034638e-18,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 3.273120535101338e-15,
+            "residual_to_ac_rms_db": -276.22979163630566,
+            "design_condition_number": 1.4151572265388779
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": 1,
+          "input_hz": 30.867706,
+          "target_hz": 32.703195314532984,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 32.69772927774729,
+          "strongest_line_cents_error": -0.28938395222595675,
+          "rms_gain_db": -1.102919815275976,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              32.703195314532984
+            ],
+            "amplitudes": [
+              0.2602344139298104
+            ],
+            "dc": 0.00010102445537674121,
+            "fitted_ac_energy_fraction": 0.9691220405547782,
+            "residual_rms": 0.03284272091840231,
+            "residual_to_ac_rms_db": -15.103514075254738,
+            "design_condition_number": 1.4147343447401366
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": 7,
+          "input_hz": 30.867706,
+          "target_hz": 46.2493023467488,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 46.249256346224165,
+          "strongest_line_cents_error": -0.0017219224957799575,
+          "rms_gain_db": -1.0758637836592808,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              46.2493023467488
+            ],
+            "amplitudes": [
+              0.26089227974261553
+            ],
+            "dc": 0.00002040895695039665,
+            "fitted_ac_energy_fraction": 0.9714067100511831,
+            "residual_rms": 0.031671570710548914,
+            "residual_to_ac_rms_db": -15.437358717698732,
+            "design_condition_number": 1.4158125371906998
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": -7,
+          "input_hz": 41.203445,
+          "target_hz": 27.500000257551516,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 27.500028296369905,
+          "strongest_line_cents_error": 0.0017651538868462538,
+          "rms_gain_db": -1.349925113426437,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              27.500000257551516
+            ],
+            "amplitudes": [
+              0.2542641051836506
+            ],
+            "dc": 0.00016089720558820828,
+            "fitted_ac_energy_fraction": 0.9711089131867854,
+            "residual_rms": 0.03093300259382245,
+            "residual_to_ac_rms_db": -15.392361207344056,
+            "design_condition_number": 1.4180275282371875
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": -1,
+          "input_hz": 41.203445,
+          "target_hz": 38.89087332949296,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 38.89040757123694,
+          "strongest_line_cents_error": -0.02073343462916871,
+          "rms_gain_db": -1.3305342567792522,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              38.89087332949296
+            ],
+            "amplitudes": [
+              0.25486038397375893
+            ],
+            "dc": 0.000014918845567328899,
+            "fitted_ac_energy_fraction": 0.974040163159438,
+            "residual_rms": 0.0293669019099557,
+            "residual_to_ac_rms_db": -15.856980414350843,
+            "design_condition_number": 1.4169003853934001
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": 0,
+          "input_hz": 41.203445,
+          "target_hz": 41.203445,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 41.20345734233109,
+          "strongest_line_cents_error": 0.000518584322864994,
+          "rms_gain_db": 1.928654933106574e-15,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              41.203445
+            ],
+            "amplitudes": [
+              0.30000000000000016
+            ],
+            "dc": 4.2622544217495256e-18,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.416856800823146e-15,
+            "residual_to_ac_rms_db": -273.6308899184949,
+            "design_condition_number": 1.4164904124941704
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": 1,
+          "input_hz": 41.203445,
+          "target_hz": 43.653529337963036,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 43.65248698388297,
+          "strongest_line_cents_error": -0.0413387060984539,
+          "rms_gain_db": -1.3890624115416539,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              43.653529337963036
+            ],
+            "amplitudes": [
+              0.2520015587743956
+            ],
+            "dc": -0.00004078714729788691,
+            "fitted_ac_energy_fraction": 0.971671186446874,
+            "residual_rms": 0.03043030475250971,
+            "residual_to_ac_rms_db": -15.47771613905978,
+            "design_condition_number": 1.4144912649938517
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": 7,
+          "input_hz": 41.203445,
+          "target_hz": 61.735413235199125,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 61.73548058774838,
+          "strongest_line_cents_error": 0.0018887532591539075,
+          "rms_gain_db": -1.3153986611434976,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              61.735413235199125
+            ],
+            "amplitudes": [
+              0.25310955398602736
+            ],
+            "dc": -0.00030417412953909006,
+            "fitted_ac_energy_fraction": 0.9637563390058792,
+            "residual_rms": 0.034713657217632275,
+            "residual_to_ac_rms_db": -14.407679404311688,
+            "design_condition_number": 1.4151189992263686
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": -7,
+          "input_hz": 46.249303,
+          "target_hz": 30.867706435992865,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 30.867668621670706,
+          "strongest_line_cents_error": -0.0021208405068366193,
+          "rms_gain_db": -1.054090898598404,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              30.867706435992865
+            ],
+            "amplitudes": [
+              0.2628010539321565
+            ],
+            "dc": -0.00007039359103903288,
+            "fitted_ac_energy_fraction": 0.9797172911644215,
+            "residual_rms": 0.02674917058940942,
+            "residual_to_ac_rms_db": -16.928740437281487,
+            "design_condition_number": 1.4151572167660147
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": -1,
+          "input_hz": 46.249303,
+          "target_hz": 43.65352908113238,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 43.65712079140472,
+          "strongest_line_cents_error": 0.14243602883377438,
+          "rms_gain_db": -1.1175354299347748,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              43.65352908113238
+            ],
+            "amplitudes": [
+              0.2611328533337855
+            ],
+            "dc": -0.00012017113594639635,
+            "fitted_ac_energy_fraction": 0.9795459689653878,
+            "residual_rms": 0.026678289767660214,
+            "residual_to_ac_rms_db": -16.892210894380867,
+            "design_condition_number": 1.4144912608555595
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": 0,
+          "input_hz": 46.249303,
+          "target_hz": 46.249303,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 46.249242053749406,
+          "strongest_line_cents_error": -0.0022813812720490355,
+          "rms_gain_db": 1.928654933106574e-15,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              46.249303
+            ],
+            "amplitudes": [
+              0.30000000000000004
+            ],
+            "dc": 1.0705399423779575e-18,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.934395995684298e-15,
+            "residual_to_ac_rms_db": -272.6619031993189,
+            "design_condition_number": 1.4158125298494897
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": 1,
+          "input_hz": 46.249303,
+          "target_hz": 48.99942966834064,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 49.00223648172876,
+          "strongest_line_cents_error": 0.09916669989613706,
+          "rms_gain_db": -1.0634582196153803,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              48.99942966834064
+            ],
+            "amplitudes": [
+              0.26238694436118537
+            ],
+            "dc": 0.0000728174482084723,
+            "fitted_ac_energy_fraction": 0.9793803132132084,
+            "residual_rms": 0.026944176146477726,
+            "residual_to_ac_rms_db": -16.857179359390777,
+            "design_condition_number": 1.415463412886328
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": 7,
+          "input_hz": 46.249303,
+          "target_hz": 69.29565798551393,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 69.29570183695051,
+          "strongest_line_cents_error": 0.0010955531458835418,
+          "rms_gain_db": -1.0340176136132218,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              69.29565798551393
+            ],
+            "amplitudes": [
+              0.2632100980861339
+            ],
+            "dc": -0.00033299903547916345,
+            "fitted_ac_energy_fraction": 0.9770432735545294,
+            "residual_rms": 0.02851975942329881,
+            "residual_to_ac_rms_db": -16.39090040839718,
+            "design_condition_number": 1.415684848073186
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": -7,
+          "input_hz": 82.406889,
+          "target_hz": 54.99999984768311,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 55.22384813294799,
+          "strongest_line_cents_error": 7.031768771514332,
+          "rms_gain_db": -0.903036621697959,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              54.99999984768311
+            ],
+            "amplitudes": [
+              0.24343097639126404
+            ],
+            "dc": -0.00010296014158611955,
+            "fitted_ac_energy_fraction": 0.8106016763686119,
+            "residual_rms": 0.0832026935459036,
+            "residual_to_ac_rms_db": -7.226238692654789,
+            "design_condition_number": 1.4143309986752108
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": -1,
+          "input_hz": 82.406889,
+          "target_hz": 77.78174571511161,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 77.81959546871617,
+          "strongest_line_cents_error": 0.84223931468551,
+          "rms_gain_db": -0.5127836677245903,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              77.78174571511161
+            ],
+            "amplitudes": [
+              0.2818288916591809
+            ],
+            "dc": 0.00001456443574343555,
+            "fitted_ac_energy_fraction": 0.9923780579570324,
+            "residual_rms": 0.017462794329695077,
+            "residual_to_ac_rms_db": -21.17934357914293,
+            "design_condition_number": 1.4147540824143026
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": 0,
+          "input_hz": 82.406889,
+          "target_hz": 82.406889,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 82.40691342556475,
+          "strongest_line_cents_error": 0.0005131411171424443,
+          "rms_gain_db": 1.928654933106574e-15,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              82.406889
+            ],
+            "amplitudes": [
+              0.30000000000000004
+            ],
+            "dc": 1.3482208078614043e-17,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 1.0613870324100129e-14,
+            "residual_to_ac_rms_db": -266.00905544469475,
+            "design_condition_number": 1.4152496696578372
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": 1,
+          "input_hz": 82.406889,
+          "target_hz": 87.30705761646298,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 87.26692152574529,
+          "strongest_line_cents_error": -0.7960518332984693,
+          "rms_gain_db": -0.5019282227193551,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              87.30705761646298
+            ],
+            "amplitudes": [
+              0.28189728257910396
+            ],
+            "dc": 0.00014110579131798782,
+            "fitted_ac_energy_fraction": 0.9912977261055549,
+            "residual_rms": 0.018677810894947702,
+            "residual_to_ac_rms_db": -20.603672518897543,
+            "design_condition_number": 1.4144893092072437
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": 7,
+          "input_hz": 82.406889,
+          "target_hz": 123.47082497209117,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 123.13538354058728,
+          "strongest_line_cents_error": -4.70975965568503,
+          "rms_gain_db": -0.5119688539060009,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              123.47082497209117
+            ],
+            "amplitudes": [
+              0.22199647712221454
+            ],
+            "dc": 0.00008106482870378285,
+            "fitted_ac_energy_fraction": 0.6170863554727761,
+            "residual_rms": 0.12371706506155258,
+            "residual_to_ac_rms_db": -4.168991579737986,
+            "design_condition_number": 1.4149753492138446
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": -7,
+          "input_hz": 440,
+          "target_hz": 293.6647679174076,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 293.6646878865462,
+          "strongest_line_cents_error": -0.0004718038602821408,
+          "rms_gain_db": 0.00016765230965494927,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              293.6647679174076
+            ],
+            "amplitudes": [
+              0.30002149940524586
+            ],
+            "dc": 9.737798647244778e-7,
+            "fitted_ac_energy_fraction": 0.9999803421342695,
+            "residual_rms": 0.0009405688903099495,
+            "residual_to_ac_rms_db": -47.06463635626185,
+            "design_condition_number": 1.4142815525681576
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": -1,
+          "input_hz": 440,
+          "target_hz": 415.3046975799451,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 415.30475063170877,
+          "strongest_line_cents_error": 0.00022115091458351204,
+          "rms_gain_db": -0.0014901396624974396,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              415.3046975799451
+            ],
+            "amplitudes": [
+              0.29996165409441855
+            ],
+            "dc": 0.0000014705995286141973,
+            "fitted_ac_energy_fraction": 0.9999816882979904,
+            "residual_rms": 0.0009075155460245184,
+            "residual_to_ac_rms_db": -47.37271287647001,
+            "design_condition_number": 1.414426127756435
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": 0,
+          "input_hz": 440,
+          "target_hz": 440,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 439.9999936279155,
+          "strongest_line_cents_error": -0.000025071749438549956,
+          "rms_gain_db": 1.928654933106574e-15,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              440
+            ],
+            "amplitudes": [
+              0.3
+            ],
+            "dc": 3.194912390222659e-17,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.5312237569171845e-14,
+            "residual_to_ac_rms_db": -253.4078149645955,
+            "design_condition_number": 1.4142135623730951
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": 1,
+          "input_hz": 440,
+          "target_hz": 466.1637615180899,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 466.1637057356081,
+          "strongest_line_cents_error": -0.00020716440362426124,
+          "rms_gain_db": -0.0018584376197549003,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              466.1637615180899
+            ],
+            "amplitudes": [
+              0.29997078060768817
+            ],
+            "dc": 0.0000032084248751933554,
+            "fitted_ac_energy_fraction": 0.9999827599538562,
+            "residual_rms": 0.0008806620606258665,
+            "residual_to_ac_rms_db": -47.63461576099818,
+            "design_condition_number": 1.414429955664543
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": 7,
+          "input_hz": 440,
+          "target_hz": 659.2551138257398,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 659.2551761112791,
+          "strongest_line_cents_error": 0.00016356466384922577,
+          "rms_gain_db": -0.0016201847399951786,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              659.2551138257398
+            ],
+            "amplitudes": [
+              0.2999620620637805
+            ],
+            "dc": 0.000011048644438802623,
+            "fitted_ac_energy_fraction": 0.999974455610006,
+            "residual_rms": 0.0010719501736043892,
+            "residual_to_ac_rms_db": -45.92704463911696,
+            "design_condition_number": 1.4143545140057365
+          }
+        }
+      ],
+      "dyads": [
+        {
+          "fixture": "B0/C1",
+          "semitones": -7,
+          "input_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "target_frequencies_hz": [
+            20.601722087801747,
+            21.826764689767025
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              20.601722087801747,
+              21.826764689767025
+            ],
+            "amplitudes": [
+              0.01783403616706568,
+              0.03589349794658388
+            ],
+            "dc": -0.0003775314347377511,
+            "fitted_ac_energy_fraction": 0.025100770853758725,
+            "residual_rms": 0.17502398380714704,
+            "residual_to_ac_rms_db": -0.11040273006591012,
+            "design_condition_number": 1.4580179956555865
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 1.2250426019652778,
+            "observed_lines_hz": [
+              20.34821886954914,
+              22.183720541309256
+            ],
+            "observed_spacing_hz": 1.8355016717601167,
+            "spacing_error_hz": 0.6104590697948389,
+            "search_band_hz": [
+              16.926594281905913,
+              25.501892495662858
+            ],
+            "valley_to_weaker_peak_ratio": 0.016730727268545315
+          }
+        },
+        {
+          "fixture": "B0/C1",
+          "semitones": 0,
+          "input_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "target_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              30.867706,
+              32.703196
+            ],
+            "amplitudes": [
+              0.20000000000000004,
+              0.2000000000000003
+            ],
+            "dc": -9.403052420456172e-18,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 1.0737885496634458e-14,
+            "residual_to_ac_rms_db": -265.5442959849693,
+            "design_condition_number": 1.450395339046714
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 1.83549,
+            "observed_lines_hz": [
+              30.867780836227265,
+              32.70314742187109
+            ],
+            "observed_spacing_hz": 1.835366585643822,
+            "spacing_error_hz": -0.0001234143561781309,
+            "search_band_hz": [
+              25.361235999999998,
+              38.209666
+            ],
+            "valley_to_weaker_peak_ratio": 0.0027209943343446015
+          }
+        },
+        {
+          "fixture": "B0/C1",
+          "semitones": 7,
+          "input_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "target_frequencies_hz": [
+            46.2493023467488,
+            48.999430003285184
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              46.2493023467488,
+              48.999430003285184
+            ],
+            "amplitudes": [
+              0.03758769238000912,
+              0.01099332261777899
+            ],
+            "dc": -0.00039239044341516163,
+            "fitted_ac_energy_fraction": 0.023848364662457988,
+            "residual_rms": 0.17600899700226771,
+            "residual_to_ac_rms_db": -0.10482713813653899,
+            "design_condition_number": 1.4372367929815375
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 2.7501276565363852,
+            "observed_lines_hz": [
+              46.629223876724105,
+              48.46443770770816
+            ],
+            "observed_spacing_hz": 1.8352138309840527,
+            "spacing_error_hz": -0.9149138255523326,
+            "search_band_hz": [
+              37.99891937713964,
+              57.24981297289434
+            ],
+            "valley_to_weaker_peak_ratio": 0.025981392671147876
+          }
+        },
+        {
+          "fixture": "E1/F1",
+          "semitones": -7,
+          "input_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "target_frequencies_hz": [
+            27.500000257551516,
+            29.13523514218368
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              27.500000257551516,
+              29.13523514218368
+            ],
+            "amplitudes": [
+              0.03320670033525162,
+              0.031541515615408966
+            ],
+            "dc": -0.000455273410215498,
+            "fitted_ac_energy_fraction": 0.037644542445677165,
+            "residual_rms": 0.16707619254829342,
+            "residual_to_ac_rms_db": -0.1666448644339907,
+            "design_condition_number": 1.4465699700674546
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 1.6352348846321654,
+            "observed_lines_hz": [
+              27.089905520384796,
+              29.539856200104698
+            ],
+            "observed_spacing_hz": 2.449950679719901,
+            "spacing_error_hz": 0.8147157950877357,
+            "search_band_hz": [
+              22.59429560365502,
+              34.04093979608018
+            ],
+            "valley_to_weaker_peak_ratio": 0.040419994328515334
+          }
+        },
+        {
+          "fixture": "E1/F1",
+          "semitones": 0,
+          "input_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "target_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              41.203445,
+              43.653529
+            ],
+            "amplitudes": [
+              0.20000000000000015,
+              0.2000000000000003
+            ],
+            "dc": -2.803499960795391e-17,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 1.2436386249339917e-14,
+            "residual_to_ac_rms_db": -263.9702064494918,
+            "design_condition_number": 1.4404792829635717
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 2.450083999999997,
+            "observed_lines_hz": [
+              41.20356642930063,
+              43.653400391984555
+            ],
+            "observed_spacing_hz": 2.4498339626839254,
+            "spacing_error_hz": -0.00025003731607142754,
+            "search_band_hz": [
+              33.85319300000001,
+              51.00378099999999
+            ],
+            "valley_to_weaker_peak_ratio": 0.000623704242055786
+          }
+        },
+        {
+          "fixture": "E1/F1",
+          "semitones": 7,
+          "input_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "target_frequencies_hz": [
+            61.735413235199125,
+            65.40639143134145
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              61.735413235199125,
+              65.40639143134145
+            ],
+            "amplitudes": [
+              0.009762830877646489,
+              0.004329439040837056
+            ],
+            "dc": 0.000038374221861571895,
+            "fitted_ac_energy_fraction": 0.0019537213509415174,
+            "residual_rms": 0.17002687056746593,
+            "residual_to_ac_rms_db": -0.008493203399522408,
+            "design_condition_number": 1.4223209964128254
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 3.670978196142322,
+            "observed_lines_hz": [
+              62.34992748395419,
+              64.80007065758532
+            ],
+            "observed_spacing_hz": 2.450143173631133,
+            "spacing_error_hz": -1.2208350225111886,
+            "search_band_hz": [
+              50.72247864677216,
+              76.41932601976842
+            ],
+            "valley_to_weaker_peak_ratio": 0.054302425472430305
+          }
+        }
+      ],
+      "temporal": [
+        {
+          "fixture": "B0_harmonic_gate",
+          "semitones": -7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 0.75
+            }
+          ],
+          "onset_target_aligned_s": 0.14264583333333333,
+          "onset_output_aligned_s": 0.14389583333333333,
+          "onset_difference_ms": 1.250000000000001,
+          "onset_total_delay_ms": 9.229166666666668,
+          "envelope_best_lag_ms": -2,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.7965143032234031,
+          "envelope_normalized_rms_error_after_gain_fit": 0.24072619565177342,
+          "target_energy_quantile_times_s": [
+            0.22454166666666667,
+            0.4461875,
+            0.6844791666666666
+          ],
+          "output_energy_quantile_times_s": [
+            0.22447916666666667,
+            0.4528125,
+            0.679625
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.4,
+            0.65
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              20.601722087801747,
+              41.203444175603494,
+              61.80516626340524,
+              82.40688835120699,
+              103.00861043900873,
+              123.61033252681048,
+              144.2120546146122,
+              164.81377670241397
+            ],
+            "amplitudes": [
+              0.32984657471584117,
+              0.04678668316799853,
+              0.004768510763468207,
+              0.07047395366222288,
+              0.0032003055286995456,
+              0.0027374173436911058,
+              0.015231179004204455,
+              0.00639281630654669
+            ],
+            "dc": -0.009647034914729864,
+            "fitted_ac_energy_fraction": 0.8458950774380878,
+            "residual_rms": 0.10382498418189781,
+            "residual_to_ac_rms_db": -8.121834884241474,
+            "design_condition_number": 1.4388378067534668
+          }
+        },
+        {
+          "fixture": "B0_harmonic_gate",
+          "semitones": 0,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 0.75
+            }
+          ],
+          "onset_target_aligned_s": 0.143,
+          "onset_output_aligned_s": 0.143,
+          "onset_difference_ms": 0,
+          "onset_total_delay_ms": 7.979166666666667,
+          "envelope_best_lag_ms": 0,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 1.0000000000000002,
+          "envelope_normalized_rms_error_after_gain_fit": 4.148511736067275e-16,
+          "target_energy_quantile_times_s": [
+            0.20229166666666668,
+            0.44716666666666666,
+            0.6787916666666667
+          ],
+          "output_energy_quantile_times_s": [
+            0.20229166666666668,
+            0.44716666666666666,
+            0.6787916666666667
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.4,
+            0.65
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              30.867706,
+              61.735412,
+              92.603118,
+              123.470824,
+              154.33853,
+              185.206236,
+              216.073942,
+              246.941648
+            ],
+            "amplitudes": [
+              0.3937471874303147,
+              0.15991104827440053,
+              0.09439735671053233,
+              0.06494406608235968,
+              0.04859106959905338,
+              0.03833723959891204,
+              0.031375453555771364,
+              0.02637548665225716
+            ],
+            "dc": -5.006642200961884e-16,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.0050363654070585e-15,
+            "residual_to_ac_rms_db": -277.8937860237209,
+            "design_condition_number": 1.4870876848662828
+          }
+        },
+        {
+          "fixture": "B0_harmonic_gate",
+          "semitones": 7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 0.75
+            }
+          ],
+          "onset_target_aligned_s": 0.1423125,
+          "onset_output_aligned_s": 0.14285416666666667,
+          "onset_difference_ms": 0.5416666666666625,
+          "onset_total_delay_ms": 8.520833333333329,
+          "envelope_best_lag_ms": -2,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.8476011986965906,
+          "envelope_normalized_rms_error_after_gain_fit": 0.14960033837052064,
+          "target_energy_quantile_times_s": [
+            0.21410416666666668,
+            0.45066666666666666,
+            0.6871041666666666
+          ],
+          "output_energy_quantile_times_s": [
+            0.20822916666666666,
+            0.4451875,
+            0.6802291666666667
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.4,
+            0.65
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              46.2493023467488,
+              92.4986046934976,
+              138.7479070402464,
+              184.9972093869952,
+              231.246511733744,
+              277.4958140804928,
+              323.7451164272416,
+              369.9944187739904
+            ],
+            "amplitudes": [
+              0.32260666000678834,
+              0.013228184535959177,
+              0.038818745226038724,
+              0.0035113698311908556,
+              0.014657671621996193,
+              0.0016665713765736676,
+              0.01146325754775906,
+              0.0011739201588163593
+            ],
+            "dc": -0.0058505070006335145,
+            "fitted_ac_energy_fraction": 0.7254520886403739,
+            "residual_rms": 0.14228367301396086,
+            "residual_to_ac_rms_db": -5.613818558644183,
+            "design_condition_number": 1.451166538447204
+          }
+        },
+        {
+          "fixture": "low_chord_crossfade",
+          "semitones": -7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "chord_crossfade_start",
+              "input_time_s": 0.65
+            },
+            {
+              "name": "chord_crossfade_end",
+              "input_time_s": 0.67
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 1.25
+            }
+          ],
+          "onset_target_aligned_s": 0.149375,
+          "onset_output_aligned_s": 0.14952083333333333,
+          "onset_difference_ms": 0.14583333333331727,
+          "onset_total_delay_ms": 8.124999999999984,
+          "envelope_best_lag_ms": 0,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.7571437396720858,
+          "envelope_normalized_rms_error_after_gain_fit": 0.3946325320264616,
+          "target_energy_quantile_times_s": [
+            0.27710416666666665,
+            0.7215625,
+            1.1558541666666666
+          ],
+          "output_energy_quantile_times_s": [
+            0.2597083333333333,
+            0.7239375,
+            1.1424583333333334
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.95,
+            1.2
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              27.500000257551516,
+              41.203444175603494,
+              54.99999984768311,
+              82.40688835120699,
+              82.50000077265454,
+              109.99999969536621,
+              123.61033252681048,
+              137.50000128775758,
+              164.81377670241397,
+              164.99999954304934,
+              192.50000180286062,
+              206.01722087801747,
+              219.99999939073243,
+              247.22066505362096,
+              274.9999992384155,
+              288.4241092292244,
+              329.62755340482795,
+              329.9999990860987,
+              384.9999989337818,
+              439.99999878146485
+            ],
+            "amplitudes": [
+              0.019138567850027186,
+              0.02211161624045388,
+              0.0742649152326291,
+              0.29874852423616743,
+              0.2935671735314798,
+              0.02871813305056372,
+              0.007153741545017549,
+              0.0040885428988119855,
+              0.22728109966386706,
+              0.22299359709959127,
+              0.003581774910119733,
+              0.00368411975127198,
+              0.014248491695399733,
+              0.0008644464896768335,
+              0.005828210255966519,
+              0.0037196720320460427,
+              0.0196512458872817,
+              0.01723578573399361,
+              0.006296717014985015,
+              0.006230249534266924
+            ],
+            "dc": 0.00025921372470864585,
+            "fitted_ac_energy_fraction": 0.1655025176487509,
+            "residual_rms": 0.14354307393745985,
+            "residual_to_ac_rms_db": -0.7857496923351727,
+            "design_condition_number": 48.648195110997165
+          }
+        },
+        {
+          "fixture": "low_chord_crossfade",
+          "semitones": 0,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "chord_crossfade_start",
+              "input_time_s": 0.65
+            },
+            {
+              "name": "chord_crossfade_end",
+              "input_time_s": 0.67
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 1.25
+            }
+          ],
+          "onset_target_aligned_s": 0.1460625,
+          "onset_output_aligned_s": 0.1460625,
+          "onset_difference_ms": 0,
+          "onset_total_delay_ms": 7.979166666666667,
+          "envelope_best_lag_ms": 0,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 1.0000000000000002,
+          "envelope_normalized_rms_error_after_gain_fit": 4.915210230696395e-16,
+          "target_energy_quantile_times_s": [
+            0.25975,
+            0.6801875,
+            1.1188333333333333
+          ],
+          "output_energy_quantile_times_s": [
+            0.25975,
+            0.6801875,
+            1.1188333333333333
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.95,
+            1.2
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              41.203445,
+              61.735412,
+              82.406889,
+              123.470824,
+              123.610335,
+              164.813778,
+              185.206236,
+              206.017225,
+              246.941648,
+              247.22066700000002,
+              288.42411500000003,
+              308.67706,
+              329.627556,
+              370.412472,
+              412.034445,
+              432.147884,
+              493.883296,
+              494.44133400000004,
+              576.8482230000001,
+              659.255112
+            ],
+            "amplitudes": [
+              0.11813544042741685,
+              0.11813543984137585,
+              0.16468249652065609,
+              0.0479778989264904,
+              0.02832190221537106,
+              0.0673632742620268,
+              0.028321914167905356,
+              0.014578713792998963,
+              0.019485131702194822,
+              0.039814063788192224,
+              0.00941353542531438,
+              0.014578714579654152,
+              0.027262467633519798,
+              0.011502270463608464,
+              0.01457871332141869,
+              0.009413535102968556,
+              0.007913401026062219,
+              0.011502269934289244,
+              0.009413535379668943,
+              0.007913401940504761
+            ],
+            "dc": -4.802087193836574e-11,
+            "fitted_ac_energy_fraction": 0.9999999999999859,
+            "residual_rms": 2.1688903769835495e-8,
+            "residual_to_ac_rms_db": -138.5229581330061,
+            "design_condition_number": 31.969968266725584
+          }
+        },
+        {
+          "fixture": "low_chord_crossfade",
+          "semitones": 7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "chord_crossfade_start",
+              "input_time_s": 0.65
+            },
+            {
+              "name": "chord_crossfade_end",
+              "input_time_s": 0.67
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 1.25
+            }
+          ],
+          "onset_target_aligned_s": 0.14277083333333335,
+          "onset_output_aligned_s": 0.14604166666666665,
+          "onset_difference_ms": 3.2708333333333064,
+          "onset_total_delay_ms": 11.249999999999973,
+          "envelope_best_lag_ms": 1,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.7707209056515711,
+          "envelope_normalized_rms_error_after_gain_fit": 0.3005974994767685,
+          "target_energy_quantile_times_s": [
+            0.25854166666666667,
+            0.6809166666666666,
+            1.1315
+          ],
+          "output_energy_quantile_times_s": [
+            0.2619166666666667,
+            0.6811666666666667,
+            1.1220416666666666
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.95,
+            1.2
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              61.735413235199125,
+              92.4986046934976,
+              123.47082497209117,
+              184.9972093869952,
+              185.20623970559737,
+              246.94164994418233,
+              277.4958140804928,
+              308.6770661759956,
+              369.9944187739904,
+              370.41247491627354,
+              432.14789264639387,
+              462.493023467488,
+              493.88329988836466,
+              554.9916281609856,
+              617.3541248604558,
+              647.4902328544832,
+              739.9888375479808,
+              740.8249498325471,
+              864.2957748046382,
+              987.7665997767293
+            ],
+            "amplitudes": [
+              0.0030795201105449383,
+              0.01769447574725286,
+              0.019539642412142875,
+              0.1058995892163442,
+              0.10973907858026923,
+              0.0193698792839329,
+              0.0013534094634818,
+              0.0022003958791976704,
+              0.03198185824204219,
+              0.019468339787535188,
+              0.002493449181741492,
+              0.0009324735478900901,
+              0.016881945225332835,
+              0.0028256886948741225,
+              0.004261654668814642,
+              0.002561197467282072,
+              0.009017961439690452,
+              0.0075753897148069516,
+              0.006308176950262689,
+              0.006965105886495004
+            ],
+            "dc": 0.0002798951707162237,
+            "fitted_ac_energy_fraction": 0.04159761178133492,
+            "residual_rms": 0.14763898816669738,
+            "residual_to_ac_rms_db": -0.18452112745982985,
+            "design_condition_number": 21.38110031181279
+          }
+        }
+      ]
+    },
+    "symmetric": {
+      "engine_parameters": {
+        "analysis_size": 384,
+        "synthesis_size": 384,
+        "hop": 96,
+        "window": "symmetric"
+      },
+      "unity_delay": {
+        "declared_delay_samples": 383,
+        "measured_peak_delay_samples": 383,
+        "measured_energy_centroid_delay_samples": 383,
+        "first_sample_above_1e_minus_9_delay_samples": 383,
+        "maximum_delayed_identity_error": 2.220446049250313e-16
+      },
+      "dc": [
+        {
+          "semitones": -7,
+          "input_dc": 0.2,
+          "declared_delay_samples": 383,
+          "steady_interval_samples": [
+            24000,
+            47000
+          ],
+          "output_mean": 0.16201584218967582,
+          "output_ac_rms": 0.027229021464448666,
+          "maximum_constant_preservation_error": 0.09261583399655995
+        },
+        {
+          "semitones": 0,
+          "input_dc": 0.2,
+          "declared_delay_samples": 383,
+          "steady_interval_samples": [
+            24000,
+            47000
+          ],
+          "output_mean": 0.2,
+          "output_ac_rms": 3.411398691031469e-17,
+          "maximum_constant_preservation_error": 8.326672684688674e-17
+        },
+        {
+          "semitones": 7,
+          "input_dc": 0.2,
+          "declared_delay_samples": 383,
+          "steady_interval_samples": [
+            24000,
+            47000
+          ],
+          "output_mean": 0.16212889598633884,
+          "output_ac_rms": 0.027282305567464783,
+          "maximum_constant_preservation_error": 0.0926146530567395
+        }
+      ],
+      "tones": [
+        {
+          "fixture": "B0",
+          "semitones": -7,
+          "input_hz": 30.867706,
+          "target_hz": 20.601722087801747,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 30.867730648902196,
+          "strongest_line_cents_error": 700.0013824481066,
+          "rms_gain_db": -2.3526943427229923,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              20.601722087801747
+            ],
+            "amplitudes": [
+              0.07396442888029436
+            ],
+            "dc": 0.00019077951586865663,
+            "fitted_ac_energy_fraction": 0.1035831120841435,
+            "residual_rms": 0.1533783459092245,
+            "residual_to_ac_rms_db": -0.47489970232045664,
+            "design_condition_number": 1.419095990764624
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": -1,
+          "input_hz": 30.867706,
+          "target_hz": 29.135234784810585,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 30.850526444324814,
+          "strongest_line_cents_error": 99.03620595331554,
+          "rms_gain_db": -2.3335210040326166,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              29.135234784810585
+            ],
+            "amplitudes": [
+              0.0760908515583687
+            ],
+            "dc": 0.0002351296807066215,
+            "fitted_ac_energy_fraction": 0.1098942092442814,
+            "residual_rms": 0.1530963366408574,
+            "residual_to_ac_rms_db": -0.5055837356738961,
+            "design_condition_number": 1.4152770385201177
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": 0,
+          "input_hz": 30.867706,
+          "target_hz": 30.867706,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 30.867646300901516,
+          "strongest_line_cents_error": -0.0033482634549426675,
+          "rms_gain_db": 0,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              30.867706
+            ],
+            "amplitudes": [
+              0.3
+            ],
+            "dc": -1.478046296008928e-18,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 3.2684196127017678e-15,
+            "residual_to_ac_rms_db": -276.2422754548762,
+            "design_condition_number": 1.4151572265388779
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": 1,
+          "input_hz": 30.867706,
+          "target_hz": 32.703195314532984,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 30.850261107244524,
+          "strongest_line_cents_error": -100.97868398913444,
+          "rms_gain_db": -2.3036926329590597,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              32.703195314532984
+            ],
+            "amplitudes": [
+              0.07742638921318905
+            ],
+            "dc": 0.00025217127771175825,
+            "fitted_ac_energy_fraction": 0.11309707539181602,
+            "residual_rms": 0.1532901675415112,
+            "residual_to_ac_rms_db": -0.5212391299146425,
+            "design_condition_number": 1.4147343447401366
+          }
+        },
+        {
+          "fixture": "B0",
+          "semitones": 7,
+          "input_hz": 30.867706,
+          "target_hz": 46.2493023467488,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 30.86768688139965,
+          "strongest_line_cents_error": -700.0010722786507,
+          "rms_gain_db": -2.2846274630995658,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              46.2493023467488
+            ],
+            "amplitudes": [
+              0.07683605991546595
+            ],
+            "dc": 0.00022564317408392944,
+            "fitted_ac_energy_fraction": 0.11124593273663297,
+            "residual_rms": 0.15363483295851138,
+            "residual_to_ac_rms_db": -0.5121839876738694,
+            "design_condition_number": 1.4158125371906998
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": -7,
+          "input_hz": 41.203445,
+          "target_hz": 27.500000257551516,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 41.203518412094624,
+          "strongest_line_cents_error": 700.0030845334559,
+          "rms_gain_db": -2.648370285241885,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              27.500000257551516
+            ],
+            "amplitudes": [
+              0.09962163823574915
+            ],
+            "dc": -0.0008594101078736649,
+            "fitted_ac_energy_fraction": 0.20099609170623756,
+            "residual_rms": 0.14008288480544304,
+            "residual_to_ac_rms_db": -0.9745109634775648,
+            "design_condition_number": 1.4180275282371875
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": -1,
+          "input_hz": 41.203445,
+          "target_hz": 38.89087332949296,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 41.201311521091064,
+          "strongest_line_cents_error": 99.91035587053759,
+          "rms_gain_db": -2.699532542599885,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              38.89087332949296
+            ],
+            "amplitudes": [
+              0.0994880529120473
+            ],
+            "dc": -0.0009547635956153766,
+            "fitted_ac_energy_fraction": 0.20410360479610468,
+            "residual_rms": 0.1388965425632641,
+            "residual_to_ac_rms_db": -0.9914346231220866,
+            "design_condition_number": 1.4169003853934001
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": 0,
+          "input_hz": 41.203445,
+          "target_hz": 41.203445,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 41.20345734233109,
+          "strongest_line_cents_error": 0.000518584322864994,
+          "rms_gain_db": 0,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              41.203445
+            ],
+            "amplitudes": [
+              0.30000000000000016
+            ],
+            "dc": 4.745382283844827e-18,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.41728893220007e-15,
+            "residual_to_ac_rms_db": -273.63004015994085,
+            "design_condition_number": 1.4164904124941704
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": 1,
+          "input_hz": 41.203445,
+          "target_hz": 43.653529337963036,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 41.19018197478694,
+          "strongest_line_cents_error": -100.55735866677745,
+          "rms_gain_db": -2.3621192045161106,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              43.653529337963036
+            ],
+            "amplitudes": [
+              0.11558664017383709
+            ],
+            "dc": -0.0008638893905233846,
+            "fitted_ac_energy_fraction": 0.255601842716759,
+            "residual_rms": 0.13945560315445804,
+            "residual_to_ac_rms_db": -1.2819471061208023,
+            "design_condition_number": 1.4144912649938517
+          }
+        },
+        {
+          "fixture": "E1",
+          "semitones": 7,
+          "input_hz": 41.203445,
+          "target_hz": 61.735413235199125,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 41.203454019418544,
+          "strongest_line_cents_error": -699.9996210335623,
+          "rms_gain_db": -2.6006954314141293,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              61.735413235199125
+            ],
+            "amplitudes": [
+              0.10084613392488531
+            ],
+            "dc": -0.0008812012243768931,
+            "fitted_ac_energy_fraction": 0.20543609786542483,
+            "residual_rms": 0.14017699246889365,
+            "residual_to_ac_rms_db": -0.9987116928301015,
+            "design_condition_number": 1.4151189992263686
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": -7,
+          "input_hz": 46.249303,
+          "target_hz": 30.867706435992865,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 46.249190336803814,
+          "strongest_line_cents_error": 699.9957827126849,
+          "rms_gain_db": -2.7802322275342646,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              30.867706435992865
+            ],
+            "amplitudes": [
+              0.11081767081820261
+            ],
+            "dc": -0.0003944347982499736,
+            "fitted_ac_energy_fraction": 0.2593274082319783,
+            "residual_rms": 0.13251104693075771,
+            "residual_to_ac_rms_db": -1.3037372590887655,
+            "design_condition_number": 1.4151572167660147
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": -1,
+          "input_hz": 46.249303,
+          "target_hz": 43.65352908113238,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 46.26970258991278,
+          "strongest_line_cents_error": 100.76344238659188,
+          "rms_gain_db": -2.589134488599602,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              43.65352908113238
+            ],
+            "amplitudes": [
+              0.12072110041051014
+            ],
+            "dc": -0.0003948436681681734,
+            "fitted_ac_energy_fraction": 0.29396292283299863,
+            "residual_rms": 0.132312442295629,
+            "residual_to_ac_rms_db": -1.5117249160227395,
+            "design_condition_number": 1.4144912608555595
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": 0,
+          "input_hz": 46.249303,
+          "target_hz": 46.249303,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 46.249242053749406,
+          "strongest_line_cents_error": -0.0022813812720490355,
+          "rms_gain_db": 0,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              46.249303
+            ],
+            "amplitudes": [
+              0.30000000000000004
+            ],
+            "dc": 3.0031678420013224e-18,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.934754044419027e-15,
+            "residual_to_ac_rms_db": -272.6612729582579,
+            "design_condition_number": 1.4158125298494897
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": 1,
+          "input_hz": 46.249303,
+          "target_hz": 48.99942966834064,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 46.24028978169922,
+          "strongest_line_cents_error": -100.33742154104223,
+          "rms_gain_db": -2.7814343118929226,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              48.99942966834064
+            ],
+            "amplitudes": [
+              0.11109691649987383
+            ],
+            "dc": -0.0003971403221562835,
+            "fitted_ac_energy_fraction": 0.26008374722566596,
+            "residual_rms": 0.13243900981533396,
+            "residual_to_ac_rms_db": -1.308174329936487,
+            "design_condition_number": 1.415463412886328
+          }
+        },
+        {
+          "fixture": "F#1",
+          "semitones": 7,
+          "input_hz": 46.249303,
+          "target_hz": 69.29565798551393,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 46.2492515291523,
+          "strongest_line_cents_error": -700.0019266913848,
+          "rms_gain_db": -2.7223378290528144,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              69.29565798551393
+            ],
+            "amplitudes": [
+              0.11347552659646738
+            ],
+            "dc": -0.00043120857494835773,
+            "fitted_ac_energy_fraction": 0.2679545900192416,
+            "residual_rms": 0.13259997104254248,
+            "residual_to_ac_rms_db": -1.3546197810502127,
+            "design_condition_number": 1.415684848073186
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": -7,
+          "input_hz": 82.406889,
+          "target_hz": 54.99999984768311,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 55.00007557728972,
+          "strongest_line_cents_error": 0.0023837378835466065,
+          "rms_gain_db": -2.6386054227627227,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              54.99999984768311
+            ],
+            "amplitudes": [
+              0.19617444476164808
+            ],
+            "dc": 0.0003109681761523124,
+            "fitted_ac_energy_fraction": 0.7850517283912628,
+            "residual_rms": 0.07258430522496088,
+            "residual_to_ac_rms_db": -6.676660426791255,
+            "design_condition_number": 1.4143309986752108
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": -1,
+          "input_hz": 82.406889,
+          "target_hz": 77.78174571511161,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 77.78068418666051,
+          "strongest_line_cents_error": -0.023627224128563776,
+          "rms_gain_db": -2.6447521957646374,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              77.78174571511161
+            ],
+            "amplitudes": [
+              0.1960845527412758
+            ],
+            "dc": 0.00030737373056681185,
+            "fitted_ac_energy_fraction": 0.7852099767366321,
+            "residual_rms": 0.07252594280826655,
+            "residual_to_ac_rms_db": -6.679858949570852,
+            "design_condition_number": 1.4147540824143026
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": 0,
+          "input_hz": 82.406889,
+          "target_hz": 82.406889,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 82.40691342556475,
+          "strongest_line_cents_error": 0.0005131411171424443,
+          "rms_gain_db": 0,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              82.406889
+            ],
+            "amplitudes": [
+              0.29999999999999993
+            ],
+            "dc": 1.5656411058244348e-17,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 1.0613290882725895e-14,
+            "residual_to_ac_rms_db": -266.0095296450629,
+            "design_condition_number": 1.4152496696578372
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": 1,
+          "input_hz": 82.406889,
+          "target_hz": 87.30705761646298,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 87.30690540507678,
+          "strongest_line_cents_error": -0.0030182412665599556,
+          "rms_gain_db": -2.5869158175625193,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              87.30705761646298
+            ],
+            "amplitudes": [
+              0.19781138974815832
+            ],
+            "dc": 0.0003159019628386888,
+            "fitted_ac_energy_fraction": 0.7884695754198656,
+            "residual_rms": 0.07243455023045824,
+            "residual_to_ac_rms_db": -6.746271588942021,
+            "design_condition_number": 1.4144893092072437
+          }
+        },
+        {
+          "fixture": "E2",
+          "semitones": 7,
+          "input_hz": 82.406889,
+          "target_hz": 123.47082497209117,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 123.4709138123314,
+          "strongest_line_cents_error": 0.0012456642572242738,
+          "rms_gain_db": -2.6094487391367567,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              123.47082497209117
+            ],
+            "amplitudes": [
+              0.1968291354533332
+            ],
+            "dc": 0.0003108472699364438,
+            "fitted_ac_energy_fraction": 0.7859962595088534,
+            "residual_rms": 0.07264644882953887,
+            "residual_to_ac_rms_db": -6.6957863571404435,
+            "design_condition_number": 1.4149753492138446
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": -7,
+          "input_hz": 440,
+          "target_hz": 293.6647679174076,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 293.6646878576931,
+          "strongest_line_cents_error": -0.00047197395708630636,
+          "rms_gain_db": -0.0005739958290675621,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              293.6647679174076
+            ],
+            "amplitudes": [
+              0.299997628839434
+            ],
+            "dc": -2.440984990487991e-9,
+            "fitted_ac_energy_fraction": 0.9999991585250035,
+            "residual_rms": 0.0001945834742844872,
+            "residual_to_ac_rms_db": -60.74958784105401,
+            "design_condition_number": 1.4142815525681576
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": -1,
+          "input_hz": 440,
+          "target_hz": 415.3046975799451,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 415.30475063237566,
+          "strongest_line_cents_error": 0.000221153694644814,
+          "rms_gain_db": 0.00047196137805418124,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              415.3046975799451
+            ],
+            "amplitudes": [
+              0.29999940545377357
+            ],
+            "dc": 7.275693498752658e-7,
+            "fitted_ac_energy_fraction": 0.9999989284178139,
+            "residual_rms": 0.00021958394474955883,
+            "residual_to_ac_rms_db": -59.69974514676416,
+            "design_condition_number": 1.414426127756435
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": 0,
+          "input_hz": 440,
+          "target_hz": 440,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 439.9999936279155,
+          "strongest_line_cents_error": -0.000025071749438549956,
+          "rms_gain_db": 0,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              440
+            ],
+            "amplitudes": [
+              0.3
+            ],
+            "dc": 3.0741217516509143e-17,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.531193477337885e-14,
+            "residual_to_ac_rms_db": -253.40787300762688,
+            "design_condition_number": 1.4142135623730951
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": 1,
+          "input_hz": 440,
+          "target_hz": 466.1637615180899,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 466.16370573497693,
+          "strongest_line_cents_error": -0.00020716674776392018,
+          "rms_gain_db": 0.00045581110661515424,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              466.1637615180899
+            ],
+            "amplitudes": [
+              0.2999992333533491
+            ],
+            "dc": 1.6080266365255692e-7,
+            "fitted_ac_energy_fraction": 0.9999989212143554,
+            "residual_rms": 0.00022035525095624766,
+            "residual_to_ac_rms_db": -59.67064841326667,
+            "design_condition_number": 1.414429955664543
+          }
+        },
+        {
+          "fixture": "A4",
+          "semitones": 7,
+          "input_hz": 440,
+          "target_hz": 659.2551138257398,
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.35,
+            1.45
+          ],
+          "strongest_line_hz": 659.2551771392581,
+          "strongest_line_cents_error": 0.00016626418341861532,
+          "rms_gain_db": -0.0005809751248393815,
+          "expected_target_fit": {
+            "frequencies_hz": [
+              659.2551138257398
+            ],
+            "amplitudes": [
+              0.2999992817880516
+            ],
+            "dc": -5.4304914119115644e-8,
+            "fitted_ac_energy_fraction": 0.9999988847610325,
+            "residual_rms": 0.0002240076045020148,
+            "residual_to_ac_rms_db": -59.52632064314311,
+            "design_condition_number": 1.4143545140057365
+          }
+        }
+      ],
+      "dyads": [
+        {
+          "fixture": "B0/C1",
+          "semitones": -7,
+          "input_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "target_frequencies_hz": [
+            20.601722087801747,
+            21.826764689767025
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              20.601722087801747,
+              21.826764689767025
+            ],
+            "amplitudes": [
+              0.0026402879669846545,
+              0.06437328777921357
+            ],
+            "dc": 0.00009348538155157087,
+            "fitted_ac_energy_fraction": 0.08550195220717671,
+            "residual_rms": 0.1491318417227498,
+            "residual_to_ac_rms_db": -0.3881721728839465,
+            "design_condition_number": 1.4580179956555865
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 1.2250426019652778,
+            "observed_lines_hz": [
+              19.99134539534874,
+              21.826695120740006
+            ],
+            "observed_spacing_hz": 1.8353497253912643,
+            "spacing_error_hz": 0.6103071234259865,
+            "search_band_hz": [
+              16.926594281905913,
+              25.501892495662858
+            ],
+            "valley_to_weaker_peak_ratio": 0.004157805263091181
+          }
+        },
+        {
+          "fixture": "B0/C1",
+          "semitones": 0,
+          "input_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "target_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              30.867706,
+              32.703196
+            ],
+            "amplitudes": [
+              0.20000000000000023,
+              0.20000000000000034
+            ],
+            "dc": -1.1569951272959678e-17,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 1.0738926106423522e-14,
+            "residual_to_ac_rms_db": -265.54345427513283,
+            "design_condition_number": 1.450395339046714
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 1.83549,
+            "observed_lines_hz": [
+              30.867780836227265,
+              32.70314742187109
+            ],
+            "observed_spacing_hz": 1.835366585643822,
+            "spacing_error_hz": -0.0001234143561781309,
+            "search_band_hz": [
+              25.361235999999998,
+              38.209666
+            ],
+            "valley_to_weaker_peak_ratio": 0.0027209943343446032
+          }
+        },
+        {
+          "fixture": "B0/C1",
+          "semitones": 7,
+          "input_frequencies_hz": [
+            30.867706,
+            32.703196
+          ],
+          "target_frequencies_hz": [
+            46.2493023467488,
+            48.999430003285184
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              46.2493023467488,
+              48.999430003285184
+            ],
+            "amplitudes": [
+              0.004367473978722218,
+              0.0413651361341113
+            ],
+            "dc": 0.0001294516581136818,
+            "fitted_ac_energy_fraction": 0.03582262315469831,
+            "residual_rms": 0.1530243147231938,
+            "residual_to_ac_rms_db": -0.1584306288258501,
+            "design_condition_number": 1.4372367929815375
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 2.7501276565363852,
+            "observed_lines_hz": [
+              47.16398542298149,
+              48.999347282899286
+            ],
+            "observed_spacing_hz": 1.8353618599177963,
+            "spacing_error_hz": -0.9147657966185889,
+            "search_band_hz": [
+              37.99891937713964,
+              57.24981297289434
+            ],
+            "valley_to_weaker_peak_ratio": 0.004694952291277243
+          }
+        },
+        {
+          "fixture": "E1/F1",
+          "semitones": -7,
+          "input_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "target_frequencies_hz": [
+            27.500000257551516,
+            29.13523514218368
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              27.500000257551516,
+              29.13523514218368
+            ],
+            "amplitudes": [
+              0.0036010309111543693,
+              0.07722522165237818
+            ],
+            "dc": -0.00010615629359792664,
+            "fitted_ac_energy_fraction": 0.1438241168598221,
+            "residual_rms": 0.13365366177708854,
+            "residual_to_ac_rms_db": -0.6743700958586506,
+            "design_condition_number": 1.4465699700674546
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 1.6352348846321654,
+            "observed_lines_hz": [
+              26.685326880033966,
+              29.135169739191447
+            ],
+            "observed_spacing_hz": 2.4498428591574815,
+            "spacing_error_hz": 0.8146079745253161,
+            "search_band_hz": [
+              22.59429560365502,
+              34.04093979608018
+            ],
+            "valley_to_weaker_peak_ratio": 0.0009873558891852093
+          }
+        },
+        {
+          "fixture": "E1/F1",
+          "semitones": 0,
+          "input_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "target_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              41.203445,
+              43.653529
+            ],
+            "amplitudes": [
+              0.2000000000000002,
+              0.2000000000000003
+            ],
+            "dc": -2.5648003672261376e-17,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 1.2436452597169718e-14,
+            "residual_to_ac_rms_db": -263.97016011059736,
+            "design_condition_number": 1.4404792829635717
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 2.450083999999997,
+            "observed_lines_hz": [
+              41.20356642930063,
+              43.653400391984555
+            ],
+            "observed_spacing_hz": 2.4498339626839254,
+            "spacing_error_hz": -0.00025003731607142754,
+            "search_band_hz": [
+              33.85319300000001,
+              51.00378099999999
+            ],
+            "valley_to_weaker_peak_ratio": 0.0006237042420557862
+          }
+        },
+        {
+          "fixture": "E1/F1",
+          "semitones": 7,
+          "input_frequencies_hz": [
+            41.203445,
+            43.653529
+          ],
+          "target_frequencies_hz": [
+            61.735413235199125,
+            65.40639143134145
+          ],
+          "declared_delay_samples": 383,
+          "steady_interval_s": [
+            0.45,
+            3.95
+          ],
+          "expected_target_fit": {
+            "frequencies_hz": [
+              61.735413235199125,
+              65.40639143134145
+            ],
+            "amplitudes": [
+              0.004076397383109202,
+              0.04918573926984067
+            ],
+            "dc": -0.000023782421087627254,
+            "fitted_ac_energy_fraction": 0.05791560349267877,
+            "residual_rms": 0.14064619762346675,
+            "residual_to_ac_rms_db": -0.2591018925001205,
+            "design_condition_number": 1.4223209964128254
+          },
+          "spectral_spacing": {
+            "status": "two_resolved_spectral_lines",
+            "analysis_duration_s": 3.5,
+            "minimum_peak_separation_hz": 0.5714285714285714,
+            "target_spacing_hz": 3.670978196142322,
+            "observed_lines_hz": [
+              62.9563795311966,
+              65.40619699468827
+            ],
+            "observed_spacing_hz": 2.4498174634916694,
+            "spacing_error_hz": -1.2211607326506524,
+            "search_band_hz": [
+              50.72247864677216,
+              76.41932601976842
+            ],
+            "valley_to_weaker_peak_ratio": 0.001284164793685734
+          }
+        }
+      ],
+      "temporal": [
+        {
+          "fixture": "B0_harmonic_gate",
+          "semitones": -7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 0.75
+            }
+          ],
+          "onset_target_aligned_s": 0.14264583333333333,
+          "onset_output_aligned_s": 0.14320833333333333,
+          "onset_difference_ms": 0.5624999999999936,
+          "onset_total_delay_ms": 8.54166666666666,
+          "envelope_best_lag_ms": -1,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.7548455108381679,
+          "envelope_normalized_rms_error_after_gain_fit": 0.28086507391124843,
+          "target_energy_quantile_times_s": [
+            0.22454166666666667,
+            0.4461875,
+            0.6844791666666666
+          ],
+          "output_energy_quantile_times_s": [
+            0.2201875,
+            0.42485416666666664,
+            0.6786041666666667
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.4,
+            0.65
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              20.601722087801747,
+              41.203444175603494,
+              61.80516626340524,
+              82.40688835120699,
+              103.00861043900873,
+              123.61033252681048,
+              144.2120546146122,
+              164.81377670241397
+            ],
+            "amplitudes": [
+              0.05846114992392002,
+              0.022940792651656317,
+              0.0811524194578994,
+              0.05124186102191484,
+              0.014173021147351307,
+              0.005014677141851074,
+              0.03654750427493972,
+              0.013681628577369938
+            ],
+            "dc": -0.013057690842086661,
+            "fitted_ac_energy_fraction": 0.12488225348861604,
+            "residual_rms": 0.22587652382168635,
+            "residual_to_ac_rms_db": -0.5793350901219956,
+            "design_condition_number": 1.4388378067534668
+          }
+        },
+        {
+          "fixture": "B0_harmonic_gate",
+          "semitones": 0,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 0.75
+            }
+          ],
+          "onset_target_aligned_s": 0.143,
+          "onset_output_aligned_s": 0.143,
+          "onset_difference_ms": 0,
+          "onset_total_delay_ms": 7.979166666666667,
+          "envelope_best_lag_ms": 0,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 1,
+          "envelope_normalized_rms_error_after_gain_fit": 3.2431858191995025e-16,
+          "target_energy_quantile_times_s": [
+            0.20229166666666668,
+            0.44716666666666666,
+            0.6787916666666667
+          ],
+          "output_energy_quantile_times_s": [
+            0.20229166666666668,
+            0.44716666666666666,
+            0.6787916666666667
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.4,
+            0.65
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              30.867706,
+              61.735412,
+              92.603118,
+              123.470824,
+              154.33853,
+              185.206236,
+              216.073942,
+              246.941648
+            ],
+            "amplitudes": [
+              0.3937471874303147,
+              0.15991104827440056,
+              0.09439735671053227,
+              0.06494406608235968,
+              0.04859106959905335,
+              0.03833723959891203,
+              0.031375453555771336,
+              0.02637548665225719
+            ],
+            "dc": -4.925562975035376e-16,
+            "fitted_ac_energy_fraction": 1,
+            "residual_rms": 4.0010257205200426e-15,
+            "residual_to_ac_rms_db": -277.9024884348205,
+            "design_condition_number": 1.4870876848662828
+          }
+        },
+        {
+          "fixture": "B0_harmonic_gate",
+          "semitones": 7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 0.75
+            }
+          ],
+          "onset_target_aligned_s": 0.1423125,
+          "onset_output_aligned_s": 0.14270833333333333,
+          "onset_difference_ms": 0.3958333333333175,
+          "onset_total_delay_ms": 8.374999999999984,
+          "envelope_best_lag_ms": -3,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.7427485515360823,
+          "envelope_normalized_rms_error_after_gain_fit": 0.18125276069254545,
+          "target_energy_quantile_times_s": [
+            0.21410416666666668,
+            0.45066666666666666,
+            0.6871041666666666
+          ],
+          "output_energy_quantile_times_s": [
+            0.1975,
+            0.45145833333333335,
+            0.6782916666666666
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.4,
+            0.65
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              46.2493023467488,
+              92.4986046934976,
+              138.7479070402464,
+              184.9972093869952,
+              231.246511733744,
+              277.4958140804928,
+              323.7451164272416,
+              369.9944187739904
+            ],
+            "amplitudes": [
+              0.037168829196015045,
+              0.030821016983511574,
+              0.029800759321842316,
+              0.008587855506159339,
+              0.01720383086372467,
+              0.006083689962585414,
+              0.0036852018462179507,
+              0.005538341001240068
+            ],
+            "dc": -0.011176913686126892,
+            "fitted_ac_energy_fraction": 0.030384779845780807,
+            "residual_rms": 0.24122300623237325,
+            "residual_to_ac_rms_db": -0.13400575957170516,
+            "design_condition_number": 1.451166538447204
+          }
+        },
+        {
+          "fixture": "low_chord_crossfade",
+          "semitones": -7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "chord_crossfade_start",
+              "input_time_s": 0.65
+            },
+            {
+              "name": "chord_crossfade_end",
+              "input_time_s": 0.67
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 1.25
+            }
+          ],
+          "onset_target_aligned_s": 0.149375,
+          "onset_output_aligned_s": 0.14727083333333332,
+          "onset_difference_ms": -2.1041666666666847,
+          "onset_total_delay_ms": 5.874999999999982,
+          "envelope_best_lag_ms": -10,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.5801571198811307,
+          "envelope_normalized_rms_error_after_gain_fit": 0.3177973866247525,
+          "target_energy_quantile_times_s": [
+            0.27710416666666665,
+            0.7215625,
+            1.1558541666666666
+          ],
+          "output_energy_quantile_times_s": [
+            0.2616875,
+            0.6466666666666666,
+            1.090625
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.95,
+            1.2
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              27.500000257551516,
+              41.203444175603494,
+              54.99999984768311,
+              82.40688835120699,
+              82.50000077265454,
+              109.99999969536621,
+              123.61033252681048,
+              137.50000128775758,
+              164.81377670241397,
+              164.99999954304934,
+              192.50000180286062,
+              206.01722087801747,
+              219.99999939073243,
+              247.22066505362096,
+              274.9999992384155,
+              288.4241092292244,
+              329.62755340482795,
+              329.9999990860987,
+              384.9999989337818,
+              439.99999878146485
+            ],
+            "amplitudes": [
+              0.026638561075430472,
+              0.07819779622374767,
+              0.02292097776647178,
+              0.5995990280954422,
+              0.5860865782914243,
+              0.006033547190153092,
+              0.027959679497504674,
+              0.01822366866412099,
+              0.28460338451481293,
+              0.28767570624209193,
+              0.012881535927619397,
+              0.0050118663343678895,
+              0.009102465461296125,
+              0.00899240555032216,
+              0.0068040434188741195,
+              0.004098774396380433,
+              0.015748670388138365,
+              0.01958213258090714,
+              0.0044818486600240294,
+              0.001054496856299207
+            ],
+            "dc": -0.013808313191358489,
+            "fitted_ac_energy_fraction": 0.42900809306230936,
+            "residual_rms": 0.08675461598201774,
+            "residual_to_ac_rms_db": -2.433700472659053,
+            "design_condition_number": 48.648195110997165
+          }
+        },
+        {
+          "fixture": "low_chord_crossfade",
+          "semitones": 0,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "chord_crossfade_start",
+              "input_time_s": 0.65
+            },
+            {
+              "name": "chord_crossfade_end",
+              "input_time_s": 0.67
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 1.25
+            }
+          ],
+          "onset_target_aligned_s": 0.1460625,
+          "onset_output_aligned_s": 0.1460625,
+          "onset_difference_ms": 0,
+          "onset_total_delay_ms": 7.979166666666667,
+          "envelope_best_lag_ms": 0,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 1,
+          "envelope_normalized_rms_error_after_gain_fit": 3.273959215690367e-16,
+          "target_energy_quantile_times_s": [
+            0.25975,
+            0.6801875,
+            1.1188333333333333
+          ],
+          "output_energy_quantile_times_s": [
+            0.25975,
+            0.6801875,
+            1.1188333333333333
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.95,
+            1.2
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              41.203445,
+              61.735412,
+              82.406889,
+              123.470824,
+              123.610335,
+              164.813778,
+              185.206236,
+              206.017225,
+              246.941648,
+              247.22066700000002,
+              288.42411500000003,
+              308.67706,
+              329.627556,
+              370.412472,
+              412.034445,
+              432.147884,
+              493.883296,
+              494.44133400000004,
+              576.8482230000001,
+              659.255112
+            ],
+            "amplitudes": [
+              0.11813544042741685,
+              0.11813543984137588,
+              0.16468249652065606,
+              0.04797789892649043,
+              0.0283219022153711,
+              0.06736327426202683,
+              0.02832191416790532,
+              0.014578713792998991,
+              0.019485131702195232,
+              0.039814063788192744,
+              0.009413535425314371,
+              0.014578714579654145,
+              0.027262467633519832,
+              0.01150227046360847,
+              0.014578713321418663,
+              0.009413535102968556,
+              0.007913401026062214,
+              0.011502269934289176,
+              0.009413535379668965,
+              0.007913401940504753
+            ],
+            "dc": -4.802086826446331e-11,
+            "fitted_ac_energy_fraction": 0.9999999999999859,
+            "residual_rms": 2.1688903769552606e-8,
+            "residual_to_ac_rms_db": -138.52295813311937,
+            "design_condition_number": 31.969968266725584
+          }
+        },
+        {
+          "fixture": "low_chord_crossfade",
+          "semitones": 7,
+          "declared_delay_samples": 383,
+          "events": [
+            {
+              "name": "onset",
+              "input_time_s": 0.15
+            },
+            {
+              "name": "chord_crossfade_start",
+              "input_time_s": 0.65
+            },
+            {
+              "name": "chord_crossfade_end",
+              "input_time_s": 0.67
+            },
+            {
+              "name": "release_end",
+              "input_time_s": 1.25
+            }
+          ],
+          "onset_target_aligned_s": 0.14277083333333335,
+          "onset_output_aligned_s": 0.14529166666666668,
+          "onset_difference_ms": 2.520833333333333,
+          "onset_total_delay_ms": 10.5,
+          "envelope_best_lag_ms": -3,
+          "envelope_lag_at_search_boundary": false,
+          "envelope_gain_fit": 0.675779441596245,
+          "envelope_normalized_rms_error_after_gain_fit": 0.2371136131760468,
+          "target_energy_quantile_times_s": [
+            0.25854166666666667,
+            0.6809166666666666,
+            1.1315
+          ],
+          "output_energy_quantile_times_s": [
+            0.2595208333333333,
+            0.6507708333333333,
+            1.1180416666666666
+          ],
+          "energy_fraction_after_release_plus_50ms": 0,
+          "late_steady_interval_s": [
+            0.95,
+            1.2
+          ],
+          "late_expected_harmonics_fit": {
+            "frequencies_hz": [
+              61.735413235199125,
+              92.4986046934976,
+              123.47082497209117,
+              184.9972093869952,
+              185.20623970559737,
+              246.94164994418233,
+              277.4958140804928,
+              308.6770661759956,
+              369.9944187739904,
+              370.41247491627354,
+              432.14789264639387,
+              462.493023467488,
+              493.88329988836466,
+              554.9916281609856,
+              617.3541248604558,
+              647.4902328544832,
+              739.9888375479808,
+              740.8249498325471,
+              864.2957748046382,
+              987.7665997767293
+            ],
+            "amplitudes": [
+              0.056263849500488405,
+              0.0008100247711691538,
+              0.02123882195200458,
+              0.28282881914822894,
+              0.2845852745594952,
+              0.011614859023097916,
+              0.02210906670087203,
+              0.009751591145905705,
+              0.05285400985137582,
+              0.05432323319963369,
+              0.00457923988439436,
+              0.0032740568367307546,
+              0.008797038988875669,
+              0.001778482894914755,
+              0.001248483113229348,
+              0.0027817166927919627,
+              0.002257675059269869,
+              0.004823195087943304,
+              0.001618203676129977,
+              0.0009304585253814544
+            ],
+            "dc": 0.0015669347178670053,
+            "fitted_ac_energy_fraction": 0.17718609225681603,
+            "residual_rms": 0.11354684005023348,
+            "residual_to_ac_rms_db": -0.846983761835925,
+            "design_condition_number": 21.38110031181279
+          }
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "B0 and E1 are engineering stress cases, not a supported tuning guarantee.",
+    "Strongest FFT line is not perceived pitch; all signals here are synthetic.",
+    "Resolved dyad spectral lines may be modulation sidebands, not two preserved notes.",
+    "20 ms RMS smoothing and carrier phase limit envelope timing interpretation.",
+    "No real DI, listening, stereo, automation, or native deadline validation."
+  ],
+  "diagnostic_wall_time_seconds": 25.668423684001027
+}

@@ -1,0 +1,19 @@
+impulse_-12 onset 121 peak 480 centroid 517.61 90% 604
+impulse_-7 onset 121 peak 480 centroid 497.26 90% 542
+impulse_-2 onset 121 peak 480 centroid 485.91 90% 496
+impulse_0 onset 122 peak 480 centroid 480.0 90% 480
+impulse_7 onset 121 peak 480 centroid 479.2 90% 493
+impulse_12 onset 121 peak 480 centroid 483.64 90% 485
+sine110_-12 Hz 54.9975 cents -0.08 band 0.99506
+sine110_-7 Hz 73.4145 cents -0.039 band 0.99523
+sine110_-2 Hz 97.9977 cents -0.021 band 0.99458
+sine110_0 Hz 110.0 cents -0.0 band 0.99979
+sine110_7 Hz 164.8163 cents 0.027 band 0.99394
+sine110_12 Hz 220.0052 cents 0.041 band 0.99378
+chord_-12 band 0.98922
+chord_-7 band 0.9756
+chord_-2 band 0.97455
+chord_0 band 0.9999
+chord_7 band 0.9704
+chord_12 band 0.95461
+automation_0 [110.0006103515625, 73.42529296875]

@@ -1,0 +1,84 @@
+PITCH RESEARCH - CROSS-SESSION HANDOFF
+Checkpoint: 2026-10-08. Research and reproducible baselines complete.
+
+GOAL
+Build a low-latency, high-quality polyphonic pitch shifter for VST3. Guitar
+leads/chords first, general instrument support. Eventual quality must match the
+user's Neural DSP Transpose reference. This is NOT yet demonstrated. User
+explicitly authorized papers, public-binary decompilation, parallel agents,
+experiments and durable project artifacts.
+
+READ FIRST
+Pitch_Shifting_Research.pdf: 11-page synthesis and implementation plan.
+Pitch_Research_Package.zip: notes, source register, scripts, raw results,
+synthetic WAVs, provenance and licenses. Extract and read README.txt.
+
+COMPLETED
+Six workstreams: papers; source audit; binary forensics; original architecture;
+Compose normal-API measurements; NumPy port of the MIT Ocean reference.
+
+MEASURED RESULTS
+- Compose WASM2026-10-01,48kHz,128-frame blocks, default10ms mode: reports480
+  samples. All six tested impulse peaks occur at480. Energy centroid479-518.
+  Tiny pre-peak energy does not imply2.5ms effective delay. Steady110Hz sine
+  strongest-line errors under0.1cent. Default tonality limit8000Hz enabled.
+- Compiled Signalsmith Stretch1.3.2: default120ms; cheaper140ms. Custom512/64
+  reports10.667ms@48kHz; quality at this setting untested.
+- Original asymmetric WOLA: N2048/L384/H96; unity reconstruction at383samples
+  =7.979ms across96 impulse phases. NOT a pitch shifter. Analysis-energy
+  centroid14.29ms before frame end illustrates stale-evidence risk.
+- Ocean: N512/H64 unity delay448samples=9.333ms.112 tone configurations;
+  three nonunity comparisons against original Java agree within about one
+  PCM16 step. Even padding m8 retains strongest lowE sine component for
+  +/-1semitone. Perceived rich-instrument pitch is a separate question.
+
+FORENSICS
+Exact user-supplied WASM was downloaded, parsed and decompiled with WABT1.0.39.
+1155 functions; names/debug stripped. SHA256:
+ffff817738e0386eb0f8dc44b331422535f4c6fe762252d99dca7be25a0f1dc1
+Official native Windows2026-10-06 exports complex subband/frequency metadata,
+analysis cadence and nonuniform nominal-grid clues. Distinct build from WASM.
+Exact proprietary transform/refinement/synthesis equations remain unknown.
+Package contains derived metadata/scripts, not proprietary binaries/pseudocode.
+No demo restrictions were bypassed.
+
+DESIGN DECISION
+First R&D candidate: short fixed synthesis support plus long past-heavy
+analysis, coherent spectral-region transport, confidence-weighted time and
+frequency phase guidance, linked stereo and measured onset handling.
+Initial48kHz/N2048/L384/H96 scheduler383samples. Investigate nonuniform complex
+subbands separately; no Compose-clone claim. Unity scaffold proves scheduling
+and reconstruction only. Pitch modification may cause aliasing or stale attacks.
+
+CRITICAL FALSIFIER
+Two unresolved tones: moving one carrier while preserving its envelope retains
+original beat spacing; true transposition requires scaled spacing. Test low
+close dyads/chord transitions before trusting isolated-tone accuracy.
+
+PRIMARY REFERENCES
+Mauler/Martin2007 windows; Laroche/Dolson1999 spectral regions;
+Prusa/Holighaus2017 phase gradients; Luff2023 Stretch; Ocean2010+errata;
+PVSOLA2012. STN2025 reports166.1ms, not a live-guitar proof. Eventide filterbank
+patent is technical prior art, not Compose attribution or a software license.
+Full URLs and hashes in sources.csv, bibliography and manifests.
+
+EXACT NEXT WORK
+1. Extract package and rerun open experiments; preserve original measurements.
+2. Build a NEW spectral transport prototype on the WOLA scaffold, starting
+   with one coherent peak-region phase rule. Compare against a short symmetric
+   baseline at matched measured delay. No transient correction initially.
+3. Test close dyads, low-note changes and gated harmonic transients. Measure
+   beat scaling, envelope timing, sidebands, pitch and gain.
+4. Add confidence and transient/vertical phase guidance one feature at a time.
+5. Test real dry guitar against exact Neural and Compose versions, then port
+   successful modules to C++ and wrap VST3.
+
+STILL NEEDED
+Exact Neural plug-in/version; real DI corpus; blinded listening; target-native
+CPU deadline measurements; stereo/automation/sample-rate/host verification.
+No finished competitive algorithm, native core or VST3 is delivered yet.
+
+PERSISTENCE
+Report, package and this handoff are saved with Pitch. Future sessions should
+use attached/selected project artifacts, not assume scratch or prior-chat
+access. The package includes its own SHA256 manifest and reproducible scripts.

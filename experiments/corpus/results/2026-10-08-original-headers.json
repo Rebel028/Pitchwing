@@ -1,0 +1,252 @@
+[
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-250608_1125.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "48000",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 1213490,
+          "duration": "25.281042"
+        }
+      ],
+      "format": {
+        "size": "3641160",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2025-06-08",
+          "creation_time": "11-25-47",
+          "time_reference": "43747400"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1830.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 670656,
+          "duration": "15.207619"
+        }
+      ],
+      "format": {
+        "size": "2012658",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-30-02",
+          "time_reference": "0"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1831-01.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 1173440,
+          "duration": "26.608617"
+        }
+      ],
+      "format": {
+        "size": "3521010",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-31-30",
+          "time_reference": "617176"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1831.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 927168,
+          "duration": "21.024218"
+        }
+      ],
+      "format": {
+        "size": "2782194",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-31-00",
+          "time_reference": "0"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1832.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 1373888,
+          "duration": "31.153923"
+        }
+      ],
+      "format": {
+        "size": "4122354",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-32-28",
+          "time_reference": "1410975"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1833.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 1073856,
+          "duration": "24.350476"
+        }
+      ],
+      "format": {
+        "size": "3222258",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-33-54",
+          "time_reference": "2469375"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1835.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 2889152,
+          "duration": "65.513651"
+        }
+      ],
+      "format": {
+        "size": "8668146",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-35-21",
+          "time_reference": "3175043"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1837.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 1075904,
+          "duration": "24.396916"
+        }
+      ],
+      "format": {
+        "size": "3228402",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-37-52",
+          "time_reference": "5556375"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1838.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 1141184,
+          "duration": "25.877188"
+        }
+      ],
+      "format": {
+        "size": "3424242",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-38-36",
+          "time_reference": "6350175"
+        }
+      }
+    }
+  },
+  {
+    "path": "/mnt/d/Reaper/shiftkey test/Media/01-std (drop f#)-261008_1839.wav",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s24le",
+          "sample_rate": "44100",
+          "channels": 1,
+          "bits_per_sample": 24,
+          "duration_ts": 1795776,
+          "duration": "40.720544"
+        }
+      ],
+      "format": {
+        "size": "5388018",
+        "tags": {
+          "encoded_by": "REAPER",
+          "date": "2026-10-08",
+          "creation_time": "18-39-07",
+          "time_reference": "6350175"
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,120 @@
+[
+  {
+    "id": "mauler2007",
+    "authors": "Dirk Mauler; Rainer Martin",
+    "year": 2007,
+    "title": "A Low Delay, Variable Resolution, Perfect Reconstruction Spectral Analysis-Synthesis System for Speech Enhancement",
+    "url": "https://www.eurasip.org/Proceedings/Eusipco/Eusipco2007/Papers/A2L-D02.pdf",
+    "web_ref": "turn27view0",
+    "evidence_note": "Primary PDF; 10ms speech-enhancement front end, not validated pitch shifter."
+  },
+  {
+    "id": "ocean2010",
+    "authors": "Nicolas Juillerat; Béat Hirsbrunner",
+    "year": 2010,
+    "title": "Low Latency Audio Pitch Shifting in the Frequency Domain",
+    "url": "https://www.researchgate.net/publication/261078164_Low_latency_audio_pitch_shifting_in_the_frequency_domain",
+    "web_ref": "turn22view0",
+    "evidence_note": "Primary author-uploaded full text; claim ~12ms. DOI 10.1109/ICALIP.2010.5685027."
+  },
+  {
+    "id": "ocean_errata",
+    "authors": "Nicolas Juillerat",
+    "year": null,
+    "title": "Ocean 2010 paper errata",
+    "url": "https://pitchtech.ch/Confs/ICALIP2010/Errata.txt",
+    "web_ref": "turn18view3",
+    "evidence_note": "Remove extra N in denominator of phase equation."
+  },
+  {
+    "id": "ocean_code",
+    "authors": "Nicolas Juillerat",
+    "year": 2018,
+    "title": "Ocean reference Java implementation",
+    "url": "https://pitchtech.ch/Confs/ICALIP2010/PitchShiftOcean.7z",
+    "web_ref": "turn15view0",
+    "evidence_note": "Downloaded and read core source + MIT license. getLatency() intentionally0; comment expected N-H."
+  },
+  {
+    "id": "laroche1999",
+    "authors": "Jean Laroche; Mark Dolson",
+    "year": 1999,
+    "title": "New Phase-Vocoder Techniques for Pitch-Shifting, Harmonizing and Other Exotic Effects",
+    "url": "https://www.ee.columbia.edu/~dpwe/papers/LaroD99-pvoc.pdf",
+    "web_ref": "turn11view3",
+    "evidence_note": "Primary PDF; coherent peak-region remapping."
+  },
+  {
+    "id": "pvdr",
+    "authors": "Zdeněk Průša; Nicki Holighaus",
+    "year": 2017,
+    "title": "Phase Vocoder Done Right",
+    "url": "https://arxiv.org/pdf/2202.07382",
+    "web_ref": "turn18view4",
+    "evidence_note": "Primary PDF, arXiv uploaded2022; source original2017. Full time/frequency phase gradients; centered time gradient adds future frame."
+  },
+  {
+    "id": "luff2023",
+    "authors": "Geraint Luff",
+    "year": 2023,
+    "title": "The Design of Signalsmith Stretch",
+    "url": "https://signalsmith-audio.co.uk/writing/2023/stretch-design/",
+    "web_ref": "turn15view3",
+    "evidence_note": "Primary author explanation. Applies to Stretch, not automatically Compose."
+  },
+  {
+    "id": "stn2025",
+    "authors": "Maria Polak; Cumhur Erkut",
+    "year": 2025,
+    "title": "Low-Latency Pitch-Shifting with STN Decomposition",
+    "url": "https://pub.dega-akustik.de/DAS-DAGA_2025/files/upload/paper/635.pdf",
+    "web_ref": "turn11view0",
+    "evidence_note": "Primary PDF; reported166.1ms, rated below baseline; useful negative result."
+  },
+  {
+    "id": "pvsola2012",
+    "authors": "Sebastian Kraft; Martin Holters; Adrian von dem Knesebeck; Udo Zölzer",
+    "year": 2012,
+    "title": "Improved PVSOLA Time-Stretching and Pitch-Shifting for Polyphonic Audio",
+    "url": "https://www.dafx.de/paper-archive/2012/papers/dafx12_submission_26.pdf",
+    "web_ref": "turn15view4",
+    "evidence_note": "Primary PDF; selective sinusoidal phase resets; no sub10ms proof."
+  },
+  {
+    "id": "rollers2008",
+    "authors": "Nicolas Juillerat; Stefan Schubiger-Banz; Stefan Müller Arisona",
+    "year": 2008,
+    "title": "Low Latency Audio Pitch Shifting in the Time Domain — companion examples",
+    "url": "https://pitchtech.ch/Confs/ICALIP2008/Rollers.html",
+    "web_ref": "turn18view1",
+    "evidence_note": "Primary companion; theoretical<10ms but frequency-dependent group delay needs measurement."
+  },
+  {
+    "id": "nolte2021",
+    "authors": "Patrick Nolte",
+    "year": 2021,
+    "title": "Latenzoptimierte Tonhöhenverschiebung polyphoner Gitarrensignale",
+    "url": "https://reposit.haw-hamburg.de/bitstream/20.500.12738/15713/1/MA_Latenzoptimierte%20Tonh%C3%B6henverschiebung.pdf",
+    "web_ref": "turn27view1",
+    "evidence_note": "Primary thesis; its own Roller implementation low-band delay~62.5ms despite~1ms high-frequency onset."
+  },
+  {
+    "id": "stftpitchshift",
+    "authors": "Juri Hock",
+    "year": null,
+    "title": "stftPitchShift C++/Python repository",
+    "url": "https://github.com/jurihock/stftPitchShift",
+    "web_ref": "turn35view1",
+    "evidence_note": "MIT; asymmetric-window reference; poly pitch shifting means multivoice spectral processing."
+  },
+  {
+    "id": "eventide_filterbank",
+    "authors": "Corey Kereliuk; Woodrow Q. Herman; Russell Wedelich",
+    "year": 2025,
+    "title": "Filterbank Pitchshifter — US20250193632A1",
+    "url": "https://patents.google.com/patent/US20250193632A1/en",
+    "pdf_url": "https://patentimages.storage.googleapis.com/6c/23/10/dc031f9154f859/US20250193632A1.pdf",
+    "web_ref": "turn49view0",
+    "evidence_note": "Technical disclosure: analytic IIR bands, IF/IM, scaled IF oscillator bank, tunable dispersion compensation. Not Compose attribution or quality benchmark. No legal/FTO analysis."
+  }
+]

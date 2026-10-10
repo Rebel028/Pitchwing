@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 3.20)
+project(PitchwingConsumerSmoke LANGUAGES CXX)
+
+set(MODE "source" CACHE STRING "Pitchwing dependency mode: source or installed")
+set_property(CACHE MODE PROPERTY STRINGS source installed)
+if(MODE STREQUAL "source")
+    set(PITCHWING_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." CACHE PATH
+        "Pitchwing source checkout")
+    add_subdirectory("${PITCHWING_SOURCE_DIR}" pitchwing)
+    if(TARGET pitchwing_render OR TARGET pitchwing_live_probe
+       OR TARGET pitchwing_tests OR TARGET pitchwing_live_tests)
+        message(FATAL_ERROR "An embedded Pitchwing dependency enabled optional targets")
+    endif()
+elseif(MODE STREQUAL "installed")
+    find_package(pitchwing 0.1 CONFIG REQUIRED)
+else()
+    message(FATAL_ERROR "MODE must be source or installed")
+endif()
+
+# Linking the static engine into a shared consumer also checks its PIC setting.
+add_library(pitchwing_consumer_shared SHARED consumer.cpp)
+target_link_libraries(pitchwing_consumer_shared PRIVATE pitchwing::pitchwing)
+target_compile_features(pitchwing_consumer_shared PRIVATE cxx_std_17)
+set_target_properties(pitchwing_consumer_shared PROPERTIES CXX_EXTENSIONS OFF)
+add_executable(pitchwing_consumer_smoke consumer.cpp)
+target_compile_definitions(pitchwing_consumer_smoke PRIVATE PITCHWING_CONSUMER_DRIVER=1)
+target_link_libraries(pitchwing_consumer_smoke PRIVATE pitchwing_consumer_shared)
+target_compile_features(pitchwing_consumer_smoke PRIVATE cxx_std_17)
+set_target_properties(pitchwing_consumer_smoke PROPERTIES CXX_EXTENSIONS OFF)
+enable_testing()
+add_test(NAME pitchwing_consumer COMMAND pitchwing_consumer_smoke)

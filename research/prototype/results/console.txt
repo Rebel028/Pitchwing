@@ -1,0 +1,263 @@
+{
+  "unity_tests": [
+    {
+      "test": "unity_noise_reconstruction",
+      "pad": 1,
+      "max_abs_error": 2.220446049250313e-16,
+      "rms_error": 2.1344397498868887e-17
+    },
+    {
+      "test": "unity_noise_reconstruction",
+      "pad": 2,
+      "max_abs_error": 1.1102230246251565e-16,
+      "rms_error": 1.9672931498702403e-17
+    },
+    {
+      "test": "unity_noise_reconstruction",
+      "pad": 4,
+      "max_abs_error": 1.6653345369377348e-16,
+      "rms_error": 2.0294320479441414e-17
+    },
+    {
+      "test": "unity_noise_reconstruction",
+      "pad": 8,
+      "max_abs_error": 1.6653345369377348e-16,
+      "rms_error": 1.969697512309566e-17
+    }
+  ],
+  "impulse": [
+    {
+      "semitones": -12,
+      "first_above_minus60db_delay_samples": 83,
+      "peak_delay_samples": 160,
+      "energy_centroid_delay_samples": 166.9520702636055,
+      "central_90pct_energy_width_samples": 18
+    },
+    {
+      "semitones": -5,
+      "first_above_minus60db_delay_samples": 11,
+      "peak_delay_samples": 352,
+      "energy_centroid_delay_samples": 352.29188388585317,
+      "central_90pct_energy_width_samples": 3
+    },
+    {
+      "semitones": -1,
+      "first_above_minus60db_delay_samples": 71,
+      "peak_delay_samples": 431,
+      "energy_centroid_delay_samples": 432.5952427262764,
+      "central_90pct_energy_width_samples": 122
+    },
+    {
+      "semitones": 0,
+      "first_above_minus60db_delay_samples": 448,
+      "peak_delay_samples": 448,
+      "energy_centroid_delay_samples": 448.0,
+      "central_90pct_energy_width_samples": 0
+    },
+    {
+      "semitones": 1,
+      "first_above_minus60db_delay_samples": 96,
+      "peak_delay_samples": 464,
+      "energy_centroid_delay_samples": 452.37622266666585,
+      "central_90pct_energy_width_samples": 59
+    },
+    {
+      "semitones": 5,
+      "first_above_minus60db_delay_samples": 109,
+      "peak_delay_samples": 520,
+      "energy_centroid_delay_samples": 464.0457578964779,
+      "central_90pct_energy_width_samples": 258
+    },
+    {
+      "semitones": 12,
+      "first_above_minus60db_delay_samples": 80,
+      "peak_delay_samples": 336,
+      "energy_centroid_delay_samples": 461.6057013967202,
+      "central_90pct_energy_width_samples": 256
+    }
+  ],
+  "selected_tones": [
+    {
+      "input_hz": 82.4069,
+      "semitones": -12,
+      "pad": 2,
+      "python_render_seconds": 0.06277453799975774,
+      "minimum_demod_denominator": 1.0000000000000002,
+      "target_hz": 41.20345,
+      "dominant_hz": 35.53189894009876,
+      "dominant_pitch_error_cents": -256.380417015672,
+      "envelope_cv": 0.10373410163430194,
+      "target_sine_residual_fraction": 0.9986758569336519,
+      "output_rms": 0.17401960463937483
+    },
+    {
+      "input_hz": 82.4069,
+      "semitones": -5,
+      "pad": 2,
+      "python_render_seconds": 0.06184897900038777,
+      "minimum_demod_denominator": 1.996614153753363,
+      "target_hz": 61.735420726734496,
+      "dominant_hz": 35.53189744506981,
+      "dominant_pitch_error_cents": -956.3804898585305,
+      "envelope_cv": 0.16176130068568548,
+      "target_sine_residual_fraction": 0.9999255064049793,
+      "output_rms": 0.16548720232059225
+    },
+    {
+      "input_hz": 82.4069,
+      "semitones": -1,
+      "pad": 2,
+      "python_render_seconds": 0.06311238800026331,
+      "minimum_demod_denominator": 2.7754972507267746,
+      "target_hz": 77.78175609772904,
+      "dominant_hz": 82.40690490033337,
+      "dominant_pitch_error_cents": 100.0001029479781,
+      "envelope_cv": 0.0276240595671016,
+      "target_sine_residual_fraction": 0.9979470480571231,
+      "output_rms": 0.18388800527520804
+    },
+    {
+      "input_hz": 82.4069,
+      "semitones": 0,
+      "pad": 2,
+      "python_render_seconds": 0.05753757099955692,
+      "minimum_demod_denominator": 2.9999999999999996,
+      "target_hz": 82.4069,
+      "dominant_hz": 82.40690490359225,
+      "dominant_pitch_error_cents": 0.00010301644173762805,
+      "envelope_cv": 0.0026566023622469287,
+      "target_sine_residual_fraction": 5.08572976515671e-14,
+      "output_rms": 0.17681643844876574
+    },
+    {
+      "input_hz": 82.4069,
+      "semitones": 1,
+      "pad": 2,
+      "python_render_seconds": 0.05990735700015648,
+      "minimum_demod_denominator": 2.7621476225628188,
+      "target_hz": 87.30706927055701,
+      "dominant_hz": 82.40690489996162,
+      "dominant_pitch_error_cents": -99.99989705983185,
+      "envelope_cv": 0.02932010316870116,
+      "target_sine_residual_fraction": 0.9998097688066172,
+      "output_rms": 0.18434027086903765
+    },
+    {
+      "input_hz": 82.4069,
+      "semitones": 5,
+      "pad": 2,
+      "python_render_seconds": 0.06568377099938516,
+      "minimum_demod_denominator": 1.6606405833198623,
+      "target_hz": 110.00001437860459,
+      "dominant_hz": 129.28190636799877,
+      "dominant_pitch_error_cents": 279.61999770297535,
+      "envelope_cv": 0.019156330847395743,
+      "target_sine_residual_fraction": 0.9998914443074101,
+      "output_rms": 0.1783221372043835
+    },
+    {
+      "input_hz": 82.4069,
+      "semitones": 12,
+      "pad": 2,
+      "python_render_seconds": 0.06307713499973033,
+      "minimum_demod_denominator": 1.0000000000000002,
+      "target_hz": 164.8138,
+      "dominant_hz": 176.15690479640526,
+      "dominant_pitch_error_cents": 115.22877525950612,
+      "envelope_cv": 0.032780221076365613,
+      "target_sine_residual_fraction": 0.9997006809281952,
+      "output_rms": 0.1738613885697497
+    },
+    {
+      "input_hz": 440.0,
+      "semitones": -12,
+      "pad": 2,
+      "python_render_seconds": 0.060974736000389385,
+      "minimum_demod_denominator": 1.0000000000000002,
+      "target_hz": 220.0,
+      "dominant_hz": 205.62499581555957,
+      "dominant_pitch_error_cents": -116.98544911284168,
+      "envelope_cv": 0.14949567394306945,
+      "target_sine_residual_fraction": 0.9997547028113832,
+      "output_rms": 0.1620973857128833
+    },
+    {
+      "input_hz": 440.0,
+      "semitones": -5,
+      "pad": 2,
+      "python_render_seconds": 0.06058659100017394,
+      "minimum_demod_denominator": 1.996614153753363,
+      "target_hz": 329.6275569128699,
+      "dominant_hz": 299.374995862644,
+      "dominant_pitch_error_cents": -166.65975140695727,
+      "envelope_cv": 0.23869738135155688,
+      "target_sine_residual_fraction": 0.9999111091554249,
+      "output_rms": 0.14669469371198876
+    },
+    {
+      "input_hz": 440.0,
+      "semitones": -1,
+      "pad": 2,
+      "python_render_seconds": 0.058616287000404554,
+      "minimum_demod_denominator": 2.7754972507267746,
+      "target_hz": 415.3046975799451,
+      "dominant_hz": 393.12499595723807,
+      "dominant_pitch_error_cents": -95.01851191302376,
+      "envelope_cv": 0.3309303807866982,
+      "target_sine_residual_fraction": 0.9999434218831371,
+      "output_rms": 0.13312646695930727
+    },
+    {
+      "input_hz": 440.0,
+      "semitones": 0,
+      "pad": 2,
+      "python_render_seconds": 0.06564582500050165,
+      "minimum_demod_denominator": 2.9999999999999996,
+      "target_hz": 440.0,
+      "dominant_hz": 439.99999869553847,
+      "dominant_pitch_error_cents": -5.13256410054701e-06,
+      "envelope_cv": 1.936221307542646e-13,
+      "target_sine_residual_fraction": 2.9042635044296584e-13,
+      "output_rms": 0.17677669529663687
+    },
+    {
+      "input_hz": 440.0,
+      "semitones": 1,
+      "pad": 2,
+      "python_render_seconds": 0.06647767499998736,
+      "minimum_demod_denominator": 2.7621476225628188,
+      "target_hz": 466.1637615180899,
+      "dominant_hz": 486.87500143255306,
+      "dominant_pitch_error_cents": 75.25748440313016,
+      "envelope_cv": 0.3295559442198383,
+      "target_sine_residual_fraction": 0.9999173104161361,
+      "output_rms": 0.13331315033066204
+    },
+    {
+      "input_hz": 440.0,
+      "semitones": 5,
+      "pad": 2,
+      "python_render_seconds": 0.06543152899939741,
+      "minimum_demod_denominator": 1.6606405833198623,
+      "target_hz": 587.3295358348151,
+      "dominant_hz": 580.6249984450246,
+      "dominant_pitch_error_cents": -19.876203342001915,
+      "envelope_cv": 0.1664770134130698,
+      "target_sine_residual_fraction": 0.999283750973536,
+      "output_rms": 0.2248088877088368
+    },
+    {
+      "input_hz": 440.0,
+      "semitones": 12,
+      "pad": 2,
+      "python_render_seconds": 0.06189877799988608,
+      "minimum_demod_denominator": 1.0000000000000002,
+      "target_hz": 880.0,
+      "dominant_hz": 908.7499986972209,
+      "dominant_pitch_error_cents": 55.655919856868636,
+      "envelope_cv": 0.14855879882903475,
+      "target_sine_residual_fraction": 0.9999735716190473,
+      "output_rms": 0.16200555222819818
+    }
+  ]
+}

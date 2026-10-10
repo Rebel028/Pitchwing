@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-09",
+  "system": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.29",
+  "python": "3.8.10",
+  "compiler": "GCC 9.4.0",
+  "cmake": "3.31.10",
+  "release_flags": "-O3 -DNDEBUG; C++17; -Wall -Wextra -Wpedantic; library -fPIC",
+  "sanitizer_flags": "-O1 -g -DNDEBUG -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer; library -fPIC",
+  "optimization_comparison": {
+    "samples": 144000,
+    "max_abs_error": 1.1102230246251565e-16,
+    "rms_error": 1.7924876222892854e-17,
+    "finite": true
+  },
+  "source_sha256": {
+    "src/LiveEngine.cpp": "78ecd5c3c092278a3ea98834f3f37a899c75a2f76ad8c16a5b671bc4870de5d9",
+    "include/pitchwing/LiveEngine.hpp": "68cf25aae40e1f570f676ce7674fc1bebdb889199aaa24b5f5f17fe087720d6d",
+    "tests/live_engine_tests.cpp": "e22be73f2d24bf41e960e2909f22bce3c42a7c750d094c714253c87765d40e87",
+    "tools/pitchwing_live_probe.cpp": "845610ad705628b66031415c9d764d60e26e111cb69b13d6d6807e2eafe2d7cf",
+    "CMakeLists.txt": "b32f0c09f414e468c34fa4070ac31ac412b1c2bc9e0c34f3478d2f0fa691d7f1",
+    "src/Engine.cpp": "62d9b9e187fd1e665d91dfd32ac4438279949f8a033bd55c1efd790d19683242",
+    "include/pitchwing/Engine.hpp": "0abcec10af26f006c0a9d39658bb7b5488f05109d8744d3dac6e44174863fae1",
+    "tests/engine_tests.cpp": "01f9149ec6e8a88d44256a7f62dd9ff952a10ca4c28f658745a75c7fc1325756"
+  },
+  "cpu": "Intel(R) Core(TM) i9-10900KF CPU @ 3.70GHz"
+}

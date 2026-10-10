@@ -1,0 +1,57 @@
+{
+  "url": "https://compose.signalsmith-audio.co.uk/demo/plugins/compose-2026-10-06-windows.zip",
+  "bytes": 1253719,
+  "sha256": "fa887b38f664219291fe2b6c8b27c15c93eb2d5709f6daadac314dece0a734bb",
+  "files": [
+    {
+      "name": "compose.clap",
+      "size": 1632256,
+      "compressed": 527226
+    },
+    {
+      "name": "__MACOSX/._compose.clap",
+      "size": 212,
+      "compressed": 133
+    },
+    {
+      "name": "compose.vst3/",
+      "size": 0,
+      "compressed": 0
+    },
+    {
+      "name": "__MACOSX/._compose.vst3",
+      "size": 212,
+      "compressed": 133
+    },
+    {
+      "name": "compose.vst3/Contents/",
+      "size": 0,
+      "compressed": 0
+    },
+    {
+      "name": "__MACOSX/compose.vst3/._Contents",
+      "size": 212,
+      "compressed": 133
+    },
+    {
+      "name": "compose.vst3/Contents/x86_64-win/",
+      "size": 0,
+      "compressed": 0
+    },
+    {
+      "name": "__MACOSX/compose.vst3/Contents/._x86_64-win",
+      "size": 212,
+      "compressed": 133
+    },
+    {
+      "name": "compose.vst3/Contents/x86_64-win/compose.vst3",
+      "size": 2070528,
+      "compressed": 723770
+    },
+    {
+      "name": "__MACOSX/compose.vst3/Contents/x86_64-win/._compose.vst3",
+      "size": 212,
+      "compressed": 133
+    }
+  ]
+}

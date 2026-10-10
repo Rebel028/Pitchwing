@@ -1,0 +1,14 @@
+Command:
+timeout 15s env ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:handle_segv=0:quarantine_size_mb=16:thread_local_quarantine_size_kb=64 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 /tmp/pitchwing-live-sanitize/pitchwing_tests
+
+Exit code: 0
+PASS unity at every hop phase (both windows)
+PASS block independence and reset
+PASS double in-place and rejected buffers
+PASS float in-place and rejected buffers
+PASS static pitch and flush lifecycle
+PASS float/double parity at 44.1 kHz
+PASS moves and moved-from state
+PASS no allocations after preparation
+PASS invalid configurations
+9/9 checks passed

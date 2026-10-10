@@ -1,0 +1,67 @@
+{
+  "purpose": "Unity WOLA reconstruction and exact sample schedule only; no pitch shift implemented or measured",
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.3.5"
+  },
+  "configuration": {
+    "sample_rate": 48000,
+    "analysis_fft_samples": 2048,
+    "analysis_history_ms": 42.666666666666664,
+    "synthesis_support_samples": 384,
+    "synthesis_support_ms": 8.0,
+    "hop_samples": 96,
+    "frame_rate_hz": 500.0,
+    "scheduled_delay_samples": 383,
+    "scheduled_delay_ms": 7.979166666666667,
+    "extra_output_fifo_samples": 0
+  },
+  "windows": {
+    "cola_max_abs_deviation_from_one": 2.220446049250313e-16,
+    "minimum_analysis_on_positive_synthesis_support": 0.008181139603937236,
+    "maximum_synthesis_coefficient": 0.5,
+    "minimum_synthesis_coefficient": 0.0,
+    "analysis_energy_centroid_samples_before_frame_end": 685.8031008393775,
+    "note": "Window division remains bounded here because product and analysis both approach zero together."
+  },
+  "unity_tests": {
+    "white_noise": {
+      "max_abs_error": 1.1102230246251565e-16,
+      "rms_error": 2.1282483126529343e-17,
+      "relative_error_db": -313.35747362951275,
+      "noncausal_frame_schedules": 0
+    },
+    "dc": {
+      "max_abs_error": 1.6653345369377348e-16,
+      "rms_error": 4.692548497825723e-17,
+      "relative_error_db": -314.4961092175861,
+      "noncausal_frame_schedules": 0
+    },
+    "tone_41_203hz": {
+      "max_abs_error": 6.661338147750939e-16,
+      "rms_error": 1.4601661068123479e-16,
+      "relative_error_db": -313.6623829069738,
+      "noncausal_frame_schedules": 0
+    },
+    "tone_82_407hz": {
+      "max_abs_error": 5.551115123125783e-16,
+      "rms_error": 1.3118576716086935e-16,
+      "relative_error_db": -314.6012800152644,
+      "noncausal_frame_schedules": 0
+    }
+  },
+  "impulse_tests": {
+    "tested_hop_phases": 96,
+    "measured_delays_samples": [
+      383
+    ],
+    "worst_max_abs_error": 3.3306690738754696e-16
+  },
+  "limitations": [
+    "No frequency remapping, phase propagation, transient treatment, or instrument audio was tested.",
+    "Perfect reconstruction at unity does not imply low artifacts after spectrum modification.",
+    "Long historical analysis can cause stale estimates even when output availability is short.",
+    "Delay excludes host/device buffers and FFT execution time; an extra FIFO changes the accounting.",
+    "No CPU performance, VST3 compatibility, or competitor quality claim follows from this diagnostic."
+  ]
+}

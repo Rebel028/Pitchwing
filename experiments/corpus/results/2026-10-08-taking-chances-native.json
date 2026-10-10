@@ -1,0 +1,351 @@
+{
+  "date": "2026-10-08",
+  "source": {
+    "path": "/mnt/d/repos/Cpp/Pitchwing/stems/02 Taking Chances.m4a",
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_fmt": "fltp",
+          "sample_rate": "44100",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "duration": "187.826213"
+        },
+        {
+          "index": 1,
+          "codec_name": "mjpeg",
+          "codec_type": "video",
+          "duration": "187.827000"
+        }
+      ],
+      "format": {
+        "duration": "187.827000",
+        "size": "3113835"
+      }
+    },
+    "size_bytes": 3113835,
+    "mtime_ns": 1755880632093115000
+  },
+  "output_directory": "/tmp/pitchwing-taking-chances-20261008-ozikic86",
+  "runner": {
+    "path": "/tmp/pitchwing-native-release/pitchwing_render",
+    "sha256": "dbd0acbf733e0a13092ceccd86cd73c54240f50fe7fe15166555ef37b3d5b949",
+    "source_sha256": {
+      "/mnt/d/repos/Cpp/Pitchwing/src/Engine.cpp": "62d9b9e187fd1e665d91dfd32ac4438279949f8a033bd55c1efd790d19683242",
+      "/mnt/d/repos/Cpp/Pitchwing/include/pitchwing/Engine.hpp": "0abcec10af26f006c0a9d39658bb7b5488f05109d8744d3dac6e44174863fae1",
+      "/mnt/d/repos/Cpp/Pitchwing/tools/pitchwing_render.cpp": "dccab74529f8c8d84764d4b43ac8549d927d585621be2d99e7d0d25e6ede5375"
+    },
+    "previous_validation": "docs/results/2026-10-08-native-parity-final.json"
+  },
+  "ffmpeg_version": "ffmpeg version 4.2.7-0ubuntu0.1 Copyright (c) 2000-2022 the FFmpeg developers",
+  "processing": {
+    "semitones": -7,
+    "sample_rate": 44100,
+    "analysis_size": 2048,
+    "synthesis_size": 384,
+    "hop": 96,
+    "window": "asymmetric",
+    "block_frames": 128,
+    "mono_mix": "0.5 * left + 0.5 * right",
+    "normalization": false,
+    "limiting": false,
+    "sample_rate_conversion": false,
+    "scope": "full decoded stream including engine delay and tail"
+  },
+  "limitations": [
+    "Current engine is mono; this is an explicit stereo-to-mono diagnostic downmix.",
+    "Native DC/low-dyad and callback-budget limitations remain.",
+    "AAC timing is handled by FFmpeg; decoded frame count is authoritative.",
+    "Level/integrity measurements are not listening quality judgments."
+  ],
+  "decode_command": [
+    "ffmpeg",
+    "-hide_banner",
+    "-v",
+    "warning",
+    "-nostdin",
+    "-threads",
+    "1",
+    "-i",
+    "/mnt/d/repos/Cpp/Pitchwing/stems/02 Taking Chances.m4a",
+    "-map",
+    "0:a:0",
+    "-vn",
+    "-af",
+    "pan=mono|c0=0.5*c0+0.5*c1",
+    "-c:a",
+    "pcm_f64le",
+    "-f",
+    "f64le",
+    "-n",
+    "/tmp/pitchwing-taking-chances-20261008-ozikic86/mono-input.f64"
+  ],
+  "decode": {
+    "exit_code": 0,
+    "wall_seconds": 0.5315072000012151,
+    "stderr": "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x64902ab35500] stream 0, timescale not set\n"
+  },
+  "decoded_input_frames": 8283136,
+  "decoded_input_seconds": 187.82621315192745,
+  "native_command": [
+    "/tmp/pitchwing-native-release/pitchwing_render",
+    "--input",
+    "/tmp/pitchwing-taking-chances-20261008-ozikic86/mono-input.f64",
+    "--output",
+    "/tmp/pitchwing-taking-chances-20261008-ozikic86/minus7.f64",
+    "--sample-rate",
+    "44100",
+    "--semitones",
+    "-7",
+    "--analysis-size",
+    "2048",
+    "--synthesis-size",
+    "384",
+    "--hop",
+    "96",
+    "--window",
+    "asymmetric",
+    "--block",
+    "128"
+  ],
+  "native_run": {
+    "exit_code": 0,
+    "wall_seconds": 75.86236401800124,
+    "stderr": "",
+    "report": {
+      "input_frames": 8283136,
+      "output_frames": 8285663,
+      "tail_frames": 2527,
+      "latency_samples": 383,
+      "block_frames": 128,
+      "sample_rate": 44100,
+      "benchmark": null
+    }
+  },
+  "encode_commands": {
+    "minus7.wav": [
+      "ffmpeg",
+      "-hide_banner",
+      "-v",
+      "warning",
+      "-nostdin",
+      "-f",
+      "f64le",
+      "-ar",
+      "44100",
+      "-ac",
+      "1",
+      "-i",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/minus7.f64",
+      "-c:a",
+      "pcm_f32le",
+      "-n",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/minus7.wav"
+    ],
+    "dry-delay383.wav": [
+      "ffmpeg",
+      "-hide_banner",
+      "-v",
+      "warning",
+      "-nostdin",
+      "-f",
+      "f64le",
+      "-ar",
+      "44100",
+      "-ac",
+      "1",
+      "-i",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/mono-input.f64",
+      "-af",
+      "adelay=383S,apad=pad_len=2144",
+      "-c:a",
+      "pcm_f32le",
+      "-n",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/dry-delay383.wav"
+    ]
+  },
+  "encoding": {
+    "minus7.wav": {
+      "exit_code": 0,
+      "stderr": "[f64le @ 0x557a4e540440] Estimating duration from bitrate, this may be inaccurate\nGuessed Channel Layout for Input Stream #0.0 : mono\n"
+    },
+    "dry-delay383.wav": {
+      "exit_code": 0,
+      "stderr": "[f64le @ 0x5e8b9a549480] Estimating duration from bitrate, this may be inaccurate\nGuessed Channel Layout for Input Stream #0.0 : mono\n"
+    }
+  },
+  "outputs": {
+    "minus7.wav": {
+      "path": "/tmp/pitchwing-taking-chances-20261008-ozikic86/minus7.wav",
+      "sha256": "5ab1ba61b13961a64572176234f2598233f5f7426c1331b5e04af5802bdd45a2",
+      "size_bytes": 33142766,
+      "frames": 8285663,
+      "duration_seconds": 187.883514739229,
+      "codec": "IEEE float32 WAV",
+      "channels": 1,
+      "sample_rate": 44100,
+      "metric_domain": "stored float32 samples including delay and full tail",
+      "peak_absolute": 1.4141238927841187,
+      "peak_dbfs": 3.0097492018827507,
+      "rms": 0.27417774243557763,
+      "samples_above_full_scale": 3236,
+      "nonfinite_samples": 0,
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "pcm_f32le",
+            "sample_fmt": "flt",
+            "sample_rate": "44100",
+            "channels": 1,
+            "duration_ts": 8285663
+          }
+        ]
+      }
+    },
+    "dry-delay383.wav": {
+      "path": "/tmp/pitchwing-taking-chances-20261008-ozikic86/dry-delay383.wav",
+      "sha256": "6a4db6eda4642b9ee1144e389bf8e99c8eac086aff10b67dd95997fa6f2b0409",
+      "size_bytes": 33142766,
+      "frames": 8285663,
+      "duration_seconds": 187.883514739229,
+      "codec": "IEEE float32 WAV",
+      "channels": 1,
+      "sample_rate": 44100,
+      "metric_domain": "stored float32 samples including delay and full tail",
+      "peak_absolute": 1.2235170602798462,
+      "peak_dbfs": 1.7522005875075481,
+      "rms": 0.3133949889172901,
+      "samples_above_full_scale": 149,
+      "nonfinite_samples": 0,
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "pcm_f32le",
+            "sample_fmt": "flt",
+            "sample_rate": "44100",
+            "channels": 1,
+            "duration_ts": 8285663
+          }
+        ]
+      },
+      "exact_float32_delayed_input_match": true
+    },
+    "listen-minus7.wav": {
+      "path": "/tmp/pitchwing-taking-chances-20261008-ozikic86/listen-minus7.wav",
+      "sha256": "d7bb8e300cc13ca870002876910fe48c49de18b22b729cf47dd3de44f231e6e3",
+      "size_bytes": 33142766,
+      "frames": 8285663,
+      "duration_seconds": 187.883514739229,
+      "codec": "IEEE float32 WAV",
+      "channels": 1,
+      "sample_rate": 44100,
+      "metric_domain": "stored float32 samples including delay and full tail",
+      "fixed_gain_db": -6,
+      "source_render": "minus7.wav",
+      "peak_absolute": 0.7087408304214478,
+      "peak_dbfs": -2.9902509379420144,
+      "rms": 0.13741438425289643,
+      "samples_above_full_scale": 0,
+      "nonfinite_samples": 0,
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "pcm_f32le",
+            "sample_fmt": "flt",
+            "sample_rate": "44100",
+            "channels": 1,
+            "duration_ts": 8285663
+          }
+        ]
+      }
+    },
+    "listen-dry-delay383.wav": {
+      "path": "/tmp/pitchwing-taking-chances-20261008-ozikic86/listen-dry-delay383.wav",
+      "sha256": "622fcf2d49bc4484dc2422956f7fa30fd0c8bf1e9a26d62c8259e6b91bd387f8",
+      "size_bytes": 33142766,
+      "frames": 8285663,
+      "duration_seconds": 187.883514739229,
+      "codec": "IEEE float32 WAV",
+      "channels": 1,
+      "sample_rate": 44100,
+      "metric_domain": "stored float32 samples including delay and full tail",
+      "fixed_gain_db": -6,
+      "source_render": "dry-delay383.wav",
+      "peak_absolute": 0.6132111549377441,
+      "peak_dbfs": -4.2477990697046994,
+      "rms": 0.157069567525322,
+      "samples_above_full_scale": 0,
+      "nonfinite_samples": 0,
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "pcm_f32le",
+            "sample_fmt": "flt",
+            "sample_rate": "44100",
+            "channels": 1,
+            "duration_ts": 8285663
+          }
+        ]
+      }
+    }
+  },
+  "decoded_input_sha256": "020edacb87143e953eefa2dfc138406705711a62751b4760dd53f87157ae6bd5",
+  "decoded_hash_scope": "complete mono little-endian float64 PCM from the recorded FFmpeg decode; encoded source was not reread solely for hashing",
+  "wet_over_dry_rms_db": -1.1611970362262671,
+  "validation": {
+    "finite_stored_samples": true,
+    "matching_output_rate_and_frames": true,
+    "dry_exactly_matches_float32_input_delayed_383": true,
+    "latency_samples": 383,
+    "latency_ms": 8.684807256235827,
+    "trailing_dry_zero_samples": 2144,
+    "native_tail_samples": 2527
+  },
+  "listening_gain_db": -6,
+  "listening_gain_reason": "Both decoded dry and native wet exceed absolute full scale. Apply identical fixed gain to the listening pair; preserve their relative levels and retain unadjusted float renders.",
+  "listening_commands": {
+    "listen-minus7.wav": [
+      "ffmpeg",
+      "-hide_banner",
+      "-v",
+      "warning",
+      "-nostdin",
+      "-i",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/minus7.wav",
+      "-af",
+      "volume=-6dB:precision=double",
+      "-c:a",
+      "pcm_f32le",
+      "-n",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/listen-minus7.wav"
+    ],
+    "listen-dry-delay383.wav": [
+      "ffmpeg",
+      "-hide_banner",
+      "-v",
+      "warning",
+      "-nostdin",
+      "-i",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/dry-delay383.wav",
+      "-af",
+      "volume=-6dB:precision=double",
+      "-c:a",
+      "pcm_f32le",
+      "-n",
+      "/tmp/pitchwing-taking-chances-20261008-ozikic86/listen-dry-delay383.wav"
+    ]
+  },
+  "raw_scratch_cleanup": [
+    "mono-input.f64",
+    "minus7.f64"
+  ],
+  "retained_wav_bytes": 132571064
+}

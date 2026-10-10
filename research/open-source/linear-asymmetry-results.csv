@@ -1,0 +1,5 @@
+asymmetry,analysis_offset_samples,synthesis_offset_samples,analysis_latency_samples,synthesis_latency_samples,total_latency_ms
+0,1023,1023,1025,1023,42.6667
+0.5,1536,511,512,511,21.3125
+0.75,1792,255,256,255,10.6458
+0.9,1946,101,102,101,4.22917

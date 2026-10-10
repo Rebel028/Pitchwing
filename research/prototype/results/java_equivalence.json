@@ -1,0 +1,32 @@
+[
+  {
+    "semitones": 5,
+    "pad": 2,
+    "sample_count": 12032,
+    "max_absolute_error": 3.051303712815756e-05,
+    "rms_error": 1.757020738135816e-05,
+    "correlation": 0.9999999548579904,
+    "java_output_precision": "16-bit PCM",
+    "pcm16_lsb": 3.0517578125e-05
+  },
+  {
+    "semitones": -5,
+    "pad": 4,
+    "sample_count": 12032,
+    "max_absolute_error": 3.0520417257109966e-05,
+    "rms_error": 1.737289539296292e-05,
+    "correlation": 0.9999999621923861,
+    "java_output_precision": "16-bit PCM",
+    "pcm16_lsb": 3.0517578125e-05
+  },
+  {
+    "semitones": 1,
+    "pad": 8,
+    "sample_count": 12032,
+    "max_absolute_error": 3.0514119038253795e-05,
+    "rms_error": 1.7607467552695758e-05,
+    "correlation": 0.9999999645267891,
+    "java_output_precision": "16-bit PCM",
+    "pcm16_lsb": 3.0517578125e-05
+  }
+]

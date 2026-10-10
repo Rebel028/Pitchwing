@@ -1,0 +1,242 @@
+{
+  "render_set": "2026-10-08-rejected-transport-stems",
+  "output_root": "/tmp/pitchwing-listening-20261008",
+  "output_metric_domain": "float64 before float32 encoding; stored samples may differ by rounding",
+  "headers_verified": {
+    "wav_files": 9,
+    "codec": "pcm_f32le",
+    "sample_rate": 44100,
+    "channels": 1,
+    "frames_per_file": 289177
+  },
+  "renders": [
+    {
+      "purpose": "diagnostic listening from a rejected research candidate, not a quality claim",
+      "source": "stems/02.wav",
+      "source_bytes": 3445560,
+      "source_mtime_ns": 1791474130769995800,
+      "source_sample_rate": 44100,
+      "source_channels": 2,
+      "selected_channel_zero_based": 0,
+      "source_frames": 574145,
+      "excerpt_start_frame": 79380,
+      "excerpt_frame_count": 264600,
+      "source_context_start_frame": 57330,
+      "preroll_frames": 22050,
+      "context_pcm_sha256": "3cf79bb58c8359c02994fff5519b049bb93a8bd78c71469ff7af5995538b6b33",
+      "selected_context_channels_sample_identical": true,
+      "engine_parameters": {
+        "sample_rate": 44100,
+        "analysis_size": 2048,
+        "synthesis_size": 384,
+        "hop": 96,
+        "window": "asymmetric"
+      },
+      "engine_sha256": "35794a1cdbbcbb8cc6a0e11e468ec7af859dc2334bb0d41998f062c53aa081c0",
+      "scheduled_delay_samples": 383,
+      "scheduled_delay_ms": 8.684807256235828,
+      "audition_interval_in_outputs_frames": [
+        22433,
+        287033
+      ],
+      "unity_maximum_absolute_error": 4.440892098500626e-16,
+      "output_encoding": "mono IEEE float32 WAV; no normalization, limiting, fades, or resampling",
+      "output_timeline": "includes source preroll, scheduled delay, and full conservative flush tail",
+      "input_context_metrics": {
+        "peak": 0.8741395473480225,
+        "peak_dbfs": -1.1683846240739448,
+        "rms": 0.1834653321076961,
+        "rms_dbfs": -14.728919772297427,
+        "samples_above_full_scale": 0
+      },
+      "outputs": [
+        {
+          "file": "dry-delay383.wav",
+          "frames": 289177,
+          "peak": 0.8741395473480225,
+          "peak_dbfs": -1.1683846240739448,
+          "rms": 0.18266195876931618,
+          "rms_dbfs": -14.767037790420012,
+          "samples_above_full_scale": 0
+        },
+        {
+          "file": "minus2.wav",
+          "frames": 289177,
+          "peak": 0.8165585884538437,
+          "peak_dbfs": -1.7602529796153767,
+          "rms": 0.15910926337600012,
+          "rms_dbfs": -15.966090697958697,
+          "samples_above_full_scale": 0
+        },
+        {
+          "file": "minus7.wav",
+          "frames": 289177,
+          "peak": 0.7659514937622595,
+          "peak_dbfs": -2.3159746506484153,
+          "rms": 0.15623232974700485,
+          "rms_dbfs": -16.124581819176303,
+          "samples_above_full_scale": 0
+        }
+      ],
+      "limitations": [
+        "Mono diagnostic, not stereo engine validation.",
+        "A delayed dry reference matches scheduling for timbre comparisons, not a live latency test.",
+        "No tuning-error ground truth is inferred from guitar recordings.",
+        "Original labels and processing status must come from the user.",
+        "Cuts may be audible at file boundaries; no fades alter measured samples."
+      ]
+    },
+    {
+      "purpose": "diagnostic listening from a rejected research candidate, not a quality claim",
+      "source": "stems/06.wav",
+      "source_bytes": 13630272,
+      "source_mtime_ns": 1791474130771495700,
+      "source_sample_rate": 44100,
+      "source_channels": 2,
+      "selected_channel_zero_based": 0,
+      "source_frames": 2271597,
+      "excerpt_start_frame": 427770,
+      "excerpt_frame_count": 264600,
+      "source_context_start_frame": 405720,
+      "preroll_frames": 22050,
+      "context_pcm_sha256": "c95d41b8a112b18da4229b042809b0c6e30e9fa67122ad0b101900ccc18862c2",
+      "selected_context_channels_sample_identical": true,
+      "engine_parameters": {
+        "sample_rate": 44100,
+        "analysis_size": 2048,
+        "synthesis_size": 384,
+        "hop": 96,
+        "window": "asymmetric"
+      },
+      "engine_sha256": "35794a1cdbbcbb8cc6a0e11e468ec7af859dc2334bb0d41998f062c53aa081c0",
+      "scheduled_delay_samples": 383,
+      "scheduled_delay_ms": 8.684807256235828,
+      "audition_interval_in_outputs_frames": [
+        22433,
+        287033
+      ],
+      "unity_maximum_absolute_error": 3.3306690738754696e-16,
+      "output_encoding": "mono IEEE float32 WAV; no normalization, limiting, fades, or resampling",
+      "output_timeline": "includes source preroll, scheduled delay, and full conservative flush tail",
+      "input_context_metrics": {
+        "peak": 0.9999998807907104,
+        "peak_dbfs": -0.0000010354387945871882,
+        "rms": 0.1845061984512526,
+        "rms_dbfs": -14.679780784357819,
+        "samples_above_full_scale": 0
+      },
+      "outputs": [
+        {
+          "file": "dry-delay383.wav",
+          "frames": 289177,
+          "peak": 0.9999998807907104,
+          "peak_dbfs": -0.0000010354387945871882,
+          "rms": 0.18369826728028588,
+          "rms_dbfs": -14.717898802480406,
+          "samples_above_full_scale": 0
+        },
+        {
+          "file": "minus2.wav",
+          "frames": 289177,
+          "peak": 0.830387207801569,
+          "peak_dbfs": -1.6143869958849364,
+          "rms": 0.1623870681245901,
+          "rms_dbfs": -15.788971184871388,
+          "samples_above_full_scale": 0
+        },
+        {
+          "file": "minus7.wav",
+          "frames": 289177,
+          "peak": 0.9085654972193052,
+          "peak_dbfs": -0.8328751908808194,
+          "rms": 0.15937734363431094,
+          "rms_dbfs": -15.951468318012378,
+          "samples_above_full_scale": 0
+        }
+      ],
+      "limitations": [
+        "Mono diagnostic, not stereo engine validation.",
+        "A delayed dry reference matches scheduling for timbre comparisons, not a live latency test.",
+        "No tuning-error ground truth is inferred from guitar recordings.",
+        "Original labels and processing status must come from the user.",
+        "Cuts may be audible at file boundaries; no fades alter measured samples."
+      ]
+    },
+    {
+      "purpose": "diagnostic listening from a rejected research candidate, not a quality claim",
+      "source": "stems/tapping1.wav",
+      "source_bytes": 4337976,
+      "source_mtime_ns": 1791474130771495700,
+      "source_sample_rate": 44100,
+      "source_channels": 2,
+      "selected_channel_zero_based": 0,
+      "source_frames": 722881,
+      "excerpt_start_frame": 396900,
+      "excerpt_frame_count": 264600,
+      "source_context_start_frame": 374850,
+      "preroll_frames": 22050,
+      "context_pcm_sha256": "cec8780b1e2add1cf59a6814830c15d1d8d4c4fd11b59b490775046b189446eb",
+      "selected_context_channels_sample_identical": true,
+      "engine_parameters": {
+        "sample_rate": 44100,
+        "analysis_size": 2048,
+        "synthesis_size": 384,
+        "hop": 96,
+        "window": "asymmetric"
+      },
+      "engine_sha256": "35794a1cdbbcbb8cc6a0e11e468ec7af859dc2334bb0d41998f062c53aa081c0",
+      "scheduled_delay_samples": 383,
+      "scheduled_delay_ms": 8.684807256235828,
+      "audition_interval_in_outputs_frames": [
+        22433,
+        287033
+      ],
+      "unity_maximum_absolute_error": 3.3306690738754696e-16,
+      "output_encoding": "mono IEEE float32 WAV; no normalization, limiting, fades, or resampling",
+      "output_timeline": "includes source preroll, scheduled delay, and full conservative flush tail",
+      "input_context_metrics": {
+        "peak": 0.5974359512329102,
+        "peak_dbfs": -4.474172937875662,
+        "rms": 0.1452200321551914,
+        "rms_dbfs": -16.759469428312357,
+        "samples_above_full_scale": 0
+      },
+      "outputs": [
+        {
+          "file": "dry-delay383.wav",
+          "frames": 289177,
+          "peak": 0.5974359512329102,
+          "peak_dbfs": -4.474172937875662,
+          "rms": 0.1445841305344772,
+          "rms_dbfs": -16.797587446434946,
+          "samples_above_full_scale": 0
+        },
+        {
+          "file": "minus2.wav",
+          "frames": 289177,
+          "peak": 0.5446637641290277,
+          "peak_dbfs": -5.277430337837612,
+          "rms": 0.13515797126042126,
+          "rms_dbfs": -17.383166713352228,
+          "samples_above_full_scale": 0
+        },
+        {
+          "file": "minus7.wav",
+          "frames": 289177,
+          "peak": 0.540722229564114,
+          "peak_dbfs": -5.3405155166221006,
+          "rms": 0.1332675018323349,
+          "rms_dbfs": -17.505514865528973,
+          "samples_above_full_scale": 0
+        }
+      ],
+      "limitations": [
+        "Mono diagnostic, not stereo engine validation.",
+        "A delayed dry reference matches scheduling for timbre comparisons, not a live latency test.",
+        "No tuning-error ground truth is inferred from guitar recordings.",
+        "Original labels and processing status must come from the user.",
+        "Cuts may be audible at file boundaries; no fades alter measured samples."
+      ]
+    }
+  ]
+}

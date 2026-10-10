@@ -1,0 +1,63 @@
+{
+  "clap": {
+    "exports": [
+      "clap_entry",
+      "signalsmith_compose_config_default",
+      "signalsmith_compose_core_version",
+      "signalsmith_compose_engine_float_addOutputInterleaved",
+      "signalsmith_compose_engine_float_addOutputInterleavedMoved",
+      "signalsmith_compose_engine_float_addOutputSplit",
+      "signalsmith_compose_engine_float_addOutputSplitMoved",
+      "signalsmith_compose_engine_float_bands",
+      "signalsmith_compose_engine_float_delete",
+      "signalsmith_compose_engine_float_inputHz",
+      "signalsmith_compose_engine_float_inputImag",
+      "signalsmith_compose_engine_float_inputReal",
+      "signalsmith_compose_engine_float_latencySamples",
+      "signalsmith_compose_engine_float_new",
+      "signalsmith_compose_engine_float_nominalBand",
+      "signalsmith_compose_engine_float_nominalHz",
+      "signalsmith_compose_engine_float_process",
+      "signalsmith_compose_engine_float_reset",
+      "signalsmith_compose_engine_float_setCallbacks",
+      "signalsmith_compose_engine_float_setInputHz",
+      "signalsmith_compose_engine_float_setInputImag",
+      "signalsmith_compose_engine_float_setInputReal",
+      "signalsmith_compose_engine_float_subRate",
+      "signalsmith_compose_get_bump_malloc",
+      "signalsmith_compose_set_bump_malloc"
+    ]
+  },
+  "vst3": {
+    "exports": [
+      "ExitDll",
+      "GetPluginFactory",
+      "InitDll",
+      "clap_entry",
+      "signalsmith_compose_config_default",
+      "signalsmith_compose_core_version",
+      "signalsmith_compose_engine_float_addOutputInterleaved",
+      "signalsmith_compose_engine_float_addOutputInterleavedMoved",
+      "signalsmith_compose_engine_float_addOutputSplit",
+      "signalsmith_compose_engine_float_addOutputSplitMoved",
+      "signalsmith_compose_engine_float_bands",
+      "signalsmith_compose_engine_float_delete",
+      "signalsmith_compose_engine_float_inputHz",
+      "signalsmith_compose_engine_float_inputImag",
+      "signalsmith_compose_engine_float_inputReal",
+      "signalsmith_compose_engine_float_latencySamples",
+      "signalsmith_compose_engine_float_new",
+      "signalsmith_compose_engine_float_nominalBand",
+      "signalsmith_compose_engine_float_nominalHz",
+      "signalsmith_compose_engine_float_process",
+      "signalsmith_compose_engine_float_reset",
+      "signalsmith_compose_engine_float_setCallbacks",
+      "signalsmith_compose_engine_float_setInputHz",
+      "signalsmith_compose_engine_float_setInputImag",
+      "signalsmith_compose_engine_float_setInputReal",
+      "signalsmith_compose_engine_float_subRate",
+      "signalsmith_compose_get_bump_malloc",
+      "signalsmith_compose_set_bump_malloc"
+    ]
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "date": "2026-10-08",
+  "exact_probe_dependencies": {
+    "signalsmith-stretch.h": {
+      "repository": "Signalsmith-Audio/signalsmith-stretch",
+      "commit": "a670068d9aeb64913331d5cc29337b19a457a7df",
+      "version": "1.3.2",
+      "license": "MIT",
+      "verified": "re-downloaded at pinned commit; byte-for-byte cmp passed"
+    },
+    "signalsmith-linear/stft.h": {
+      "repository": "Signalsmith-Audio/linear",
+      "commit": "146b26f91b48835d665fa0498d64d9617818d27a",
+      "license": "MIT",
+      "verified": "re-downloaded at pinned commit; byte-for-byte cmp passed"
+    },
+    "signalsmith-linear/fft.h": {
+      "repository": "Signalsmith-Audio/linear",
+      "commit": "146b26f91b48835d665fa0498d64d9617818d27a",
+      "license": "MIT",
+      "verified": "re-downloaded at pinned commit; byte-for-byte cmp passed"
+    }
+  },
+  "files": [
+    {
+      "file": "latency-probe-results.csv",
+      "bytes": 522,
+      "sha256": "aa98eff153bd12b20b3dd1deec4c90b8daaa476c06eb20deb2d4a89a37e0aeec",
+      "git_blob_sha1": "8c425fe313fc8e5780db3f46360c5b93d90a6f14"
+    },
+    {
+      "file": "latency_probe",
+      "bytes": 44056,
+      "sha256": "eef45b01ed727822048cc99b9d2d7cbe5f7b9009eace2b209ce2ddaf088f01f0",
+      "git_blob_sha1": "467e925b2ee2d063c5cf1d2ec95ccb0b806b392b"
+    },
+    {
+      "file": "latency_probe.cpp",
+      "bytes": 1257,
+      "sha256": "cf49d321c7e1ad2e5c71aadda0ec1b3888e2901776b9279a47d5f7f37975ddf6",
+      "git_blob_sha1": "e111978cd6a73fa14a1373aea5e22db416f941f9"
+    },
+    {
+      "file": "linear-LICENSE.txt",
+      "bytes": 1074,
+      "sha256": "072b5e9eb5b22880bdf6256324654cf3ce53dba828edb911921121e1be09d9c3",
+      "git_blob_sha1": "c2569820cd018245f891b974048dc4ab128f43b1"
+    },
+    {
+      "file": "linear-commit.json",
+      "bytes": 4782,
+      "sha256": "b64c4779fe2f3f3256688944672a33843b0bae2e5992dcede97fc8d1497e013a",
+      "git_blob_sha1": "9fb318fe6ce9e0323fa88d9e9ee0a2ce84355d1e"
+    },
+    {
+      "file": "linear-fft.h",
+      "bytes": 45242,
+      "sha256": "fb55f69ac14cdbac66b9c76053069ff63bc36d18af20d8c028b9acc0aad6516a",
+      "git_blob_sha1": "49986af016d6eea6bae7e09e7c53858beac400be"
+    },
+    {
+      "file": "linear-stft.h",
+      "bytes": 24313,
+      "sha256": "7422ff5ddc2a017dc0587dcce99ce5ba30a2414bc2996081f6b00d56905d9b8c",
+      "git_blob_sha1": "5cbbcafc530501056e7ec909cb73e22c7a722683"
+    },
+    {
+      "file": "rubberband-BinClassifier.h",
+      "bytes": 5252,
+      "sha256": "ac46eee51c70c57288b3506a6f88b6bfaaf39a8455d5e1031cd6ac8465afeede",
+      "git_blob_sha1": "64fd65c3fd9fc7168f929bd8310a69f8af87a14d"
+    },
+    {
+      "file": "rubberband-Guide.h",
+      "bytes": 21714,
+      "sha256": "fdcda0ec555c97c59c17dc730f4b4e72d747218ed2a11d115547390be1e44f58",
+      "git_blob_sha1": "5e1c50b7f83ff8e93aa2b3525dc456d34b6c719a"
+    },
+    {
+      "file": "rubberband-PhaseAdvance.h",
+      "bytes": 10577,
+      "sha256": "ee9c164d50cba827160480ff6eb2fa2d6c2dce30b7615e753a10e077b4032f73",
+      "git_blob_sha1": "f0958d15a428f43227bbbdf391d19050e2932e0c"
+    },
+    {
+      "file": "rubberband-R3LiveShifter.cpp",
+      "bytes": 41795,
+      "sha256": "d6f28fdb9542d6a509cdde9e9859831ece1426cd489e4f788431fa133fe5172f",
+      "git_blob_sha1": "80e8bd5fa3096e4e8ef73505179824b3dd96a295"
+    },
+    {
+      "file": "rubberband-R3LiveShifter.h",
+      "bytes": 14989,
+      "sha256": "90f6320171d395523eb10e05dcd94643d0f7645cc8d492d0f0a8e2e278d86958",
+      "git_blob_sha1": "247416bb78d7d4352679e6fc70bf4bc9205cc8cb"
+    },
+    {
+      "file": "rubberband-tree.json",
+      "bytes": 59408,
+      "sha256": "050b472b1cc7e470a1984135d533bdab42a0c8f23765ba63562be5206b0bde65",
+      "git_blob_sha1": "428d40c90420bc7e640800f95351d7b58c8c12b6"
+    },
+    {
+      "file": "signalsmith-stretch.h",
+      "bytes": 35446,
+      "sha256": "1188667959ac19dd40c0a6abbce694e44705615ec4f0e8db8af0f1cfb4c5dea7",
+      "git_blob_sha1": "cd13f2e98b8967577c6da9bc848d4e42c5eeab2a"
+    },
+    {
+      "file": "stftpitchshift-LICENSE",
+      "bytes": 1069,
+      "sha256": "68e5a7665569eea62c82c9c90150c435359a4b64fcb7d1a09b89deef0196f1fb",
+      "git_blob_sha1": "44398dc0936df6c5756a82517443af16ac4dd892"
+    },
+    {
+      "file": "stftpitchshift-Pitcher.h",
+      "bytes": 2503,
+      "sha256": "40ded0f66ecd6d9e3622815cb5a1efbe72fc5b89383ad77fab7b200cbce5ca87",
+      "git_blob_sha1": "ad8db7920e19e8a3ca947702c35c297fb6055829"
+    },
+    {
+      "file": "stftpitchshift-README.md",
+      "bytes": 11911,
+      "sha256": "4fd3a34482e21952c98f0c971e9c4ba40826eb84ee77e5e5f73c1f72e80af348",
+      "git_blob_sha1": "e58e0396b0b9ceed2fb32c6a3da19b4703bbd1f8"
+    },
+    {
+      "file": "stftpitchshift-STFT.h",
+      "bytes": 7491,
+      "sha256": "f486cc272d2a8b6cfcf480e7abe3733e5af0f2ba28f6886778bd47c89793331a",
+      "git_blob_sha1": "4432cdb89d10909f9f55b1d4d9796dddf8c075ef"
+    },
+    {
+      "file": "stftpitchshift-Vocoder.h",
+      "bytes": 3270,
+      "sha256": "b0cfd339188f6e8cf77e27d14bde21df0f3ba453a159b64a62d3d1871f9f4058",
+      "git_blob_sha1": "ebe580ba22a74a93d623d3587d644b43e65019e0"
+    },
+    {
+      "file": "stftpitchshift-issues.json",
+      "bytes": 285513,
+      "sha256": "a5cc05315d285dcf85f8e6a92ba03464b1893a3c0090a474c4e5c7a9cb23082a",
+      "git_blob_sha1": "00fa616e8416f19261938f279ee0a2a2180f7313"
+    },
+    {
+      "file": "stftpitchshift-tree.json",
+      "bytes": 26163,
+      "sha256": "9467fd734ff9e8087ea0709010d68b7d575c9fbca18970b691d4f494a2d24216",
+      "git_blob_sha1": "140bb4e684e0e59cdd4e9b7b9d54705fbe9b115f"
+    },
+    {
+      "file": "stn-HorizontalMedianFilter.h",
+      "bytes": 1215,
+      "sha256": "cfdfaac7c9778b1ccce6fe3f58e97d6b83b04740419d2b1b19a59bac749d9d1a",
+      "git_blob_sha1": "7cc59ddbc4e4a75adb05d1f440e1cd9a65648b4c"
+    },
+    {
+      "file": "stn-NoiseMorphing.cpp",
+      "bytes": 9080,
+      "sha256": "e6ce2bde7f77d4a28529d24b5f9f48615dcbf15ca6098541ba58e4b729963c9c",
+      "git_blob_sha1": "af01fb2e830652462a3e623ef52c62c8fcf630e3"
+    },
+    {
+      "file": "stn-NoiseMorphing.h",
+      "bytes": 4622,
+      "sha256": "e3d4f7509f9ab8842a02ec29807bd5689090673d035894517c88ca6f0ed98268",
+      "git_blob_sha1": "b5e34f367b79b1074ed5ca4419f742c6035bcfb1"
+    },
+    {
+      "file": "stn-PluginProcessor.cpp",
+      "bytes": 12203,
+      "sha256": "6b83ef22433da98f39403b2bd31c73dee2358aeb2d9ecce22fa91cee1ef3de48",
+      "git_blob_sha1": "22536584361aba5f330706ac2ed30c8d6bfea620"
+    },
+    {
+      "file": "stn-PluginProcessor.h",
+      "bytes": 5074,
+      "sha256": "1962a7acd280f509013c0bed356e28d7c18e125d7fe5ec2ac81a7b03ea5879cc",
+      "git_blob_sha1": "3743bd9bc4fdd539cfde147443023327cc5ac544"
+    },
+    {
+      "file": "stn-README.md",
+      "bytes": 2800,
+      "sha256": "5480bd7690d167a39334ea75d3e152ab14dd52e43eb9ea2a3e11a0dd9e8774a2",
+      "git_blob_sha1": "ecd5632be38e8012b1ee3e4ace73bcf12ad5b155"
+    },
+    {
+      "file": "stn-decomposeSTN.cpp",
+      "bytes": 12674,
+      "sha256": "0a97e45c6f621441c2a20d50f840f81f8652eb09b91149cc50e58ceb38ae983b",
+      "git_blob_sha1": "a640229a9c7f0c6deb6467cdea5010930929bbd1"
+    },
+    {
+      "file": "stn-decomposeSTN.h",
+      "bytes": 3993,
+      "sha256": "3353dfa4107f0839588c5e790cf18b10b5bfd6f36a7e1422353349130f47b280",
+      "git_blob_sha1": "4b7806061d30e9a86a7f9e0606b697aef63ed391"
+    },
+    {
+      "file": "stn-shift-stretch.h",
+      "bytes": 30484,
+      "sha256": "b059ca5936e640f650c51755e6d2438e54e710725c4dea4940eafb3bb6b2331b",
+      "git_blob_sha1": "a011e031cd5fc656580cfa1dee31d5f6c1dd3172"
+    },
+    {
+      "file": "stn-tree.json",
+      "bytes": 97551,
+      "sha256": "a381b0b214209d2debfa3dfd03f4c0486de952d0828c8b2911c31df906e28cd1",
+      "git_blob_sha1": "2caa0a1c2765db460d716bc39b32134a5fa5f8db"
+    },
+    {
+      "file": "stretch-LICENSE.txt",
+      "bytes": 1093,
+      "sha256": "ee2ef82481ffb445ecdd4b3a4c1f82c0cddb2da8fe39d8e8dc384fffb3e7f06f",
+      "git_blob_sha1": "889031e63236bb72aa28ff2ec2362db1691723d1"
+    },
+    {
+      "file": "stretch-commit.json",
+      "bytes": 7533,
+      "sha256": "7459bae96deaf72e43147d9a377ca0555ae26c6c94440cd88fbd0547f6ab18ee",
+      "git_blob_sha1": "2a546e4955ed3f919cd0c3d39cea1c23379121a3"
+    }
+  ]
+}

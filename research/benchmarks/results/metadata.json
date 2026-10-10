@@ -1,0 +1,579 @@
+{
+  "date": "2026-10-08T12:39:09.982Z",
+  "binarySha256": "ffff817738e0386eb0f8dc44b331422535f4c6fe762252d99dca7be25a0f1dc1",
+  "binaryFilename": "compose-2026-10-01.wclap.wasm",
+  "node": "v24.19.0",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "unavailable",
+  "sampleRate": 48000,
+  "blockSize": 128,
+  "descriptors": [
+    {
+      "id": "uk.co.signalsmith.compose.pitch-shifter-layer1",
+      "name": "Compose: Pitch Shifter",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.octaver",
+      "name": "Compose: Octaver",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.cleanup",
+      "name": "Compose (WIP): Cleanup",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.chorus",
+      "name": "Compose: Chorus (Spectral)",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.chorus-detune",
+      "name": "Compose: Chorus (Pitch-Shifter)",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.transients",
+      "name": "Compose: Transients",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.swell",
+      "name": "Compose: Swell",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.decay-scale",
+      "name": "Compose (Bespoke Effect Example): Decay Scale",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.frequency-snap",
+      "name": "Compose (Bespoke Effect Example): Frequency Snap",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    },
+    {
+      "id": "uk.co.signalsmith.compose.shepard-drop",
+      "name": "Compose (Bespoke Effect Example): Shepard Drop",
+      "vendor": "Signalsmith Audio",
+      "version": "1.0.0"
+    }
+  ],
+  "params": [
+    {
+      "id": 111168617,
+      "flags": 32,
+      "name": "latency",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.6511627906976745,
+      "current": 0.6511627906976745,
+      "display": "10ms"
+    },
+    {
+      "id": 3066349389,
+      "flags": 32,
+      "name": "overlap",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "current": 0.5,
+      "display": "4"
+    },
+    {
+      "id": 2637347009,
+      "flags": 32,
+      "name": "resolution",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "current": 0.5,
+      "display": "20"
+    },
+    {
+      "id": 1483700289,
+      "flags": 33,
+      "name": "iterations",
+      "module": "",
+      "min": 0,
+      "max": 3,
+      "default": 2,
+      "current": 2,
+      "display": "4"
+    },
+    {
+      "id": 1584506513,
+      "flags": 33,
+      "name": "direct",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "current": 1,
+      "display": "on"
+    },
+    {
+      "id": 2468455371,
+      "flags": 33,
+      "name": "channels",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "current": 1,
+      "display": "full"
+    },
+    {
+      "id": 1631008982,
+      "flags": 32,
+      "name": "smoothing",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.3076923076923077,
+      "current": 0.3076923076923077,
+      "display": "1%"
+    },
+    {
+      "id": 3860140779,
+      "flags": 32,
+      "name": "phase",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "current": 0.5,
+      "display": "1%"
+    },
+    {
+      "id": 2324904752,
+      "flags": 32,
+      "name": "detail",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.9210526315789475,
+      "current": 0.9210526315789475,
+      "display": "0.8"
+    },
+    {
+      "id": 437858484,
+      "flags": 32,
+      "name": "tr. reset",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.7499999999999999,
+      "current": 0.7499999999999999,
+      "display": "2"
+    },
+    {
+      "id": 1360731499,
+      "flags": 32,
+      "name": "tr. boost",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "current": 0,
+      "display": "0"
+    },
+    {
+      "id": 4219379923,
+      "flags": 33,
+      "name": "semitones",
+      "module": "",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "current": 0,
+      "display": "none"
+    },
+    {
+      "id": 1806742716,
+      "flags": 32,
+      "name": "tonality limit",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "current": 0.5,
+      "display": "8000Hz"
+    },
+    {
+      "id": 3718681970,
+      "flags": 32,
+      "name": "smoothing",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "current": 0.5,
+      "display": "1"
+    },
+    {
+      "id": 2041725517,
+      "flags": 32,
+      "name": "timbre",
+      "module": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "current": 0,
+      "display": "0"
+    }
+  ],
+  "latencyMap": [
+    {
+      "normalized": 0,
+      "display": "2ms"
+    },
+    {
+      "normalized": 0.1,
+      "display": "3.2ms"
+    },
+    {
+      "normalized": 0.2,
+      "display": "4.3ms"
+    },
+    {
+      "normalized": 0.3,
+      "display": "5.5ms"
+    },
+    {
+      "normalized": 0.4,
+      "display": "6.8ms"
+    },
+    {
+      "normalized": 0.5,
+      "display": "8ms"
+    },
+    {
+      "normalized": 0.6,
+      "display": "9.4ms"
+    },
+    {
+      "normalized": 0.7,
+      "display": "10.7ms"
+    },
+    {
+      "normalized": 0.8,
+      "display": "12.1ms"
+    },
+    {
+      "normalized": 0.9,
+      "display": "13.6ms"
+    },
+    {
+      "normalized": 1,
+      "display": "15ms"
+    }
+  ],
+  "scope": "Synthetic public-API tests; no listening or comparison to Neural DSP. Wall CPU timing includes JS host and WASM overhead.",
+  "suppressedDiagnosticLines": 28500,
+  "cases": [
+    {
+      "name": "impulse_-12",
+      "type": "impulse",
+      "shift": -12,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "impulse_-12.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 103.25001899999997,
+      "realtimeFactor": 0.051625009499999985,
+      "blockP50Ms": 0.0403699999999958,
+      "blockP99Ms": 0.6236930000000029,
+      "blockMaxMs": 2.3117600000000067,
+      "automation": null
+    },
+    {
+      "name": "impulse_-7",
+      "type": "impulse",
+      "shift": -7,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "impulse_-7.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 78.88897699999922,
+      "realtimeFactor": 0.03944448849999961,
+      "blockP50Ms": 0.025498000000027332,
+      "blockP99Ms": 0.4208929999999782,
+      "blockMaxMs": 0.9576870000000213,
+      "automation": null
+    },
+    {
+      "name": "impulse_-2",
+      "type": "impulse",
+      "shift": -2,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "impulse_-2.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 77.48645400000112,
+      "realtimeFactor": 0.03874322700000056,
+      "blockP50Ms": 0.021522000000004482,
+      "blockP99Ms": 0.4017839999999637,
+      "blockMaxMs": 0.580489,
+      "automation": null
+    },
+    {
+      "name": "impulse_0",
+      "type": "impulse",
+      "shift": 0,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "impulse_0.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 77.21101500000134,
+      "realtimeFactor": 0.03860550750000067,
+      "blockP50Ms": 0.01756599999998798,
+      "blockP99Ms": 0.4078139999999735,
+      "blockMaxMs": 0.8486459999999738,
+      "automation": null
+    },
+    {
+      "name": "impulse_7",
+      "type": "impulse",
+      "shift": 7,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "impulse_7.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 76.79053800000071,
+      "realtimeFactor": 0.03839526900000036,
+      "blockP50Ms": 0.008342000000027383,
+      "blockP99Ms": 0.383057000000008,
+      "blockMaxMs": 0.6741170000000238,
+      "automation": null
+    },
+    {
+      "name": "impulse_12",
+      "type": "impulse",
+      "shift": 12,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "impulse_12.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 88.13867699999969,
+      "realtimeFactor": 0.04406933849999985,
+      "blockP50Ms": 0.036875000000009095,
+      "blockP99Ms": 0.4424739999999474,
+      "blockMaxMs": 0.983235000000036,
+      "automation": null
+    },
+    {
+      "name": "sine110_-12",
+      "type": "sine110",
+      "shift": -12,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "sine110_-12.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 130.23937399999818,
+      "realtimeFactor": 0.0651196869999991,
+      "blockP50Ms": 0.1556399999999485,
+      "blockP99Ms": 0.43338199999993776,
+      "blockMaxMs": 0.6033120000000736,
+      "automation": null
+    },
+    {
+      "name": "sine110_-7",
+      "type": "sine110",
+      "shift": -7,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "sine110_-7.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 128.7446390000008,
+      "realtimeFactor": 0.0643723195000004,
+      "blockP50Ms": 0.15373800000008941,
+      "blockP99Ms": 0.460961999999995,
+      "blockMaxMs": 1.0410000000000537,
+      "automation": null
+    },
+    {
+      "name": "sine110_-2",
+      "type": "sine110",
+      "shift": -2,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "sine110_-2.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 130.05924900000116,
+      "realtimeFactor": 0.06502962450000058,
+      "blockP50Ms": 0.15322700000001532,
+      "blockP99Ms": 0.48319500000002336,
+      "blockMaxMs": 1.0578050000000303,
+      "automation": null
+    },
+    {
+      "name": "sine110_0",
+      "type": "sine110",
+      "shift": 0,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "sine110_0.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 130.33229400000073,
+      "realtimeFactor": 0.06516614700000037,
+      "blockP50Ms": 0.15052300000002106,
+      "blockP99Ms": 0.5032839999998941,
+      "blockMaxMs": 1.73494699999992,
+      "automation": null
+    },
+    {
+      "name": "sine110_7",
+      "type": "sine110",
+      "shift": 7,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "sine110_7.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 138.72672800000305,
+      "realtimeFactor": 0.06936336400000152,
+      "blockP50Ms": 0.15589999999997417,
+      "blockP99Ms": 0.5512759999999162,
+      "blockMaxMs": 2.0588769999999386,
+      "automation": null
+    },
+    {
+      "name": "sine110_12",
+      "type": "sine110",
+      "shift": 12,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "sine110_12.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 129.34319099999993,
+      "realtimeFactor": 0.06467159549999997,
+      "blockP50Ms": 0.15493900000001304,
+      "blockP99Ms": 0.4204019999999673,
+      "blockMaxMs": 0.5643650000001799,
+      "automation": null
+    },
+    {
+      "name": "chord_-12",
+      "type": "chord",
+      "shift": -12,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "chord_-12.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 129.11291800000163,
+      "realtimeFactor": 0.06455645900000082,
+      "blockP50Ms": 0.15431899999998677,
+      "blockP99Ms": 0.47996999999986656,
+      "blockMaxMs": 1.2473760000000311,
+      "automation": null
+    },
+    {
+      "name": "chord_-7",
+      "type": "chord",
+      "shift": -7,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "chord_-7.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 142.09188800000197,
+      "realtimeFactor": 0.07104594400000099,
+      "blockP50Ms": 0.1542580000000271,
+      "blockP99Ms": 0.9378469999999197,
+      "blockMaxMs": 2.532646999999997,
+      "automation": null
+    },
+    {
+      "name": "chord_-2",
+      "type": "chord",
+      "shift": -2,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "chord_-2.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 127.54246399999761,
+      "realtimeFactor": 0.0637712319999988,
+      "blockP50Ms": 0.15314600000010614,
+      "blockP99Ms": 0.43074700000011035,
+      "blockMaxMs": 0.7345169999998689,
+      "automation": null
+    },
+    {
+      "name": "chord_0",
+      "type": "chord",
+      "shift": 0,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "chord_0.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 122.06064500000639,
+      "realtimeFactor": 0.061030322500003197,
+      "blockP50Ms": 0.14789900000005218,
+      "blockP99Ms": 0.414553000000069,
+      "blockMaxMs": 1.139285999999629,
+      "automation": null
+    },
+    {
+      "name": "chord_7",
+      "type": "chord",
+      "shift": 7,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "chord_7.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 134.3613830000022,
+      "realtimeFactor": 0.0671806915000011,
+      "blockP50Ms": 0.1536380000002282,
+      "blockP99Ms": 0.5651270000003024,
+      "blockMaxMs": 1.8581500000000233,
+      "automation": null
+    },
+    {
+      "name": "chord_12",
+      "type": "chord",
+      "shift": 12,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "chord_12.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 127.23627800000395,
+      "realtimeFactor": 0.06361813900000197,
+      "blockP50Ms": 0.15415800000027957,
+      "blockP99Ms": 0.4390099999995982,
+      "blockMaxMs": 0.5419920000003913,
+      "automation": null
+    },
+    {
+      "name": "automation_0",
+      "type": "automation",
+      "shift": 0,
+      "inputOnsetSample": 8192,
+      "reportedLatencySamples": 480,
+      "outputFile": "automation_0.f32",
+      "durationSeconds": 2,
+      "totalWallMs": 133.11229699999922,
+      "realtimeFactor": 0.0665561484999996,
+      "blockP50Ms": 0.15385699999978897,
+      "blockP99Ms": 0.4652179999998225,
+      "blockMaxMs": 1.1967309999999998,
+      "automation": {
+        "sample": 48000,
+        "from": 0,
+        "to": -7
+      }
+    }
+  ]
+}

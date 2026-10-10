@@ -1,0 +1,28 @@
+2026-10-08 - RESEARCH DECISION LOG
+
+D01: Complete polyphonic instrument audio, guitar-first. No monophonic
+pitch-corrector substitute. VST3 is a later wrapper, not the DSP design.
+
+D02: Initial target8-10ms added DSP. Count all adapters/lookahead/resamplers.
+Measure attack centroid and low-band settling, not only first output/API delay.
+
+D03: Compose2026-10-01 WASM is the measured reference. Native2026-10-06 is a
+distinct forensic source. No Neural DSP binary/audio tested.
+
+D04: Ocean is a reproducible low-delay control, not a proposed final engine.
+Even m8 exposes low-note strongest-line tuning errors. Keep failed cases.
+
+D05: Do not start with serial STN decomposition/shift/recombination. Study
+causal confidence masks in one shared synthesis pipeline first.
+
+D06: Candidate: past-heavy analysis, short synthesis, coherent spectral
+transport. Verified383-sample unity schedule does not prove shifted quality.
+
+D07: Close dyads and changing low chords must falsify weak designs early.
+One-band carrier scaling can preserve wrong beat spacing.
+
+D08: Port to native after numerical/audio evidence. Preallocate, count timing,
+share stereo decisions and verify variable blocks/automation.
+
+D09: Preserve source hashes, scripts, raw results and decision history in
+project artifacts. No competitive-quality claim until blinded reference tests.
