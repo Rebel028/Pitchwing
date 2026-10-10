@@ -151,13 +151,17 @@ are unchanged. Floating-point association differs, so the parent compares a
 captured pre-optimization waveform within numerical tolerance before measuring
 timing again. This change does not itself establish a speedup or callback bound.
 
-When all L saved controls are exactly zero, add the original windowed recent
-time-domain samples directly and set current region rotations to zero. No inverse
-transforms are needed for that frame. Sustained unity eventually becomes exact
-delayed reconstruction without clearing audio history. Earlier nonunity frame
-contributions first have to leave the overlap ring. Resetting region rotations
-while those contributions fade can produce a transition phase/gain dip; exact
-steady unity is not proof of a transparent or click-free bypass transition.
+When all L saved controls are exactly zero and every inherited region rotation
+is exactly zero, add the original windowed recent time-domain samples directly;
+no inverse transforms are needed for that frame. After a nonunity run the
+rotations are not reset (a reset mixed rotated and unrotated copies of each
+partial in the overlap ring and measured dips to −15 dB per partial); unity
+frames keep rendering regions with zero translation while each rotation is
+slewed towards zero by at most `max(omega, 2*pi*100 Hz) * H * 0.006` per hop,
+i.e. a glide of at most 10 cents (33 cents below 100 Hz), so the worst case
+settles within about 420 hops. Sustained unity then becomes exact delayed
+reconstruction without clearing audio history (measured per-partial dips
+≤ 0.7 dB, `scripts/quality_fixtures.py --only unity`).
 
 ## Preserved limitations and validation ownership
 

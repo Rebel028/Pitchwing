@@ -368,7 +368,7 @@ void testStereoInvariants() {
 }
 
 void testSubHopControlAndUnityReturn() {
-    const auto source = signal(3601);
+    const auto source = signal(60001);
     LiveEngine reference;
     const auto identity = render(reference, source);
     const auto pulse = 8 * reference.hopSamples() + 13;
@@ -386,10 +386,11 @@ void testSubHopControlAndUnityReturn() {
     LiveEngine returning({48000.0, -7.0});
     constexpr std::size_t release = 1027;
     const auto output = render(returning, source, {{release, 0.0}});
-    // Allow full old support and pending frames to drain. This is eventual
-    // identity, not a claim that phase/gain transition artifacts are inaudible.
+    // Allow full old support and pending frames to drain, plus the rotation
+    // settling glide (pi at the 100 Hz floor and 0.006 per hop: <= 417 hops).
+    // Eventual identity, not a claim that the transition is inaudible.
     const auto stable = release + 3 * returning.synthesisSize()
-                        + 2 * returning.hopSamples() + returning.latencySamples();
+                        + 420 * returning.hopSamples() + returning.latencySamples();
     CHECK(stable < source.left.size());
     for (std::size_t i = stable; i < output.left.size(); ++i) {
         CHECK(std::abs(output.left[i] - identity.left[i]) < 2e-11);

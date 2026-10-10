@@ -869,3 +869,13 @@ re-scoped to a multi-resolution evaluation; direct-oscillator synthesis dropped
 (no CPU win below ~28 regions); image-aware estimator adopted. New order:
 unity-transition fix → estimator + ownership ancestry → DC gain/fold/bin-0
 ghost → window-tail study → multi-resolution low band → profiling.
+
+Unity-transition fix (commit after 293aab0): `findRegions` now inherits
+rotations in unity frames too and slews them to zero (≤ 10-cent glide, 100 Hz
+floor); `prepareFrame` takes the exact-unity path only when no rotation is
+settling. Fixture `unity_transition` before/after: per-partial worst dips
+−15.0 dB (1 kHz) / −5.0 dB (220 Hz) → +0.2…+0.7 dB; 1 ms total-RMS variation
+−3.1 → −2.0 dB (same class as the previously accepted 0→+3 direction, 1.9 dB;
+steady control 0.0). Quick evaluation matrix unchanged (identical numbers).
+The eventual-unity test now waits 420 hops for the glide. Cost: region
+rendering continues up to ~0.8 s after a return to exactly 0.

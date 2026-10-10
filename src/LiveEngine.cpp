@@ -95,6 +95,7 @@ struct LiveEngine::Impl {
           bins(n / 2 + 1), ringSize(length + hop), delay(length - 1 + hop),
           tail(n + delay + hop), ratioMinusOne(std::exp2(config.pitchSemitones / 12.0) - 1.0),
           binWidth(twoPi / static_cast<double>(n)), inverseN(1.0 / static_cast<double>(n)),
+          settleFloorOmega(twoPi * 100.0 / config.sampleRate),
           fft(n), analysis(n), synthesis(length), transportSynthesis(length), controlHistory(length),
           frameControl(length), negativeSuffix(length), magnitude(bins),
           binOmega(bins), peaks(bins), time(n), inverseSpectrum(n), inverseTime(n),
@@ -144,6 +145,7 @@ struct LiveEngine::Impl {
         completedRegions = 0;
         hopArea = 0.0;
         previousValid = false;
+        settling = false;
         closed = false;
     }
 
@@ -238,6 +240,7 @@ struct LiveEngine::Impl {
     }
 
     void findRegions() noexcept {
+        settling = false;
         auto largest = 0.0;
         auto smallest = std::numeric_limits<double>::max();
         auto largestBin = std::size_t{1};
@@ -307,7 +310,7 @@ struct LiveEngine::Impl {
                 }
             }
             auto rotation = 0.0;
-            if (previousRegionCount > 0 && !unitySupport) {
+            if (previousRegionCount > 0) {
                 auto nearest = std::size_t{0};
                 auto distance = std::abs(previousRegions[0].omega - omega);
                 for (std::size_t old = 1; old < previousRegionCount; ++old) {
@@ -319,6 +322,15 @@ struct LiveEngine::Impl {
                 }
                 const auto& ancestor = previousRegions[nearest];
                 rotation = principal(ancestor.rotation + 0.5 * (ancestor.omega + omega) * hopArea);
+                if (unitySupport) {
+                    // Resetting rotations to zero would mix rotated and unrotated
+                    // copies of each partial in the overlap ring (measured dips to
+                    // -15 dB). Slew them out instead: at most a 10-cent glide, with
+                    // a 100 Hz floor so sub-bass regions settle within ~1 s.
+                    const auto slew = std::max(omega, settleFloorOmega) * static_cast<double>(hop) * 0.006;
+                    rotation -= std::clamp(rotation, -slew, slew);
+                    settling = settling || rotation != 0.0;
+                }
             }
             regions[index] = Region{peak, omega, rotation};
         }
@@ -357,24 +369,34 @@ struct LiveEngine::Impl {
             fft.fft(time.data(), spectrum[channel].data());
             spectrum[channel][0].imag(0.0);
             spectrum[channel][n / 2].imag(0.0);
+        }
+        findRegions();
+        // Exact delayed unity only once every inherited rotation has settled to
+        // zero; until then unity frames render regions with delta 0 like any other.
+        const auto exactUnity = unitySupport && !settling;
+        for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             auto destination = frameOutputStart;
             const auto dc = spectrum[channel][0].real() * inverseN;
+            auto source = historyPosition + n - length;
+            if (source >= n) {
+                source -= n;
+            }
             for (std::size_t q = 0; q < length; ++q) {
-                const auto value = unitySupport ? time[n - length + q].real() : dc;
+                const auto value = exactUnity ? history[channel][source] * analysis[n - length + q] : dc;
                 output[channel][destination] += value * synthesis[q];
                 if (++destination == ringSize) {
                     destination = 0;
                 }
+                if (++source == n) {
+                    source = 0;
+                }
             }
-        }
-        findRegions();
-        for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             std::copy_n(spectrum[channel].begin(), bins, previousSpectrum[channel].begin());
         }
         std::copy_n(regions.begin(), regionCount, previousRegions.begin());
         previousRegionCount = regionCount;
         previousValid = true;
-        if (unitySupport) {
+        if (exactUnity) {
             // No region inverse transforms are needed for exact delayed unity.
             regionCount = 0;
         }
@@ -444,6 +466,7 @@ struct LiveEngine::Impl {
     double ratioMinusOne;
     const double binWidth;
     const double inverseN;
+    const double settleFloorOmega;
     Transform fft;
     std::vector<double> analysis;
     std::vector<double> synthesis;
@@ -476,6 +499,7 @@ struct LiveEngine::Impl {
     double hopArea = 0.0;
     double frameRatioMinusOne = 0.0;
     bool unitySupport = true;
+    bool settling = false;
     bool previousValid = false;
     bool closed = false;
 };
