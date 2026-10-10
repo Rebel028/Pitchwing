@@ -870,7 +870,7 @@ re-scoped to a multi-resolution evaluation; direct-oscillator synthesis dropped
 unity-transition fix → estimator + ownership ancestry → DC gain/fold/bin-0
 ghost → window-tail study → multi-resolution low band → profiling.
 
-Unity-transition fix (commit after 293aab0): `findRegions` now inherits
+Unity-transition fix (commit after 8418b0d): `findRegions` now inherits
 rotations in unity frames too and slews them to zero (≤ 10-cent glide, 100 Hz
 floor); `prepareFrame` takes the exact-unity path only when no rotation is
 settling. Fixture `unity_transition` before/after: per-partial worst dips
@@ -1091,7 +1091,7 @@ Listening renders of step 8 (not yet heard): `/tmp/pitchwing-listening-step8/`; 
 — 06 excerpt dry / step4 / step8 at −7 and −2 (44.1 kHz), chord DI 14–19 s
 dry / step4 / step8 at ±12. Objective check on the chord DI: wet/dry energy
 > 2 kHz unchanged (1.20/1.21 at +12, 0.38/0.39 at −12), +12 level −1.8 → −0.4 dB.
-The step-4 binary used for A/B is built from `git archive 84a8683` in
+The step-4 binary used for A/B is built from `git archive 3620038` in
 `/tmp/pw-old-build`.
 
 Handoff point (session 3): work committed on `worktree-engine-quality-work`
@@ -1163,7 +1163,7 @@ screenshot: full-scale spikes at attacks on 06 −7). Measured on the 06 excerpt
 step 4 peak 1.05/0.94, step 8 0.93/0.88, **step 10 359/227 with 18337/16002
 samples above full scale** (−7/−2). Steps 9–10 have a transient blow-up on real
 material that the synthetic fixtures (stationary tones, smooth gates) missed;
-step 8 (71c0666) is the last build the user accepts. Next session: bisect steps
+step 8 (fd5eefb) is the last build the user accepts. Next session: bisect steps
 5/9/10 on real material, add a real-material peak/attack gate, fix at the root
 (suspect unbounded component amplitudes from jointFit at onsets).
 
@@ -1173,8 +1173,8 @@ Purpose: fix the clipping the user heard in step 10 (above) and add a
 real-material gate so synthetic-only validation cannot miss it again.
 
 Bisect (Release builds from `git archive` in `/tmp/pw-s4/b-*`, 06 excerpt at
-−7/−2): step 8 (71c0666) peak 0.93/0.88; step 9 (2fc49e1) 381/225, 18277/16145
-samples > 1; step 10 (893426f) 359/227. The defect arrives with step 9.
+−7/−2): step 8 (fd5eefb) peak 0.93/0.88; step 9 (33cb2d0) 381/225, 18277/16145
+samples > 1; step 10 (6bf58db) 359/227. The defect arrives with step 9.
 
 Root cause (instrumented copy, `PW_DEBUG` print after `jointFit` in
 `splitRegion`, not committed): on the real strum every frame splits 0–1.5 kHz
@@ -1241,7 +1241,7 @@ fixtures/stereo/MSVC).
 
 Merge and ShiftKey rebuild for live testing (user request, 2026-10-10): the
 main checkout's `engine-quality` was fast-forwarded to `worktree-engine-quality-work`
-(4dbe6ac, 16 commits; `master` untouched). ShiftKey, which builds `../Pitchwing`
+(42e38a0, 16 commits; `master` untouched). ShiftKey, which builds `../Pitchwing`
 from source, was rebuilt with `cmd.exe /c build.bat Release` (existing
 `build\Release` configuration, no downloads; ShiftKey's own uncommitted working
 changes were built as they are, not edited) and its VST3 installed to the user's
@@ -1352,7 +1352,7 @@ presentable before the user pushes it to a private GitHub repository, and
 prepare the (untested) Apple Silicon build.
 
 Changes:
-- `master` fast-forwarded to `engine-quality` (c48abf4); branches
+- `master` fast-forwarded to `engine-quality` (b0f1925); branches
   `engine-quality` / `worktree-engine-quality-work` and the stale worktree
   removed. `.agents/` and `__pycache__/` are untracked and ignored.
 - Licence: GPL-3.0 (`LICENSE`); the bundled Signalsmith FFT stays MIT.
