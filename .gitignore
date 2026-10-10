@@ -160,3 +160,7 @@ vcpkg_installed/
 .codex/
 # Large user recordings stay out of git; see experiments/corpus/README.md.
 stems/
+
+# Agent skill copies and Python bytecode
+.agents/
+__pycache__/
