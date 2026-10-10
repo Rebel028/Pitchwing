@@ -1086,3 +1086,18 @@ flux ratios 0.87–0.98 (pass ±0.2). hf_junk +12 4.88 → 5.2× (+0.3 dB,
 cumulative +0.6 dB since step 5; unexplained, open). The split dyad's bends
 remain the weakest case (−17…−20 dB worst blocks): long-frame lag on moving
 partials.
+
+Listening renders of step 8 (not yet heard): `/tmp/pitchwing-listening-step8/`
+— 06 excerpt dry / step4 / step8 at −7 and −2 (44.1 kHz), chord DI 14–19 s
+dry / step4 / step8 at ±12. Objective check on the chord DI: wet/dry energy
+> 2 kHz unchanged (1.20/1.21 at +12, 0.38/0.39 at −12), +12 level −1.8 → −0.4 dB.
+The step-4 binary used for A/B is built from `git archive 84a8683` in
+`/tmp/pw-old-build`.
+
+Handoff point (session 3): work committed on `worktree-engine-quality-work`
+through step 8. Open, in priority order: (1) split dyads while bending
+(bend_model worst blocks −17…−20 dB; long-frame lag on moving partials);
+(2) hf_junk +12 4.5 → 5.2× synthetic (+0.6 dB, unexplained; real DI unchanged);
+(3) onset lag at +7 (0.78 ms, shift-caused, unchanged); (4) user listening of
+step 8; (5) profiling (sort, model fill), 44.1 kHz fixture runs, stereo checks,
+MSVC notes.
