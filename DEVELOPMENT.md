@@ -1087,7 +1087,7 @@ cumulative +0.6 dB since step 5; unexplained, open). The split dyad's bends
 remain the weakest case (−17…−20 dB worst blocks): long-frame lag on moving
 partials.
 
-Listening renders of step 8 (not yet heard): `/tmp/pitchwing-listening-step8/`
+Listening renders of step 8 (not yet heard): `/tmp/pitchwing-listening-step8/`; step 10 renders (same layout, `06-step10-*`, `chord-step10-*`) in `/tmp/pitchwing-listening-step10/`
 — 06 excerpt dry / step4 / step8 at −7 and −2 (44.1 kHz), chord DI 14–19 s
 dry / step4 / step8 at ±12. Objective check on the chord DI: wet/dry energy
 > 2 kHz unchanged (1.20/1.21 at +12, 0.38/0.39 at −12), +12 level −1.8 → −0.4 dB.
