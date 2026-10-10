@@ -1156,3 +1156,13 @@ build, see below); (3) inter-harmonic phase at onsets (θ=0 births for
 components born together, re-gauntlet against caveat 5); (4) dyad bends +7
 still −28 dB median; (5) hf_junk +0.6 dB, churn borderline events; (6) 44.1 kHz
 fixtures, stereo, MSVC.
+
+User listening (2026-10-10, after step 10): step 4 and step 8 renders sound much
+better than step 10; step 10 distorts pick attacks and clips (Audacity
+screenshot: full-scale spikes at attacks on 06 −7). Measured on the 06 excerpt:
+step 4 peak 1.05/0.94, step 8 0.93/0.88, **step 10 359/227 with 18337/16002
+samples above full scale** (−7/−2). Steps 9–10 have a transient blow-up on real
+material that the synthetic fixtures (stationary tones, smooth gates) missed;
+step 8 (71c0666) is the last build the user accepts. Next session: bisect steps
+5/9/10 on real material, add a real-material peak/attack gate, fix at the root
+(suspect unbounded component amplitudes from jointFit at onsets).
