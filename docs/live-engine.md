@@ -68,7 +68,7 @@ For sample rate $f_s$ the constructor chooses (`LiveEngine.cpp:144-149`)
 $$
 H = \lfloor 0.002\, f_s \rfloor,\qquad
 L = 4H,\qquad
-N = \operatorname{fastSizeAbove}\!\left(\left\lceil f_s \cdot \tfrac{2048}{48000} \right\rceil\right),
+N = \mathrm{fastSizeAbove}\!\left(\left\lceil f_s \cdot \tfrac{2048}{48000} \right\rceil\right),
 $$
 
 $$
@@ -137,7 +137,7 @@ peak with a credible neighbour (3-bin residual at most 30 %, centre at least
 1 bin) within 24 bins: the neighbours' pass-1 lobes are subtracted from the
 peak's three bins and four parabolic steps of spacing 0.15 bin restart from
 the pass-1 centre. Subtracting non-credible fits (DC-lobe sidelobes) broke pure
-DC at +7. Near $\omega = 0$ only $\operatorname{Re}(a)$ is determined; when
+DC at +7. Near $\omega = 0$ only $\mathrm{Re}(a)$ is determined; when
 the $2 \times 2$ determinant is at most $10^{-12}$ of its diagonal product, or
 the fitted amplitude exceeds four times the data, the fit falls back to that
 real-only solution (`LiveEngine.cpp:296-307`).
@@ -240,7 +240,7 @@ and attack-envelope ratios on the user's guitar excerpts; results are in
 Every entry adds into four shared spectra per channel instead of owning an
 inverse transform. The frame uses the mean control $c$ (see "Pitch control
 integration"), and each entry's translation $\delta = \omega c$ is split into
-the nearest whole-bin shift $s = \operatorname{round}(\delta N / 2\pi)$, an
+the nearest whole-bin shift $s = \mathrm{round}(\delta N / 2\pi)$, an
 exact circular shift of its bins, and a remainder
 
 $$
@@ -279,7 +279,7 @@ rotation of a tracked region is inherited from the previous frame's region
 nearest in frequency (`LiveEngine.cpp:852-883`):
 
 $$
-\theta_t = \operatorname{principal}\!\left(\theta_{t-H} + \tfrac{1}{2}\,(\omega_{t-H} + \omega_t) \sum_{k = t-H+1}^{t} u[k]\right).
+\theta_t = \mathrm{principal}\!\left(\theta_{t-H} + \tfrac{1}{2}\,(\omega_{t-H} + \omega_t) \sum_{k = t-H+1}^{t} u[k]\right).
 $$
 
 The first frame has no ancestor and starts at zero rotation. The frame's

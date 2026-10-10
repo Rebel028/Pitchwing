@@ -1432,3 +1432,7 @@ non-code line of the 17 files; all relative links resolve; README anchors
 
 Remaining: ShiftKey-side docs untouched; `DEVELOPMENT.md` and `PROJECT.md`
 keep their own conventions (record and scope, not rewritten).
+
+Fix (same day): GitHub rejected `\operatorname` ("The following macros are
+not allowed: operatorname"). Its four uses in `docs/live-engine.md` (lines 71,
+140, 243, 282) now use `\mathrm{...}`; no other markdown file used it.
