@@ -1,0 +1,11 @@
+WSL timing probe (pitchwing_live_probe timing), diagnostic only, not target-native.
+Build: step 7 (split + lobe ownership + decimated long analysis), Release, /tmp/pitchwing-build-wt2.
+rate block automation: mean_us p95_us deadline_misses/calls
+44100 32 F: 200 319 0/689     44100 64 F: 404 501 0/344    44100 128 F: 799 964 0/172
+48000 32 F: 176 272 0/750     48000 64 F: 358 452 0/375    48000 128 F: 712 870 0/187
+48000 64 T: 360 457 0/375
+96000 32 F: 172 303 28/1500   96000 32 T: 170 297 21/1500  96000 64 T: 345 495 4/750
+96000 128 F: 671 822 0/375    block 1 (all rates): ~4080-4210 misses, pre-existing
+Step 6 (undecimated 4n complex FFT per channel per hop): 48000 64 mean 421 p95 554;
+96000 32: 250/1500 misses (once per hop). Step 3 reference: 48000 64 mean 352 p95 437;
+96000 32: 10-22/1500 misses.

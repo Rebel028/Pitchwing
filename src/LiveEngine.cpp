@@ -19,7 +19,8 @@ constexpr double twoPi = 2.0 * pi;
 constexpr std::size_t maxRegions = 64;
 constexpr std::size_t lobeRange = 48;      // bins; |A| is below -65 dB beyond
 constexpr std::size_t lobeOversample = 64;
-constexpr std::size_t longFactor = 4;      // long analysis = 4 n; supplies omega only
+constexpr std::size_t longFactor = 4;      // long analysis spans 4 n; supplies omega only
+constexpr double decimatedRate = 6000.0;   // long analysis runs decimated to about this rate
 constexpr double longLimitHz = 700.0;      // long peaks are searched below this
 constexpr std::size_t maxSplit = 4;        // components per split region
 constexpr std::size_t maxEntries = maxRegions + 16;
@@ -50,6 +51,15 @@ double principal(double angle) noexcept {
         result += twoPi;
     }
     return result - pi;
+}
+
+// Largest divisor of the long span that keeps the decimated rate >= decimatedRate.
+std::size_t chooseDecimation(std::size_t span, double rate) noexcept {
+    auto best = std::size_t{1};
+    for (std::size_t factor = 2; static_cast<double>(factor) * decimatedRate <= rate; ++factor) {
+        best = span % factor == 0 ? factor : best;
+    }
+    return best;
 }
 
 // sum_{m < count} e^{j phi m}
@@ -138,25 +148,28 @@ struct LiveEngine::Impl {
           binWidth(twoPi / static_cast<double>(n)), inverseN(1.0 / static_cast<double>(n)),
           settleFloorOmega(twoPi * 100.0 / config.sampleRate),
           nLong(longFactor * n), longBinWidth(twoPi / static_cast<double>(nLong)),
-          longLimit(std::min(nLong / 2 - 2, static_cast<std::size_t>(
+          decimation(chooseDecimation(nLong, config.sampleRate)), nDecimated(nLong / decimation),
+          longLimit(std::min(nDecimated / 2 - 2, static_cast<std::size_t>(
               std::ceil(longLimitHz / config.sampleRate * static_cast<double>(nLong))))),
-          fft(n), longFft(nLong), analysis(n), longAnalysis(nLong), synthesis(length), transportSynthesis(length), dcWindow(length), controlHistory(length),
+          fft(n), longFft(nDecimated), analysis(n), longAnalysis(nDecimated), synthesis(length), transportSynthesis(length), dcWindow(length), controlHistory(length),
           frameControl(length), negativeSuffix(length), magnitude(bins),
-          binOmega(bins), peaks(bins), time(nLong), inverseSpectrum(n), inverseTime(n),
+          binOmega(bins), peaks(bins), time(n), inverseSpectrum(n), inverseTime(n),
           modulation(length), taper(n / 2), lobe(2 * lobeRange * lobeOversample + 1),
           longLobe(lobe.size()), longMagnitude(longLimit + 2), longPeaks(longLimit + 2),
           longOmega(longLimit + 2) {
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
-            history[channel].resize(nLong);
+            history[channel].resize(n);
+            decimated[channel].resize(nDecimated);
             output[channel].resize(ringSize);
             spectrum[channel].resize(n);
-            longSpectrum[channel].resize(nLong);
+            longSpectrum[channel].resize(nDecimated);
             model[channel].resize(bins);
         }
         // Both windows: sine rise to N - L/2, cosine fall over the last L/2.
-        auto makeWindow = [this](std::vector<double>& window, std::vector<Complex>& table, double& sum) {
+        auto makeWindow = [](std::vector<double>& window, std::vector<Complex>& table, double& sum,
+                             std::size_t fall) {
             const auto size = window.size();
-            const auto pivot = size - length / 2;
+            const auto pivot = size - fall;
             for (std::size_t index = 0; index < size; ++index) {
                 window[index] = index < pivot
                     ? std::sin(pi * static_cast<double>(index) / (2.0 * static_cast<double>(pivot)))
@@ -172,8 +185,41 @@ struct LiveEngine::Impl {
                 table[entry] = windowSpectrum(size, pivot, offset * twoPi / static_cast<double>(size));
             }
         };
-        makeWindow(analysis, lobe, analysisSum);
-        makeWindow(longAnalysis, longLobe, longSum);
+        makeWindow(analysis, lobe, analysisSum, length / 2);
+        makeWindow(longAnalysis, longLobe, longSum, std::max<std::size_t>(length / 2 / decimation, 1));
+        // Anti-alias FIR for the decimated long analysis (Kaiser, ~90 dB): only
+        // aliases landing below ~longLimitHz matter, so the transition runs from
+        // 750 Hz to rate/decimation - 750 Hz.
+        if (decimation == 1) {
+            fir.assign(1, 1.0);
+        } else {
+            const auto rate = config.sampleRate;
+            const auto transition = twoPi * (rate / static_cast<double>(decimation) - 1500.0) / rate;
+            const auto taps = 2 * static_cast<std::size_t>(std::ceil((90.0 - 8.0) / (2.285 * transition) / 2.0)) + 1;
+            const auto beta = 0.1102 * (90.0 - 8.7);
+            const auto cutoff = 0.5 / static_cast<double>(decimation);
+            auto bessel = [](double x) {  // I0
+                auto sum = 1.0, term = 1.0;
+                for (int k = 1; k < 50; ++k) {
+                    term *= (0.5 * x / k) * (0.5 * x / k);
+                    sum += term;
+                }
+                return sum;
+            };
+            fir.resize(taps);
+            const auto middle = 0.5 * static_cast<double>(taps - 1);
+            auto total = 0.0;
+            for (std::size_t i = 0; i < taps; ++i) {
+                const auto t = static_cast<double>(i) - middle;
+                const auto sinc = t == 0.0 ? 2.0 * cutoff : std::sin(twoPi * cutoff * t) / (pi * t);
+                const auto ratio = t / middle;
+                fir[i] = sinc * bessel(beta * std::sqrt(std::max(0.0, 1.0 - ratio * ratio))) / bessel(beta);
+                total += fir[i];
+            }
+            for (auto& tap : fir) {
+                tap /= total;
+            }
+        }
         for (std::size_t q = 0; q < length; ++q) {
             const auto product = (1.0 - std::cos(twoPi * static_cast<double>(q) /
                                                static_cast<double>(length))) / 4.0;
@@ -516,6 +562,11 @@ struct LiveEngine::Impl {
         std::fill(controlHistory.begin(), controlHistory.end(), 0.0);
         historyPosition = 0;
         controlPosition = 0;
+        decimationPhase = 0;
+        decimatedPosition = 0;
+        for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+            std::fill(decimated[channel].begin(), decimated[channel].end(), 0.0);
+        }
         outputPosition = 0;
         frameOutputStart = 0;
         hopPhase = 0;
@@ -589,8 +640,23 @@ struct LiveEngine::Impl {
     std::array<double, 2> processSample(double left, double right) noexcept {
         history[0][historyPosition] = left;
         history[1][historyPosition] = right;
-        if (++historyPosition == nLong) {
+        if (++historyPosition == n) {
             historyPosition = 0;
+        }
+        if (++decimationPhase == decimation) {
+            decimationPhase = 0;
+            for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                auto sum = 0.0;
+                auto source = historyPosition;
+                for (const auto tap : fir) {
+                    source = source == 0 ? n - 1 : source - 1;
+                    sum += tap * history[channel][source];
+                }
+                decimated[channel][decimatedPosition] = sum;
+            }
+            if (++decimatedPosition == nDecimated) {
+                decimatedPosition = 0;
+            }
         }
         controlHistory[controlPosition] = ratioMinusOne;
         if (++controlPosition == length) {
@@ -815,13 +881,10 @@ struct LiveEngine::Impl {
         }
         frameRatioMinusOne = frameControl[length - 1];
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
-            auto source = historyPosition + nLong - n;
-            if (source >= nLong) {
-                source -= nLong;
-            }
+            auto source = historyPosition;
             for (std::size_t index = 0; index < n; ++index) {
                 time[index] = Complex{history[channel][source] * analysis[index], 0.0};
-                if (++source == nLong) {
+                if (++source == n) {
                     source = 0;
                 }
             }
@@ -829,10 +892,10 @@ struct LiveEngine::Impl {
             spectrum[channel][0].imag(0.0);
             spectrum[channel][n / 2].imag(0.0);
             if (!unitySupport) {
-                source = historyPosition;
-                for (std::size_t index = 0; index < nLong; ++index) {
-                    time[index] = Complex{history[channel][source] * longAnalysis[index], 0.0};
-                    if (++source == nLong) {
+                source = decimatedPosition;
+                for (std::size_t index = 0; index < nDecimated; ++index) {
+                    time[index] = Complex{decimated[channel][source] * longAnalysis[index], 0.0};
+                    if (++source == nDecimated) {
                         source = 0;
                     }
                 }
@@ -846,9 +909,9 @@ struct LiveEngine::Impl {
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             auto destination = frameOutputStart;
             const auto dc = (spectrum[channel][0].real() - binZeroShare[channel]) / analysisSum;
-            auto source = historyPosition + nLong - length;
-            if (source >= nLong) {
-                source -= nLong;
+            auto source = historyPosition + n - length;
+            if (source >= n) {
+                source -= n;
             }
             for (std::size_t q = 0; q < length; ++q) {
                 output[channel][destination] += exactUnity
@@ -857,7 +920,7 @@ struct LiveEngine::Impl {
                 if (++destination == ringSize) {
                     destination = 0;
                 }
-                if (++source == nLong) {
+                if (++source == n) {
                     source = 0;
                 }
             }
@@ -966,6 +1029,8 @@ struct LiveEngine::Impl {
     const double settleFloorOmega;
     const std::size_t nLong;
     const double longBinWidth;
+    const std::size_t decimation;
+    const std::size_t nDecimated;
     const std::size_t longLimit;
     Transform fft;
     Transform longFft;
@@ -990,6 +1055,10 @@ struct LiveEngine::Impl {
     std::vector<double> taper;
     std::vector<Complex> lobe;
     std::vector<Complex> longLobe;
+    std::vector<double> fir;
+    std::array<std::vector<double>, 2> decimated;
+    std::size_t decimationPhase = 0;
+    std::size_t decimatedPosition = 0;
     std::array<std::vector<Complex>, 2> longSpectrum;
     std::vector<double> longMagnitude;
     std::vector<std::size_t> longPeaks;

@@ -1045,3 +1045,17 @@ bend_model single E2 −19 → −23…−25 dB, dyad holds −52 → −56 dB, 
 (informational), churn, unity, warble unchanged or better. Regression:
 hf_junk wet/dry > 2 kHz at +12 4.49 → 4.88× (+0.4 dB; unexplained). The
 remaining −23 dB single-note residual is not yet analysed.
+
+Chord onset and CPU (step 7). Window-study Q3 chord-onset fixture, old build vs
+step 6 ([docs/results/2026-10-10-chord-onset-step6.json](docs/results/2026-10-10-chord-onset-step6.json)):
+unchanged (+7 mean 50 % lag 0.78 ms, first-5 ms energy −2.2 dB) — the split adds
+no bloom since nothing is transported from the long frame. WSL timing probe
+(diagnostic): the undecimated long FFT (two complex FFT(4n) per hop) raised 48 kHz
+block-64 mean 352 → 421 µs and 96 kHz block-32 misses 10–22 → 250/1500 (once
+per hop). The long analysis now runs on a decimated copy (factor 8 at 48 kHz,
+polyphase Kaiser FIR computed every M input samples, FFT 4n/M points, same bin
+spacing): 48 kHz block 64 358 µs, 96 kHz block 32 21–28 misses
+([docs/results/2026-10-10-timing-step7.txt](docs/results/2026-10-10-timing-step7.txt)).
+Quality equivalent to step 6 ([matrix](docs/results/2026-10-10-live-step7-decimated-full.json),
+[fixtures](docs/results/2026-10-10-fixtures-step7-decimated.json); only warble
+−7 IF p-p 8.5 → 12.7 c, below its 17.8 c static two-tone reference).

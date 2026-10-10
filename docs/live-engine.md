@@ -111,8 +111,13 @@ from −1.1…−1.5 dB to −0.7…−0.9 dB (E2: −0.23 dB).
 
 Unresolved low partials are split, not re-analysed
 (`docs/quality/2026-10-10-multires-gauntlet.md`). A second past-heavy analysis
-of `4n` samples (same window construction, closed-form window spectrum) runs
-whenever the frame is not exact unity and supplies frequencies only; it is
+spanning `4n` samples runs whenever the frame is not exact unity and supplies
+frequencies only. It is computed on a decimated copy of the input (largest
+divisor of `4n` keeping ≥ 6 kHz, 8 at 48 kHz; Kaiser anti-alias FIR, ~90 dB,
+transition 750 Hz to rate/M − 750 Hz since only aliases below the 700 Hz search
+limit matter), so its FFT is `4n/M` points with the same bin spacing as a full
+`4n` frame; the window has the same construction with a fall of `L/(2M)`
+samples and its own closed-form lobe table; it is
 never transported, so latency, bloom and the short frame's time resolution are
 unchanged. Its peaks below 700 Hz (floor `1e-4` re the short maximum scaled by
 the window sums, skirt peaks dropped with its own lobe table) are counted per
