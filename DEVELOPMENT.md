@@ -1344,3 +1344,56 @@ the gate) landed. Open: (1) merge/move of the engine source into ShiftKey
 the hop (96 kHz small-block misses), cheaper fitPeaks; (4) earlier priorities
 (inter-harmonic phase at onsets, dyad bends +7, hf_junk, split-count flicker on
 real strums, MSVC C4723).
+
+## 2026-10-10 — Session 5: merge to master, README, licence, macOS guide
+
+Purpose: close the engine-quality programme into `master`, make the repository
+presentable before the user pushes it to a private GitHub repository, and
+prepare the (untested) Apple Silicon build.
+
+Changes:
+- `master` fast-forwarded to `engine-quality` (c48abf4); branches
+  `engine-quality` / `worktree-engine-quality-work` and the stale worktree
+  removed. `.agents/` and `__pycache__/` are untracked and ignored.
+- Licence: GPL-3.0 (`LICENSE`); the bundled Signalsmith FFT stays MIT.
+  Recorded in `PROJECT.md` and the README.
+- README: "How it works" (one screen, links to the maths in
+  `docs/live-engine.md` and `docs/native-core.md`), figures, project structure
+  table, licence, link to the macOS guide. Hand-drawn block diagram
+  `docs/figures/pipeline.svg`; three PNGs from a real render
+  (`scripts/readme_figures.py`: `stems/chord.wav` 14–17 s, +7 semitones,
+  44.1 kHz, block 32, latency 439 trimmed; waveform 145 KB, spectrum 93 KB,
+  spectrogram 108 KB at 150 dpi). The script asserts output length, finite
+  samples, peak < 1.25 and file size ≤ 200 KB; intermediates in
+  `/tmp/pitchwing-figures`.
+- `docs/apple-silicon.md`: build-and-verify guide for the user's Mac
+  (macOS 26.5.1, Xcode 26.2, no tools yet). Not executed anywhere; marked so.
+
+Decisions: no CMake option for `SIGNALSMITH_USE_ACCELERATE`, because the
+platform header it includes (`platform/fft-accelerate.h`) is not vendored and
+the parity evidence covers the portable FFT only. No denormal handling exists
+or is documented as required (`src/`/`include/` contain none). The README
+build section was left as is (`/tmp/pitchwing-build` is current).
+
+ShiftKey (separate repository, separate agents, same day): makes Pitchwing an
+optional auto-detected dependency and its default engine, and gains CI plus
+macOS preparation. The user pushes Pitchwing to GitHub themselves.
+
+Findings: the 14–17 s chord excerpt contains a wide-band noise burst at
+15.0–15.6 s (in the source, cf. `docs/quality/2026-10-10-code-caveats.md`);
+the spectrum frame is therefore taken at 16.2 s. Harmonics at 93/140/187/280 Hz
+land at 140/210/280/420 Hz (ratio 1.498) with no visible unshifted residue
+above −80 dBFS in that frame; the shifted spectrogram shows a faint noise
+floor around 1 kHz between 0.2–1.0 s that the input lacks (not analysed).
+
+Validation: Release build in `/tmp/pitchwing-build` (gcc, approved CMake);
+`ctest` 2/2 pass; `scripts/readme_figures.py` reruns cleanly from the repo
+root; all README relative links resolve. The SVG was rasterised once with
+ImageMagick to check layout (not committed).
+
+Remaining work / deferred: (1) sound-quality analysis of the `test2-*` renders
+in `/mnt/e/Reaper render/shiftkey test/` against the Neural DSP references;
+(2) run `docs/apple-silicon.md` on the Mac and record results, then a macOS CI
+job; (3) `FetchContent` of Pitchwing from the private repository in ShiftKey;
+(4) the session-4 open items (spread `prepareFrame` across the hop, cheaper
+`fitPeaks`, inter-harmonic phase, dyad bends +7, hf_junk, split-count flicker).
