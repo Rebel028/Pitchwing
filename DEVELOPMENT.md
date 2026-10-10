@@ -1238,3 +1238,14 @@ churn (not measured; a stability metric is needed if listening finds roughness);
 (3) the priorities of the session-3 handoff (two-phase prepareFrame, cheaper
 splitRegion/jointFit, inter-harmonic phase, dyad bends +7, hf_junk, 44.1 kHz
 fixtures/stereo/MSVC).
+
+Merge and ShiftKey rebuild for live testing (user request, 2026-10-10): the
+main checkout's `engine-quality` was fast-forwarded to `worktree-engine-quality-work`
+(4dbe6ac, 16 commits; `master` untouched). ShiftKey, which builds `../Pitchwing`
+from source, was rebuilt with `cmd.exe /c build.bat Release` (existing
+`build\Release` configuration, no downloads; ShiftKey's own uncommitted working
+changes were built as they are, not edited) and its VST3 installed to the user's
+VST3 folder. MSVC 14.29 warnings in the engine: C4456 (`step` shadowed in the
+component oscillator, `src/LiveEngine.cpp` ~1101, harmless) and C4723 (possible
+division by zero inside `<complex>`, optimizer-reported; source not traced).
+The live test in the host is the user's.
