@@ -1166,3 +1166,75 @@ material that the synthetic fixtures (stationary tones, smooth gates) missed;
 step 8 (71c0666) is the last build the user accepts. Next session: bisect steps
 5/9/10 on real material, add a real-material peak/attack gate, fix at the root
 (suspect unbounded component amplitudes from jointFit at onsets).
+
+## 2026-10-10 — Session 4: step-9/10 transient blow-up on real guitar (step 11)
+
+Purpose: fix the clipping the user heard in step 10 (above) and add a
+real-material gate so synthetic-only validation cannot miss it again.
+
+Bisect (Release builds from `git archive` in `/tmp/pw-s4/b-*`, 06 excerpt at
+−7/−2): step 8 (71c0666) peak 0.93/0.88; step 9 (2fc49e1) 381/225, 18277/16145
+samples > 1; step 10 (893426f) 359/227. The defect arrives with step 9.
+
+Root cause (instrumented copy, `PW_DEBUG` print after `jointFit` in
+`splitRegion`, not committed): on the real strum every frame splits 0–1.5 kHz
+(short bins 0–36) into 21–32 components spaced 0.35–0.5 short bin, the count
+flickering frame to frame. The short-frame amplitude solve (ridge 1e-12·trace)
+fits these frames (residual 1–6 %) with cancelling amplitudes: max
+`|a|·|A(0)|` over the group's largest bin |X| has median 1.1, p99 232, max 7483.
+Each component is transported with its own shift (oscillator, step 9), so the
+cancellation fails in the output. Step 8 capped splits at 4 components and
+never split these groups. A test bound (reject the split above 2× / 4× data)
+removed the blow-up (peak 0.88 / 1.16), confirming the mechanism.
+
+Real-material gate (new, `scripts/real_material_gate.py`; run it for every
+future step together with evaluate.py full matrix, quality_fixtures.py,
+chord_fit.py, tests and the WSL timing probe): decodes `stems/06.wav` ch0
+9.2–15.7 s (−7/−2) and `stems/chord.wav` whole (±12), renders each `--render`
+binary, reports peak, samples > 1, RMS ratio, and the ratio of 5 ms wet blocks
+to the dry maximum within ±25 ms (a per-block ratio was dominated by low-note
+waveform troughs: 2–3 even for steps 4/8). Limits: peak ≤ 1.25× dry,
+envelope max ≤ 2, p99 ≤ 1.5; steps 4 and 8 (the builds the user accepted)
+pass with ≤ 1.47 / 1.31, step 10 fails with peaks 26–256.
+
+Candidates (all on the step-10 code, gate + chord_fit + warble):
+
+| Variant | 06 peak −7/−2 | env max | chord fits | warble −7 IF p-p / sidebands |
+|---|---|---|---|---|
+| step 10 | 165/256 | 1454 | 0.89–1.0 | 5.0 c / −106.5 dB |
+| reject split > 4× | 1.04/1.31 | 4.9 (old metric) | — | — |
+| reject split > 2× | 0.89/0.97 | — | 0.90–1.0 | — |
+| re-solve with ridge when > 2× | 0.91/0.89 | 1.96 | — | 5.0 / −106.5 |
+| ridge 1e-3 | 1.06/0.82 | — | — | — |
+| **ridge 1e-2 always** | 0.91/0.80 | 1.31 | 0.89–1.0 | 13.4 / −72.8 |
+| ridge 1e-1 | 0.91/0.79 | — | 0.84–1.0 (−0.06) | — |
+
+Decision: ridge 1 % of the mean Gram diagonal, always (one line, bounds
+`|a|·|A(0)|` by ~5× the data for any group, no split on/off flicker; the shrunk
+remainder stays in the residual cells). The re-solve-on-bound variant keeps the
+warble exactly but leaves a 2× (+6 dB) 5 ms envelope overshoot at 4.54 s on
+06 −2, where amplitudes are only 1.0–1.7× the data. The warble cost (IF p-p 13.4 c)
+stays below the dyad's 17.8 c static two-tone reference (step 7: 12.7 c).
+
+Results ([gate](docs/results/2026-10-10-real-gate-step11.json),
+[matrix](docs/results/2026-10-10-live-step11-ridge-full.json),
+[fixtures](docs/results/2026-10-10-fixtures-step11-ridge.json),
+[timing](docs/results/2026-10-10-timing-step11.txt), WSL diagnostic): gate
+passes (06 peak 0.91/0.80 vs step 8 0.92/0.73, 0 samples > 1; chord ±12 peak
+0.94/0.84 vs step 8 1.11/0.89; envelope max ≤ 1.37). chord_fit unchanged
+(0.89–1.0). Matrix equivalent to step 10 except low_chord_crossfade envelope
+gain 0.955/1.004 → 0.931/0.973 (late fit unchanged 0.94/0.95). Fixtures vs
+step 10: warble −7 as above (+7 2.1 → 2.4 c, −91 → −68 dB sidebands), bend_model
+dyad +7 hold −56.9 → −51 dB, churn borderline event at +5 −40 dBFS gone. Timing
+equal to step 10. Tests green.
+
+Listening renders (latency-trimmed, aligned with dry, float32):
+`/tmp/pitchwing-listening-step11/` — 06 dry / step 8 / step 11 at −7 and −2,
+chord DI 14–19 s dry / step 8 / step 11 at ±12. Awaiting the user.
+
+Open: (1) user listening of step 11 vs step 8; (2) the real strum's split
+count flickers 21–32 per frame — component identity and inherited phases may
+churn (not measured; a stability metric is needed if listening finds roughness);
+(3) the priorities of the session-3 handoff (two-phase prepareFrame, cheaper
+splitRegion/jointFit, inter-harmonic phase, dyad bends +7, hf_junk, 44.1 kHz
+fixtures/stereo/MSVC).

@@ -180,6 +180,14 @@ IFFT, but only when that residual exceeds −30 dB of the cell's energy
 (`residualFloor`); steady partials stay oscillator-only. Below the floor the
 residual is dropped (not exact; noted as a shortcut in the code).
 
+Amplitude ridge (step 11). On real guitar attacks a group holds 21–32
+components 0.35–0.5 short bin apart across 0–1.5 kHz; the short-frame solve with
+the 1e-12 ridge then returned cancelling amplitudes up to 7000× the group's
+largest bin, which the components' different shifts no longer cancel (step 10:
+peaks 359× full scale). `jointFit` now adds 1 % of the mean Gram diagonal,
+bounding `|a|·|A(0)|` to about 5× the data; the shrunk remainder stays in the
+residual cells. Checked by `scripts/real_material_gate.py`.
+
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
 channel relations without mixing samples between channels. A silent channel

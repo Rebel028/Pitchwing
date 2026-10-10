@@ -1,0 +1,10 @@
+WSL timing probe, step 11 (jointFit ridge 1 % of mean diagonal), automation off, diagnostic only (pitchwing_live_probe timing).
+44100 32 mean 322 p95 601 miss 0 / 689
+44100 64 mean 645 p95 858 miss 0 / 344
+44100 128 mean 1299 p95 1675 miss 0 / 172
+48000 32 mean 284 p95 488 miss 0 / 750
+48000 64 mean 566 p95 753 miss 0 / 375
+48000 128 mean 1138 p95 1459 miss 0 / 187
+96000 32 mean 249 p95 480 miss 261 / 1500
+96000 64 mean 503 p95 732 miss 102 / 750
+96000 128 mean 1000 p95 1290 miss 9 / 375

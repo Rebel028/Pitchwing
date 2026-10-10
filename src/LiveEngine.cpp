@@ -515,10 +515,16 @@ struct LiveEngine::Impl {
             }
             trace += gram[u][u];
         }
+        // Ridge at 1 % of the mean diagonal: a guitar attack chains up to 32
+        // components 0.35-0.45 bin apart, the plain solve then fits the frame
+        // with cancelling amplitudes up to 7000x the data, and the components'
+        // different shifts undo the cancellation (step 10: 359x full scale).
+        // The ridge bounds |a| * |A| by 5x the data; the shrunk remainder stays
+        // in the residual cells.
         for (std::size_t u = 0; u < dim; ++u) {
-            gram[u][u] += 1e-12 * trace;
+            gram[u][u] += 0.01 * trace / static_cast<double>(dim);
         }
-        // Cholesky factor in place (the ridge keeps it positive definite).
+        // Cholesky factor in place (positive definite with the ridge).
         for (std::size_t u = 0; u < dim; ++u) {
             for (std::size_t v = 0; v <= u; ++v) {
                 auto sum = gram[u][v];

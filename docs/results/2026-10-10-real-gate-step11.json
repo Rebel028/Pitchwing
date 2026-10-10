@@ -1,0 +1,88 @@
+{
+ "latency": 439,
+ "peak_limit": 1.25,
+ "envelope_limit": 2.0,
+ "envelope_p99_limit": 1.5,
+ "cases": {
+  "step8/06/-7": {
+   "peak": 0.9186704711709158,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 0,
+   "rms_ratio": 0.9333441729399891,
+   "envelope_ratio_max": 1.278350857000196,
+   "envelope_ratio_p99": 1.0242104169313724,
+   "envelope_ratio_max_at_s": 1.746031746031746,
+   "pass": true
+  },
+  "step8/06/-2": {
+   "peak": 0.7307490720317961,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 0,
+   "rms_ratio": 0.9268515898992955,
+   "envelope_ratio_max": 1.1366908524031951,
+   "envelope_ratio_p99": 1.054224593524345,
+   "envelope_ratio_max_at_s": 3.2077097505668934,
+   "pass": true
+  },
+  "step11/06/-7": {
+   "peak": 0.912453820901543,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 0,
+   "rms_ratio": 0.9621026118045367,
+   "envelope_ratio_max": 1.2637206778526453,
+   "envelope_ratio_p99": 1.02340427038742,
+   "envelope_ratio_max_at_s": 1.1473922902494331,
+   "pass": true
+  },
+  "step11/06/-2": {
+   "peak": 0.7947350568325232,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 0,
+   "rms_ratio": 0.9742913393969554,
+   "envelope_ratio_max": 1.3101112075776868,
+   "envelope_ratio_p99": 1.0983973267926832,
+   "envelope_ratio_max_at_s": 4.449886621315192,
+   "pass": true
+  },
+  "step8/chord/+12": {
+   "peak": 1.1064424187479853,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 15,
+   "rms_ratio": 0.9858842887070118,
+   "envelope_ratio_max": 1.4651622661706942,
+   "envelope_ratio_p99": 1.3106309037813242,
+   "envelope_ratio_max_at_s": 9.722902494331066,
+   "pass": true
+  },
+  "step8/chord/-12": {
+   "peak": 0.8935878045939047,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 0,
+   "rms_ratio": 1.00503032399721,
+   "envelope_ratio_max": 1.3140216900082242,
+   "envelope_ratio_p99": 1.1936289433341178,
+   "envelope_ratio_max_at_s": 9.41859410430839,
+   "pass": true
+  },
+  "step11/chord/+12": {
+   "peak": 0.9436805901185283,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 0,
+   "rms_ratio": 0.9851283250061936,
+   "envelope_ratio_max": 1.373752432886257,
+   "envelope_ratio_p99": 1.2832287761934211,
+   "envelope_ratio_max_at_s": 9.722902494331066,
+   "pass": true
+  },
+  "step11/chord/-12": {
+   "peak": 0.840809584223772,
+   "dry_peak": 0.9999998807907104,
+   "over_full_scale": 0,
+   "rms_ratio": 1.0027344446666202,
+   "envelope_ratio_max": 1.2188755568181437,
+   "envelope_ratio_p99": 1.1658477802577258,
+   "envelope_ratio_max_at_s": 11.593650793650793,
+   "pass": true
+  }
+ }
+}
