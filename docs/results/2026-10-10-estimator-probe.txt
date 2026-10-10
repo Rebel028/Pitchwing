@@ -1,0 +1,11 @@
+window |A| dB at bin offsets: 1:-11 2:-18 3:-22 4:-25 6:-30 8:-36 12:-47 16:-51 24:-59
+B0   bin= 1.317 par: mean -51.56 pp 406.66  if: mean -15.56 pp 681.38  fit: mean  -0.22 pp   2.01
+E1   bin= 1.758 par: mean  -2.38 pp 181.80  if: mean  -6.06 pp 433.24  fit: mean  -0.02 pp   1.56
+F#1  bin= 1.973 par: mean  -4.91 pp 144.82  if: mean  -4.75 pp 375.91  fit: mean  -0.06 pp   1.19
+E2   bin= 3.516 par: mean  +3.25 pp  29.31  if: mean -16.04 pp 152.02  fit: mean  +0.03 pp   0.62
+A2   bin= 4.693 par: mean  +3.16 pp   9.38  if: mean  -0.12 pp  46.82  fit: mean  +0.02 pp   0.27
+E3   bin= 7.032 par: mean  +0.69 pp   1.94  if: mean  -0.00 pp   9.57  fit: mean  -0.01 pp   0.13
+A4   bin=18.773 par: mean  -0.28 pp   0.12  if: mean  -0.00 pp   0.49  fit: mean  -0.00 pp   0.05
+-- with 2nd harmonic at -6 dB (E2 + 164.8 Hz) and E2+G#2 dyad
+E2+h2 par: mean  +4.19 pp  78.78  if: mean  -8.85 pp 234.20  fit: mean  -1.42 pp  30.17
+E2+G#2 par: mean +129.42 pp 1072.73  if: mean +171.03 pp 619.02  fit: mean +132.57 pp 871.68

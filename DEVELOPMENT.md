@@ -811,3 +811,61 @@ region boundaries / direct-oscillator synthesis / gated tracking / DC policy /
 low-band zoom estimator); fix one mechanism at a time with before/after runs of
 `evaluate.py --native` and the preserved baseline JSON; keep the `06/minus7`
 excerpt as the listening reference and re-render it after each change.
+
+## 2026-10-10 — Quality programme, session 2: confirmation, gauntlet, estimator
+
+Continuation of the previous entry on `engine-quality` (worked in the git
+worktree `worktree-engine-quality-work`, build in `/tmp/pitchwing-build-wt`;
+the worktree binary reproduces the quick baseline JSON exactly).
+
+Estimator finding (verified numerically, `experiments/quality/estimator_probe.py`
+and `estimator_fit.py`, output in
+[docs/results/2026-10-10-estimator-probe.txt](docs/results/2026-10-10-estimator-probe.txt)):
+replicating `findRegions` on a stationary tone shows the cross-frame
+instantaneous-frequency estimate (`LiveEngine.cpp` 289–307) is corrupted by the
+negative-frequency image of the real input (and by DC/leakage): per-frame
+estimates wobble 152 cents peak-to-peak at E2 (bin 3.5), 376–433 at F#1/E1,
+681 at B0, with long-run means of −16 (E2), −5, −6, −16 cents. The E2 mean
+predicts output errors of +8.0 (−7 st) / −5.3 (+7 st) cents via
+`(r−1)/r`; the baseline measured +6.96 / −4.66. The parabola fallback is as
+bad (29–407 c pp). So the engine's low regions carry a per-hop frequency
+jitter of tens of cents times |r−1| — a steady FM source on every low note,
+independent of the dyad problem. The analysis window's sidelobes are high
+(−18 dB at 2 bins, −36 at 8, −47 at 12) because of its 192-sample fall.
+A 3-bin complex lobe fit against the tabulated window spectrum with the image
+term included (`X[k] = a·A(ω_k−ω) + ā·A(ω_k+ω)`, 1-D search over ω, linear
+solve for `a`) gives |bias| ≤ 0.2 cents and ≤ 2 cents pp on all isolated
+tones B0–A4; with a −6 dB second harmonic 3.5 bins away it is 30 c pp (IF:
+234); on an unresolved dyad (E2+G#2) every estimator is meaningless, as
+expected. This is candidate G of the research options, now with evidence; it
+replaces the IF estimate rather than refining it.
+
+Fixture confirmation run (validation subagent; `scripts/quality_fixtures.py`,
+[docs/results/2026-10-10-fixtures.json](docs/results/2026-10-10-fixtures.json),
+[docs/quality/2026-10-10-fixture-results.md](docs/quality/2026-10-10-fixture-results.md),
+32 renders, 48 kHz, ~40 s): unity-transition dip CONFIRMED (+3→0: per-partial
+dips to −15 dB at 1 kHz, −5 dB at 220 Hz, depth phase-dependent, 9/10 fail;
+0→+3 has no dip); low-dyad warble/spacing CONFIRMED (E2+G#2 output spacing
+stays 21.42 Hz at ±7 instead of 14.3/32.1, each line 3.5–5 Hz off, outer beat
+sidebands −24…−30 dB); DC CONFIRMED (0.05 DC: hop line −60.8 dBFS, mean gain
+0.725; E1 unshifted ghost −17.9 dB re the shifted line at ±12 — relevant to the
+user's F#1/G#1 tunings); churn crackle REFUTED at −60/−40 dBFS noise (flux
+ratio 0.87–0.96, no extra events); sub-zero toggling clicks REFUTED, gain loss
+confirmed (−0.9 dB at E2 −12); hop-rate sidebands at −41…−47 dB exist for all
+four tone pairs but are spacing-independent (not partition ringing); the
+spacing-dependent artefact is the neighbour's skirt translated by the wrong δ:
+−19 dB lines at f ± (f2−f1)(r−1) for a 3.5-bin pair, < −43 dB at 30 bins. +12
+on a clean synthetic chord gives 4.5× wet/dry > 2 kHz, so ~5× of the real DI's
+21.8× is unexplained (noise floor/clicks translated up).
+
+Gauntlet (four reviewers, condensed with synthesis in
+[docs/quality/2026-10-10-gauntlet.md](docs/quality/2026-10-10-gauntlet.md)):
+soft cos² region masks dropped (steady |w+(1−w)e^{jΔθ}| notch, split-lobe
+skirts, degenerate at 2–3.5 bin spacings); gated ancestry with θ=0 births
+dropped (caveat-5 dips at beat rate) in favour of bin-ownership ancestry;
+no HPF in the engine (exact unity contract); flux-onset re-anchoring deferred
+(band-scoped global reset, lag is window-caused); parametric low band
+re-scoped to a multi-resolution evaluation; direct-oscillator synthesis dropped
+(no CPU win below ~28 regions); image-aware estimator adopted. New order:
+unity-transition fix → estimator + ownership ancestry → DC gain/fold/bin-0
+ghost → window-tail study → multi-resolution low band → profiling.
