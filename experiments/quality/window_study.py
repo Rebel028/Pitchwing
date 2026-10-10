@@ -70,7 +70,7 @@ def model(x, u, A, S, regions, dc=True, ideal_hz=None, amp=0.3):
         out = np.zeros(L)
         if ideal_hz is not None:  # hypothesis (a): the windowed frame as a pure complex exponential
             w = 2 * PI * ideal_hz / FS
-            out = S * np.real(amp * A[N - L:] * np.exp(1j * (w * n_abs - PI / 2)) * np.exp(1j * w * u * n_abs))
+            out = S * np.real(amp * A[N - L:] * np.exp(1j * (w * (1 + u) * (n_abs - N) - PI / 2)))
         else:
             for lo, hi, fr in regions:
                 Z = np.zeros(N, complex)
@@ -164,7 +164,7 @@ def q2():
     rows = []
     hann4 = (1 - np.cos(2 * PI * np.arange(L) / L)) / 4
     pad = 16
-    x1k, x300 = tone(1000, dur=2.5), tone(300, dur=2.5)
+    x1k, x300 = tone(1000), tone(300)
     for shape in ('cos', 'cos02', 'hann', 'blackman'):
         for F in (192, 256, 320, 384):
             A = window(F, shape); S = synthesis(A)

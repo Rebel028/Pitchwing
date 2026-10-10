@@ -17,7 +17,7 @@ namespace {
 constexpr double pi = 3.141592653589793238462643383279502884;
 constexpr double twoPi = 2.0 * pi;
 constexpr std::size_t maxRegions = 64;
-constexpr std::size_t lobeRange = 24;      // bins; |A| is below -59 dB beyond
+constexpr std::size_t lobeRange = 48;      // bins; |A| is below -65 dB beyond
 constexpr std::size_t lobeOversample = 64;
 using Complex = std::complex<double>;
 using Transform = signalsmith::linear::SplitFFT<double>;
@@ -212,6 +212,42 @@ struct LiveEngine::Impl {
         return cost;
     }
 
+    // Window-skirt ripples of a strong partial are local maxima above the 1e-4
+    // floor; as regions they slice that partial's own skirt and re-emit it with
+    // another translation (hop-rate combs at about -52 dB, window study Q1).
+    // Keep a peak only if it exceeds twice the skirt predicted from the nearest
+    // larger peak on each side.
+    std::size_t dropSkirtPeaks(std::size_t count) noexcept {
+        const auto scale = 1.0 / std::abs(lobe[lobeRange * lobeOversample]);
+        auto predicted = [&](std::size_t from, std::size_t at) {
+            const auto distance = std::abs(static_cast<double>(at) - static_cast<double>(from));
+            const auto image = static_cast<double>(at + from);
+            return magnitude[from] * scale * (std::abs(lobeAt(std::max(distance - 0.5, 0.0))) +
+                                              std::abs(lobeAt(std::max(image - 0.5, 0.0))));
+        };
+        auto kept = std::size_t{0};
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto bin = peaks[i];
+            auto skirt = 0.0;
+            for (auto j = i; j-- > 0;) {
+                if (magnitude[peaks[j]] > magnitude[bin]) {
+                    skirt += predicted(peaks[j], bin);
+                    break;
+                }
+            }
+            for (auto j = i + 1; j < count; ++j) {
+                if (magnitude[peaks[j]] > magnitude[bin]) {
+                    skirt += predicted(peaks[j], bin);
+                    break;
+                }
+            }
+            if (magnitude[bin] >= 2.0 * skirt) {
+                peaks[kept++] = bin;
+            }
+        }
+        return kept;
+    }
+
     double fitOmega(std::size_t peak) noexcept {
         // The range reaches 0 so a DC lobe fits as an untranslated w = 0 tone.
         auto low = peak <= 1 ? 0.0 : static_cast<double>(peak) - 0.6;
@@ -381,6 +417,7 @@ struct LiveEngine::Impl {
                 }
             }
         }
+        count = dropSkirtPeaks(count);
         if (count == 0) {
             peaks[count++] = largestBin;
         }

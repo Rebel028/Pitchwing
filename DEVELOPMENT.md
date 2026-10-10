@@ -925,3 +925,51 @@ target-native result), old frozen build vs new: 48 kHz block 64 mean 302 →
 same order); 96 kHz block 1 misses unchanged (~4210/48000, pre-existing). The
 frequency fit costs 65 cost evaluations per region per hop; if the native
 budget needs it, reduce the 5 grid rounds to 4 (resolution 0.0056 bin) first.
+
+Window-tail / hop-line / onset-lag study (subagent;
+`experiments/quality/window_study.py`,
+[docs/results/2026-10-10-window-study.json](docs/results/2026-10-10-window-study.json),
+[docs/quality/2026-10-10-window-study.md](docs/quality/2026-10-10-window-study.md),
+renders on the pre-estimator build, re-measured after): the spacing-independent
+hop-rate lines (−52 dB at f−500 Hz for a lone 1 kHz tone, any shift) come from
+a spurious second region on the tone's own window skirt (a −62 dB local maximum
+at bin 6, above the 1e-4 floor) whose slice of the skirt is re-emitted with its
+own translation; a NumPy replay with the engine's peak picking reproduces every
+render to 0.5 dB, a single-region model gives −81 dB. Partition-of-unity error,
+ω jitter and the Nyquist taper are refuted. Window shape is not the lever: no
+tail (cos/Hann/Blackman, F = 192…384) moves the near sidelobes (−16/−18 dB at
+1.75/2 bins, set by the long sine rise) by more than 1 dB; cos F = 320/384
+lowers the 3.5–10 bin skirt by 4–9 dB at the cost of 1/A up to 245 and a
+spurious-region-prone tail; Hann/Blackman falls are unusable (synthesis window
+ends at its maximum). Onset lag: on the region path at 0.0001 st the 50 %
+crossing is within 0.04 ms of the input and 90 %-energy within 0.3 ms; at +7
+it is +0.73 ms / +3.1 ms with −2.7 dB first-5 ms energy — the lag is caused by
+the shift (region-dependent rotation dispersing the transient), not by the
+window or region bandpass.
+
+Skirt-peak rejection (`dropSkirtPeaks`, lobe table widened to ±48 bins): a
+local maximum is kept only if it exceeds twice the skirt predicted from the
+nearest larger peak on each side (window table at distance − 0.5 bin, image
+included). Lone 1 kHz tone at +7/+12/−2/−7: f−500 Hz line −51.7 → −81.6 dB,
+non-line residual −51.5 → −73 dB (the single-region model value); the f−1000 Hz
+line stays at −70 dB (unexplained, model −79); 300 Hz residual −48 dB unchanged.
+Quick matrix: tones/DC/dyads unchanged; B0 gate −7 late fit 0.77 → 0.85 (back
+to baseline), chord crossfade +7 late fit 0.14 → 0.11 and envelope lag 0 →
+−11 ms (metric sensitive to the fitted gain; nrmse unchanged 0.31). Fixtures
+`hop_sidebands` (the −19 dB skirt-slice lines of a real 3.5-bin neighbour remain
+— that is brick-wall partitioning of resolved neighbours and needs a different
+fix), `churn_crackle`, `hf_junk` unchanged.
+
+Handoff point (context limit): all work is committed on the worktree branch
+`worktree-engine-quality-work` (worktree `.claude/worktrees/engine-quality-work`,
+build `/tmp/pitchwing-build-wt2`); `engine-quality` can be fast-forwarded to it.
+Listening renders of the final build: `/tmp/pitchwing-listening-step4/`
+(06 dry/−7/−2 at 44.1 kHz; chord DI 14–19 s dry/+12/−12) — not yet heard by the
+user. Next: brief gauntlet (formalist + historian) of
+`docs/quality/2026-10-10-multires-plan.md`, then prototype the long low-band
+analysis with `N_low` as a constructor constant (4096 and 8192), measured with
+`evaluate.py`, `quality_fixtures.py --only warble` (spacing must scale), a new
+bend fixture and the window-study Q3 chord-onset fixture; then the resolved-
+neighbour skirt-slice lines (−19 dB) — candidates: identity-locked per-bin
+phase for skirt bins or boundary placement at the predicted skirt crossing;
+then profiling (`line 418` clear, audio-thread sort) and stereo refinement.
