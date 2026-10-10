@@ -644,3 +644,88 @@ aliasing, settling and unity-transition limitations remain; this explanation
 does not establish new sound-quality acceptance. No DSP changes, builds,
 experiments or installations were needed; validation was documentation/source
 inspection. Existing low-register and target-native validation work remains.
+
+## 2026-10-10 — Live chord-decay clicks: diagnosis and quality programme
+
+Request: the ShiftKey consumer makes clicking artefacts on long-decaying live
+chords; `stems/chord.wav` (clean DI, mono PCM24 44.1 kHz, 21.7 s) is the
+example, clicks heard after shifting about ±12 semitones. Check whether this is
+an algorithm problem, then maximise quality at the fixed low latency using the
+research and the current code. Work on branch `engine-quality`; use research,
+prototyping and validation subagents; run core ideas through a gauntlet;
+record everything here. Mono is essential, stereo desirable; Windows and macOS
+(Apple Silicon) targets, macOS debugging deferred to another session.
+
+Setup: committed the pre-existing tree as the baseline on `master`
+(`stems/` added to `.gitignore`: 51 MB of user audio stays out of git) and
+branched `engine-quality`. Rebuilt Release in `/tmp/pitchwing-build` with the
+approved temporary CMake. Added `tools/pitchwing_live_render.cpp` (raw float64
+mono through `LiveEngine`, 32-sample chunks like ShiftKey, full tail) and
+`scripts/artifact_scan.py` (per-second RMS, relative/absolute step counts,
+wet/dry high-frequency ratio). Diagnostic only; thresholds are heuristics.
+
+Findings:
+
+- The DI itself contains the clicks. Between 15.05 s and 18.9 s, during the
+  chord decay at −33…−44 dBFS, there are 90 one-sample polarity flips of the
+  waveform (x → −x, median step 0.039, max 0.089). They sit on a ≈6.0 ms grid
+  (264.6 samples; twelve consecutive events drift < 1 sample), not on the
+  engine's 88-sample hop grid. The DI's >2 kHz energy in the decay is ~1300×
+  its sustain level. Positions are listed in
+  [the DI scan](docs/results/2026-10-10-chord-di-scan.json).
+- Rendering the DI through `LiveEngine` at +12/−12 does not amplify them:
+  per-second counts of relative steps are similar (e.g. 15 s: 78 dry, 90 at
+  +12, 36 at −12), high-frequency wet/dry energy in the decay is 1.23× (+12) and
+  0.39× (−12), and the burst spread around a flip is unchanged (72 ms both).
+  See [+12](docs/results/2026-10-10-chord-plus12-scan.json) and
+  [−12](docs/results/2026-10-10-chord-minus12-scan.json) scans.
+- A clean synthetic decaying five-note low chord (F#1–C#3, 12 harmonics, 10 s)
+  through `LiveEngine` at −12/−7/−2/+5/+12 at 44.1 and 48 kHz shows no
+  discontinuities after the attack (relative step ≤ 0.12 after 1 s; the only
+  flagged samples are in the near-silent tail where the relative metric is
+  meaningless).
+- The attack at 8.85 s reaches 0.99999 in the DI (11 samples), i.e. the DI
+  was already clipped before the engine.
+
+Conclusion so far: the clicks in this recording are present in the input, not
+created by the algorithm, so the 6 ms step source (interface/driver/DAW
+resampling? the grid is not integer at 44.1 kHz) must be found on the user's
+side. The user re-listened and confirmed the artefacts are in the DI. Listening excerpts (14–19 s, dry/+12/−12)
+are in `/tmp/pitchwing-chord/`. This does not clear the engine of the known
+defects (DC, low dyads, ungated ancestry, no transient handling); those are
+now the quality programme. Two research subagents are writing
+`docs/quality/2026-10-10-code-caveats.md` and
+`docs/quality/2026-10-10-research-options.md`; next steps follow their lists
+through a gauntlet before prototyping.
+
+Baseline harness for the quality work (all on `engine-quality`):
+
+- `experiments/transport/evaluate.py --native <pitchwing_live_render>` now
+  drives the native `LiveEngine` through the existing synthetic matrix (tones,
+  dyads, DC, gate/chord-change temporal fixtures, unity impulse) in about 4 s
+  (quick) / 10 s (full) under WSL. `scripts/summarize_eval.py` prints the key
+  numbers of one or more result files for before/after comparison.
+- Native full baseline: [2026-10-10-live-baseline-full.json](docs/results/2026-10-10-live-baseline-full.json)
+  (quick variant alongside). It reproduces the Python findings: dyad spacing
+  unchanged (B0/C1 1.84 Hz at −7/+7 instead of 1.23/2.75; E1/F1 2.45 instead of
+  1.64/3.67, fit share 0.002–0.038), DC 0.2 → 0.018 (−7) / 0.15 (+7), E2 ±7 st
+  error +7.03/−4.71 cents with fit share 0.81/0.62, B0–F#1 gain −1.0…−1.5 dB,
+  chord-crossfade late fit 0.17 (−7) / 0.04 (+7), onset difference up to
+  3.3 ms, envelope NRMSE 0.15–0.40 on nonzero shifts. Unity is exact at 479.
+- `tools/pitchwing_live_render` accepts an optional per-sample control file
+  (semitones per input sample, applied before each block) for automation tests.
+
+In flight at the time of writing (results land in the repository, not in
+context): a code-caveat audit (`docs/quality/2026-10-10-code-caveats.md`), a
+research-options synthesis (`docs/quality/2026-10-10-research-options.md`),
+and a matched-delay Signalsmith Stretch baseline
+(`experiments/stretch-baseline/`, `docs/quality/2026-10-10-stretch-baseline.md`,
+`docs/results/2026-10-10-stretch-*.json`). Next: merge those into a ranked
+improvement plan, run the core design decisions through a gauntlet (notably:
+single-IFFT integer/fractional-bin region translation with per-region phase
+accumulation instead of up to 64 analytic IFFTs per hop; gated peak tracking
+with birth/death; past-only transient phase reset; explicit DC/sub-bin policy;
+unresolved-dyad treatment), then prototype one change at a time against the
+baseline JSON and the `06/minus7` listening excerpt. Session handoff is planned
+once the three agents report, because the conversation context is near the
+user's 250k limit.

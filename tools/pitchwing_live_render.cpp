@@ -1,7 +1,10 @@
 // Offline mono render through LiveEngine for diagnostics.
-// usage: pitchwing_live_render <in.f64> <out.f64> <rate> <semitones> [block]
+// usage: pitchwing_live_render <in.f64> <out.f64> <rate> <semitones> [block] [control.f64]
 // Input/output are raw little-endian float64 mono; output includes the full
-// tail, so output length = input length + tailSamples().
+// tail, so output length = input length + tailSamples(). An optional control
+// file holds one semitone value per input sample; the target is set before
+// every block from the block's first control sample (ShiftKey sets it before
+// each <=32-sample chunk), overriding <semitones>.
 #include <pitchwing/LiveEngine.hpp>
 
 #include <cstdio>
@@ -25,10 +28,26 @@ int main(int argc, char** argv) {
         while (std::fread(&v, sizeof v, 1, f) == 1) input.push_back(v);
         std::fclose(f);
     }
-    pitchwing::LiveEngine engine({rate, semitones});
+    std::vector<double> control;
+    if (argc > 6) {
+        std::FILE* f = std::fopen(argv[6], "rb");
+        if (!f) return 3;
+        double v;
+        while (std::fread(&v, sizeof v, 1, f) == 1) control.push_back(v);
+        std::fclose(f);
+        if (control.size() < input.size()) {
+            std::fprintf(stderr, "control file shorter than input\n");
+            return 3;
+        }
+    }
+    pitchwing::LiveEngine engine({rate, control.empty() ? semitones : control[0]});
     std::vector<double> out(input.size() + engine.tailSamples()), scratch(out.size());
     for (std::size_t offset = 0; offset < input.size(); offset += block) {
         const auto n = std::min(block, input.size() - offset);
+        if (!control.empty() && engine.setPitchSemitones(control[offset]) != pitchwing::Status::Ok) {
+            std::fprintf(stderr, "setPitchSemitones failed at %zu\n", offset);
+            return 4;
+        }
         if (engine.process(input.data() + offset, input.data() + offset,
                            out.data() + offset, scratch.data() + offset, n) != pitchwing::Status::Ok) {
             std::fprintf(stderr, "process failed at %zu\n", offset);

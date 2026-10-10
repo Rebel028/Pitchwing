@@ -159,10 +159,31 @@ def observed_dyad_lines(samples, targets):
     return result
 
 
+NATIVE_TOOL = None  # set by --native: path to pitchwing_live_render
+
+
+def render_native(samples, semitones):
+    import subprocess
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="pitchwing-eval-") as scratch:
+        source = Path(scratch) / "in.f64"
+        sink = Path(scratch) / "out.f64"
+        np.asarray(samples, dtype=np.float64).tofile(source)
+        completed = subprocess.run([NATIVE_TOOL, str(source), str(sink), str(SAMPLE_RATE),
+                                    repr(float(semitones)), "32"], capture_output=True, text=True)
+        if completed.returncode != 0:
+            raise RuntimeError("native render failed: " + completed.stderr)
+        delay = int(completed.stderr.strip().rsplit("latency", 1)[1])
+        return np.fromfile(sink), delay
+
+
 def render_aligned(samples, config, semitones):
-    engine = TransportEngine(sample_rate=SAMPLE_RATE, semitones=semitones, **config)
-    output = np.concatenate((engine.process(samples), engine.flush()))
-    delay = engine.latency_samples
+    if NATIVE_TOOL is not None:
+        output, delay = render_native(samples, semitones)
+    else:
+        engine = TransportEngine(sample_rate=SAMPLE_RATE, semitones=semitones, **config)
+        output = np.concatenate((engine.process(samples), engine.flush()))
+        delay = engine.latency_samples
     if len(output) < len(samples) + delay:
         raise RuntimeError("engine flush did not expose the complete delayed signal")
     if not np.all(np.isfinite(output)):
@@ -336,15 +357,19 @@ def unity_delay_case(config):
     source = np.zeros(round(0.2 * SAMPLE_RATE))
     source_index = round(0.08 * SAMPLE_RATE)
     source[source_index] = 1.0
-    engine = TransportEngine(sample_rate=SAMPLE_RATE, semitones=0.0, **config)
-    output = np.concatenate((engine.process(source), engine.flush()))
+    if NATIVE_TOOL is not None:
+        output, latency = render_native(source, 0.0)
+    else:
+        engine = TransportEngine(sample_rate=SAMPLE_RATE, semitones=0.0, **config)
+        output = np.concatenate((engine.process(source), engine.flush()))
+        latency = engine.latency_samples
     peak = int(np.argmax(np.abs(output)))
     energy = np.square(output)
     active = np.flatnonzero(np.abs(output) > 1e-9)
     reference = np.zeros(len(output))
-    reference[source_index + engine.latency_samples] = 1.0
+    reference[source_index + latency] = 1.0
     return {
-        "declared_delay_samples": engine.latency_samples,
+        "declared_delay_samples": latency,
         "measured_peak_delay_samples": peak - source_index,
         "measured_energy_centroid_delay_samples":
         float(np.dot(np.arange(len(output)), energy) / np.sum(energy) - source_index),
@@ -405,7 +430,8 @@ def evaluate(quick=False):
             "No real DI, listening, stereo, automation, or native deadline validation.",
         ],
     }
-    for name, config in CONFIGURATIONS.items():
+    configurations = {"live_native": {"tool": NATIVE_TOOL}} if NATIVE_TOOL else CONFIGURATIONS
+    for name, config in configurations.items():
         result["configurations"][name] = {
             "engine_parameters": config,
             "unity_delay": unity_delay_case(config),
@@ -426,7 +452,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--quick", action="store_true", help="smaller tone/dyad matrix; retains low notes")
     parser.add_argument("--output", type=Path, help="explicit new JSON path; default prints to stdout")
+    parser.add_argument("--native", type=Path, help="render through this pitchwing_live_render binary instead of the Python engine")
     args = parser.parse_args()
+    if args.native is not None:
+        global NATIVE_TOOL
+        NATIVE_TOOL = str(args.native.resolve())
     if args.output is not None and args.output.exists():
         parser.error("output already exists; choose a new path to preserve previous evidence")
     result = evaluate(quick=args.quick)
