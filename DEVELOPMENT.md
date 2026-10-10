@@ -1327,3 +1327,20 @@ the whole analysis (96 kHz small blocks), then cheaper fitPeaks.
 ShiftKey rebuilt with step 12 (`build.bat Release`, BUILD OK, VST3 installed;
 the C4456 warning disappeared with the oscillator code). Awaiting the user's
 live test.
+
+Live test of step 12 (user, 2026-10-10): REAPER, buffer 256, 48 kHz, ShiftKey
+FX CPU ~1.5 %; real-time playback works, sound "ok but not the best" (no
+specific defect named yet). Real-time failure resolved. Next session (user):
+discuss the merge and probably move the engine source into the ShiftKey
+project.
+
+Handoff point (session 4, final): branch `worktree-engine-quality-work` =
+main checkout `engine-quality` (fast-forwarded). Steps 11 (jointFit ridge,
+real-material gate) and 12 (shared Taylor-term synthesis, real-time factor in
+the gate) landed. Open: (1) merge/move of the engine source into ShiftKey
+(user decision pending; `master` untouched, no remote); (2) sound quality
+"not the best" live — get specifics, compare against the Neural DSP renders in
+`/mnt/e/Reaper render/shiftkey test/`; (3) spread prepareFrame analysis across
+the hop (96 kHz small-block misses), cheaper fitPeaks; (4) earlier priorities
+(inter-harmonic phase at onsets, dyad bends +7, hf_junk, split-count flicker on
+real strums, MSVC C4723).
