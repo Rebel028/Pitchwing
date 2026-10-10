@@ -164,3 +164,4 @@ stems/
 # Agent skill copies and Python bytecode
 .agents/
 __pycache__/
+build-mac/
