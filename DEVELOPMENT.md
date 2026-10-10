@@ -1249,3 +1249,29 @@ VST3 folder. MSVC 14.29 warnings in the engine: C4456 (`step` shadowed in the
 component oscillator, `src/LiveEngine.cpp` ~1101, harmless) and C4723 (possible
 division by zero inside `<complex>`, optimizer-reported; source not traced).
 The live test in the host is the user's.
+
+Live test result (user, 2026-10-10): ShiftKey with this engine renders offline
+correctly but crackles and lags in real time as soon as the shift is ±1
+semitone; other engines in the same plug-in run fine. Diagnosis: engine CPU.
+Wall time of `pitchwing_live_render` on the real 06 excerpt (6.5 s audio,
+44.1 kHz, block 64, WSL gcc Release, one thread): 0 st 0.67 s (unity path skips
+analysis); ±1/−7 st step 4 5.17 s, step 8 5.5 s, step 11 6.2 s — i.e. 80–95 %
+of real time on average before any callback spikes, so a host misses
+deadlines. The synthetic timing probe (clean low chords) reported ~45 % and
+hid this. gprof on the real excerpt at −1 st
+(`-pg -fno-inline-functions`, /tmp/pw-s4/b-prof): 385098 IFFTs in 3281 hops
+(~117 per 2 ms hop: ~62 regions × 2 channels, each rendered by its own n-point
+IFFT in `renderRegion`); FFT code ~80 % of time, renderRegion 6 %, fitPeaks
+4 %, splitRegion 4 %, jointFit 1 %. Root cause: per-region full-size inverse
+transforms scale with the number of spectral peaks, and real guitar (noise,
+attacks, full-band harmonics above the −80 dB floor) has many more than the
+fixtures. This is architectural (present since the first live engine), not a
+step-9–11 regression; steps 9–11 add ~10 %.
+Next: design a cheaper synthesis (e.g. oscillator rendering for well-fitted
+lobes as already done for split components, one IFFT for residual bins grouped
+by shift, fewer/merged high-frequency regions), gauntlet it, and add a
+real-material real-time-factor check (wall time / audio time on the gate
+excerpts, target well below 30 % on WSL) to the step gate.
+User test material for later quality/CPU work: `/mnt/e/Reaper render/shiftkey test/`
+(44 WAVs: chords / riff / small-arpeggio DIs, Neural DSP pitch-shifter renders
+at ±3/5/7/12 as a commercial reference, ShiftKey renders at ±3).
