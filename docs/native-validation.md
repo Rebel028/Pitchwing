@@ -1,132 +1,181 @@
-# Native/reference validation tools
+# Native validation tools
 
-The native engine ports the transport experiment with an explicit deterministic
-stability fix. Passing these checks means its output follows the new
-`StableTransportEngine` variant, not necessarily the preserved original
-`TransportEngine`. The change does not repair the documented unresolved-dyad
-spacing or shifted-DC failures, establish a supported low tuning, or demonstrate
-competitive perceptual quality. Listening to the native variant is still needed.
+Two tools check the static native engine against its Python reference:
+the offline runner `pitchwing_render` (`tools/pitchwing_render.cpp`) and the
+parity harness `scripts/compare_native.py`. A passing harness run means the
+native output matches `StableTransportEngine` in
+`experiments/transport/stable_reference.py` to $10^{-10}$ maximum absolute
+error, with equal frame counts, finite output, and equal declared latency. It
+does not mean parity with the preserved original `TransportEngine`
+(`experiments/transport/engine.py`), does not repair the documented
+unresolved-dyad and shifted-DC defects, and is not listening approval. The
+reference variant and its reason are described in
+[native core](native-core.md); recorded runs are in
+[native validation results](native-validation-results.md).
 
-The original `experiments/transport/engine.py` remains untouched. The new
-`stable_reference.py` subclass selects candidate bin 1 when nonzero interior
-spectral magnitudes have relative spread at most `1e-12`. Its peak-cap ties use
-magnitude followed by bin index, retaining the greatest 64. Other frequency,
-phase ancestry, transport, and scheduling equations are retained. This removes
-an ill-conditioned peak choice at spectrally flat startup frames: roundoff from
-different FFT implementations could select different peaks and produce lasting
-phase differences. It is an algorithm behavior change, recorded in report
-metadata and source hashes; it must not be described as exact parity with the
-old listening prototype.
+## Build and test
+
+Use the already installed tools; ask before installing anything. The CMake
+options are in `CMakeLists.txt`: `PITCHWING_BUILD_TOOLS` and
+`PITCHWING_BUILD_TESTS` default to on at the top level, and
+`PITCHWING_ENABLE_ASAN` and `PITCHWING_ENABLE_UBSAN` default to off and
+require GCC or Clang. Configuration downloads nothing; the FFT header is
+bundled under `third_party/` (see `third_party/README.md`).
+
+```sh
+cmake -S . -B /tmp/pitchwing-native-release -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+cmake --build /tmp/pitchwing-native-release --parallel 2
+ctest --test-dir /tmp/pitchwing-native-release --output-on-failure
+```
+
+`ctest` runs `pitchwing_engine` (`tests/engine_tests.cpp`, nine groups) and
+`pitchwing_live_engine` (`tests/live_engine_tests.cpp`). For a sanitizer build:
+
+```sh
+cmake -S . -B /tmp/pitchwing-native-sanitize -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG='-O1 -g' -DBUILD_TESTING=ON -DPITCHWING_ENABLE_ASAN=ON -DPITCHWING_ENABLE_UBSAN=ON
+cmake --build /tmp/pitchwing-native-sanitize --parallel 2
+ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:quarantine_size_mb=16:thread_local_quarantine_size_kb=64 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 /tmp/pitchwing-native-sanitize/pitchwing_tests
+```
+
+Leak detection stays off: in the recorded WSL run the leak scan rejected
+`ptrace` (see the results document).
+[Live validation](live-validation.md) records the later sanitizer runs,
+including the `handle_segv=0` option they needed.
 
 ## Offline runner
 
-The CMake target `pitchwing_render` reads and writes mono raw little-endian IEEE
-float64 files. It preloads input and allocates output before processing. The
-runner itself is an offline utility and performs allocations and file I/O; the
-engine's processing contract is tested separately. Existing output paths are
-refused. Use one writer per new output path.
+`pitchwing_render` reads one mono raw little-endian IEEE float64 file, runs
+every `process()` block through one `Engine`, appends the `flush()` tail, and
+writes the complete stream as the same raw format. The output keeps the
+scheduled delay and is not cropped, normalized, resampled, limited, or
+converted to integer PCM. The runner refuses an existing output path and
+assumes one writer per new path. It requires a little-endian machine with
+64-bit IEEE doubles. It prints a compact JSON report on stdout; argument,
+file, and engine failures go to stderr with exit status 1.
 
 ```sh
 /tmp/pitchwing-native-release/pitchwing_render --input /tmp/input.f64 --output /tmp/new-output.f64 --sample-rate 48000 --semitones -7 --analysis-size 2048 --synthesis-size 384 --hop 96 --window asymmetric --block 128 --benchmark
 ```
 
-Output contains every `process()` sample followed by the terminal `flush()`
-tail. It retains scheduled delay and is not cropped, normalized, resampled,
-limited, or converted to integer PCM. Configuration defaults match the example
-except that the default pitch shift is zero and benchmarking is off. Symmetric
-comparison requires `--window symmetric --analysis-size 384`. The runner
-supports little-endian machines with 64-bit IEEE doubles and emits compact JSON
-on stdout; argument, file, and engine failures go to stderr with nonzero status.
+| Option | Default | Usage |
+|---|---|---|
+| `--input PATH` | required | Raw float64 input file. |
+| `--output PATH` | required | New raw float64 output file; an existing path is an error. |
+| `--sample-rate HZ` | 48000 | Finite positive number; only used for the benchmark deadline and the report. |
+| `--semitones X` | 0 | Finite pitch shift within $[-12, 12]$. |
+| `--analysis-size N` | 2048 | Analysis FFT size; symmetric mode needs `--analysis-size 384`. |
+| `--synthesis-size L` | 384 | Synthesis window size. |
+| `--hop H` | 96 | Hop size. |
+| `--window MODE` | asymmetric | `asymmetric` or `symmetric`. |
+| `--block B` | 128 | Samples per `process()` call. |
+| `--benchmark` | off | Times individual `process()` calls after warmup. |
+| `--warmup-frames N` | $N + L$ source frames | Calls whose input starts before this frame are not timed; `0` times every call. |
+| `--help` | | Prints usage and exits 0 (only as the sole argument). |
 
-`--benchmark` times only individual process calls after preparation and input/
-output allocation. It records mean, nearest-rank p95, maximum, total call time,
-input-frame throughput, the worst observed ratio of call duration to that
-block's audio duration, and the count of calls exceeding their block duration.
-Calls whose input start is before `analysis-size + synthesis-size` frames are
-excluded as startup warmup; `--warmup-frames N` can override this count, including
-zero. Warmup advances the same stream and does not change rendered output.
-Timing includes clock overhead and the possibly shorter final block. It excludes
-construction, warmup calls, file I/O, and flush. If no call remains after warmup,
-the benchmark field is null. It is a bounded diagnostic without a stress loop. WSL
-scheduler behavior and these workloads cannot establish target-native callback
-deadlines or worst-case real-time safety.
+The runner itself allocates and performs file I/O; it preloads the input and
+allocates the output before processing. The engine's no-allocation contract is
+tested separately in `tests/engine_tests.cpp`. The runner checks every
+`process` and `flush` status and rejects a nonfinite output sample.
 
-## Bounded parity harness
+With `--benchmark`, the report's `benchmark` object records the timed call
+count, warmup frames, excluded calls, timed input frames, mean, nearest-rank
+p95 (index $\lceil 0.95\,n \rceil - 1$ of the sorted durations), maximum,
+total call time, worst ratio of call duration to that block's audio duration,
+the number of calls longer than their block, and input frames per second.
+Warmup calls advance the same stream and do not change the rendered output.
+Timing includes clock overhead and the possibly shorter final block and
+excludes construction, warmup, file I/O, and flush. With no timed call the
+field is `null`. WSL scheduling makes these numbers a diagnostic, not a
+target-native deadline result; the report says so in its `limitations` string.
 
-Use the already approved NumPy environment and an already built runner:
+## Parity harness
+
+Run the harness with the approved NumPy environment and a built runner:
 
 ```sh
 OPENBLAS_NUM_THREADS=1 /tmp/pitchwing-env/bin/python -B scripts/compare_native.py --runner /tmp/pitchwing-native-release/pitchwing_render --benchmark --output /tmp/pitchwing-native-parity.json --listening-output /tmp/pitchwing-native-06-down7.wav --archive-stem-input /tmp/pitchwing-native-06-input.f64
 ```
 
-The harness performs 30 comparisons by default:
+| Option | Default | Usage |
+|---|---|---|
+| `--runner PATH` | required | Built `pitchwing_render` executable. |
+| `--output PATH` | stdout | New JSON report path; an existing path is an error. |
+| `--tolerance X` | $10^{-10}$ | Maximum absolute float64 sample error per case; finite and positive. |
+| `--benchmark` | off | Passes `--benchmark` to every runner call. |
+| `--skip-stem` | off | Runs only the 27 synthetic cases. |
+| `--stem PATH` | `stems/06.wav` | Preferred recording; must stay integer PCM24 at 44.1 kHz. |
+| `--listening-output PATH` | none | New float32 WAV under `/tmp` of the native preferred excerpt at block 128. |
+| `--archive-stem-input PATH` | none | New raw float64 file under `/tmp` holding the selected excerpt input. |
 
-- Unity noise, DC, and B0 mixture at blocks 1, 127, and 512, with both windows.
-- E1 at -7 semitones, B0/C1 at +7, and A4 at -1, each at blocks 64 and 257 with
-  both windows. These short signals test implementation parity, not steady
-  pitch-quality resolution.
-- Three phased A4 signals at -1 semitone, with the first nonzero sample at input
-  frame 0, 96, or 97, each with asymmetric analysis and blocks 32, 64, and 128.
-  These nine cases specifically exercise the startup peak-selection failure
-  both on and immediately after a hop boundary.
-- The preferred `stems/06.wav` interval 9.7–15.7 s with 0.5 s source preroll,
-  original 44.1 kHz, channel zero, -7 semitones, asymmetric window, blocks 32,
-  64, and 128, giving the requested bounded timing observations for each size.
-  The reader seeks to 9.2 s and reads only the selected 6.5 seconds once. Both
-  engines process the same samples, including preroll, and their complete
-  delayed outputs and tails are compared. No full source hash or corpus scan
-  is repeated; the report hashes the selected interleaved PCM bytes.
+The harness exits 0 when every case passes and 1 otherwise. A case passes when
+frame counts match, all native samples are finite, the maximum absolute error
+is at most the tolerance, and the runner's `latency_samples` equals the
+reference's. The report also stores the RMS error and the error-to-reference
+RMS ratio. A larger error is a diagnostic failure that needs an explanation;
+the harness never widens its tolerance for FFT or peak-choice differences.
 
-The preserved original Python engine also processes the preferred excerpt once,
-reusing the same decoded samples. Every preferred native result records its
-waveform difference from that original separately under
-`original_prototype_comparison`; these numbers are **not** acceptance criteria.
-They make the stability variant's change from the prior listening prototype
-visible rather than hiding it behind a different reference.
+### Cases
 
-`--skip-stem` explicitly selects the 27 synthetic-only comparisons. `--stem`
-may specify the same preferred recording at a different path. The expected
-format remains integer PCM24 at 44.1 kHz; changing the source also changes the
-fixture and must be recorded. The source's tuning and processing provenance
-remain as documented in the corpus guide, without new inference from the data.
+The default run performs 30 comparisons, all with $L = 384$ and $H = 96$:
 
-The default acceptance bound is maximum absolute float64 sample error `1e-10`
-over complete, equally sized streams, with finite output and equal declared
-latency. Reports also contain RMS error and error/reference RMS ratio. A larger
-error is a diagnostic failure requiring explanation; the harness does not
-silently adjust its tolerance for FFT differences or phase/peak choices.
+- unity: noise plus 0.12 DC plus a B0 sine (6143 samples at 48 kHz) at blocks
+  1, 127, and 512, with both windows (6 cases);
+- E1 at $-7$ semitones, B0 plus C1 at $+7$, and A4 at $-1$, each at blocks 64
+  and 257 with both windows (12 cases). These short signals test
+  implementation parity, not steady pitch quality;
+- A4 at $-1$ semitone with the first nonzero sample at input frame 0, 96, or
+  97, asymmetric window, blocks 32, 64, and 128 (9 cases). They exercise the
+  startup peak-selection failure on and just after a hop boundary;
+- the preferred recording `stems/06.wav`, audition interval 9.7 to 15.7 s with
+  0.5 s preroll, 44.1 kHz, channel zero, $-7$ semitones, asymmetric window,
+  blocks 32, 64, and 128 (3 cases). The reader seeks to 9.2 s and reads 6.5 s
+  once; both engines process the same samples including preroll. The report
+  hashes only the selected interleaved PCM bytes.
 
-Raw input/output intermediates live under a temporary `/tmp` directory and are
-removed after the run. Input is rewritten there for each fixture/window, while
-the preferred source file is read only once. Each Python reference is computed
-once per fixture/window and reused across native block sizes. The original
-preferred-excerpt reference is likewise computed only once. No audio files
-or results are implicitly written into the repository. JSON defaults to stdout;
-an explicit `--output` path is created exclusively and must not already exist.
+The preserved original `TransportEngine` also processes the preferred excerpt
+once, and each preferred case records its difference from that output under
+`original_prototype_comparison` with `used_for_acceptance: false`. These
+numbers make the variant's change from the accepted listening prototype
+visible; they are not acceptance criteria.
 
-Optional `--listening-output NEW_PATH` writes one mono IEEE float32 WAV under
-`/tmp`, using the already loaded native preferred-excerpt output at block 128.
-It is written only if that case passes stable-reference parity. The small RIFF
-writer includes float format and sample-count chunks. It retains the entire
-stream, including preroll, 383-sample delay, and flush tail; there is no crop,
-normalization, limiting, or resampling. At 44.1 kHz, audition frames are
-22433 through 287032 inclusive (`[22433, 287033)`). The report records these
-bounds, encoded hash, and encoding details. Compare this variant with the
-preserved original render before deciding whether its audible changes are
-acceptable. Numerical parity with the stability variant is not listening approval.
+`--skip-stem` selects the 27 synthetic cases. `--stem` points at the same
+recording at another path; changing the source changes the fixture and must be
+recorded. The recording's tuning and provenance are documented in
+`experiments/corpus/README.md`.
 
-Optional `--archive-stem-input NEW_PATH` retains the selected mono float64 input
-under `/tmp`, with its hash, frame count, rate, and source interval in the report.
-This permits subsequent isolated timing runs without rereading the recording.
-For example, reuse that archive with `pitchwing_render --sample-rate 44100
---semitones -7 --block 32 --benchmark` and explicit new input/output paths as in
-the runner command above. Listening/archive outputs require the stem case, must
-be distinct new paths in existing `/tmp` directories, and are never implicit.
+### Scratch and outputs
 
-The report records Python/NumPy/platform versions, both Python-reference source
-hashes, native/tool source hashes, runner binary
-hash, fixture configurations, optional timings, and failed case identifiers.
-Persist the compact report and build configuration with the development record.
-The tool does not install dependencies or run a build. Native tests, allocation
-checks, sanitizer runs, supported sample-rate coverage, parameter automation,
-stereo behavior, and listening remain separate validation tasks.
+Raw intermediates live in a temporary directory under `/tmp` that the harness
+removes at exit. The input is rewritten there once per fixture and window; the
+preferred recording is read once. Each Python reference is computed once per
+fixture and window and reused across native block sizes. Nothing is written
+into the repository.
+
+`--listening-output` writes one mono IEEE float32 WAV (format tag 3, with a
+`fact` chunk) from the native preferred-excerpt output at block 128, only when
+that case passes. The file keeps the whole stream: preroll, 383-sample delay,
+and flush tail, with no crop, normalization, limiting, or resampling. At
+44.1 kHz the audition interval is frames $[22433, 287033)$, from
+$\mathrm{round}(0.5 \cdot 44100) + 383$ for six seconds. The report records
+these bounds, the encoded hash, and the encoding. Compare this file with the
+preserved original render before judging its audible changes.
+
+`--archive-stem-input` keeps the selected mono float64 input with its hash,
+frame count, rate, and source interval in the report, so a later timing run
+can reuse it without rereading the recording: pass it to `pitchwing_render`
+with `--sample-rate 44100 --semitones -7 --block 32 --benchmark` and new
+paths. Both audio outputs require the stem case and must be new paths in
+existing `/tmp` directories.
+
+### Report contents
+
+The JSON report (`schema_version` 2) records the reference-variant policy,
+Python, NumPy, and platform versions, SHA-256 of the harness, runner source,
+engine header and source, both Python references, and
+`experiments/corpus/audit_stems.py`, the runner binary hash, the tolerance,
+whether the stem was included, the limitations list, every case with its
+configuration and optional runner timing, `case_count`, `passed`, and
+`failed_cases` as `fixture/window/blockB` identifiers. Persist the compact
+report with the development record. The harness installs nothing and runs no
+build. Native contract tests, allocation checks, sanitizer runs, sample-rate
+coverage, automation, stereo, and listening are separate tasks.

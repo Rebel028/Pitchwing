@@ -1,8 +1,8 @@
 # LiveEngine fixture results (2026-10-10)
 
 Synthetic fixtures from [2026-10-10-code-caveats.md](2026-10-10-code-caveats.md)
-rendered through `pitchwing_live_render` (48 kHz, block 32, H=96, L=384,
-D=479) by `scripts/quality_fixtures.py`; numbers in
+rendered through `pitchwing_live_render` (48 kHz, block 32, $H=96$, $L=384$,
+$D=479$) by `scripts/quality_fixtures.py`; numbers in
 [docs/results/2026-10-10-fixtures.json](../results/2026-10-10-fixtures.json).
 Whole run: 32 renders, ~40 s in WSL. Synthetic tones only, not real guitar.
 dB are power ratios unless marked dBFS (full-scale sine = 0 dBFS).
@@ -23,17 +23,17 @@ dB are power ratios unless marked dBFS (full-scale sine = 0 dBFS).
 
 Predicted: 6 ms phasey dip per partial of random depth when the control lands on
 exactly 0 after a nonunity run. Measured (220 Hz + 1 kHz, +3 -> 0 at ten T values
-1.000..1.117 s; envelope per partial over one period, min in [T, T+40 ms] vs min
-of the 50 ms before): worst dips -5.0 dB (220 Hz, T=1.091) and -15.0 dB
-(1 kHz, T=1.104); 1 ms total-RMS dip up to -3.1 dB. Depth varies 0..-15 dB with
+1.000..1.117 s; envelope per partial over one period, min in $[T,\ T+40\ \mathrm{ms}]$ vs min
+of the 50 ms before): worst dips -5.0 dB (220 Hz, $T=1.091$) and -15.0 dB
+(1 kHz, $T=1.104$); 1 ms total-RMS dip up to -3.1 dB. Depth varies 0..-15 dB with
 T as predicted (phase-dependent). Controls: steady +3 gives 0.0 dB; the reverse
 0 -> +3 step gives no dip (-0.4 / -0.5 dB per partial, +1.9 dB overshoot).
 Confirmed; fails the 1 dB threshold in 9 of 10 cases. No full null seen (10 T only).
 
 ## 2. Hop-rate sidebands (caveat 3)
 
-Predicted: lines at f_shift +- k*500 Hz, worse for neighbours < 10 bins apart.
-Measured (2^17 Hann over 1-3 s, +-5 Hz bands, re the shifted line):
+Predicted: lines at $f_{\text{shift}} \pm k \cdot 500$ Hz, worse for neighbours < 10 bins apart.
+Measured ($2^{17}$ Hann over 1-3 s, $\pm 5$ Hz bands, re the shifted line):
 
 | pair | semis | worst hop sideband | non-line residual | strongest residual peaks (Hz, dB) |
 |---|---|---|---|---|
@@ -44,11 +44,11 @@ Measured (2^17 Hann over 1-3 s, +-5 Hz bands, re the shifted line):
 
 Hop-rate lines exist (-41..-47 dB, all four fail -50) but do not depend on
 spacing, so they are not the predicted partition-ringing product; both tones
-land within 0.1 Hz of ratio*f (two regions, no rigid translation at 3.5 bins).
-The spacing-dependent artefact is at f_line +- beat, beat = (f2-f1)*(r-1)
+land within 0.1 Hz of $\text{ratio} \cdot f$ (two regions, no rigid translation at 3.5 bins).
+The spacing-dependent artefact is at $f_{\text{line}} \pm \text{beat}$, $\text{beat} = (f_2-f_1)(r-1)$
 (82 Hz at +12, 8.9 Hz at -2): -19 dB for the close pair, < -43 dB for the wide
 pair. That is ~10 % amplitude modulation at the differential rate, the caveat's
-secondary "tremolo at |dw||r-1|" prediction (9 Hz roughness at -2), 20 dB above
+secondary "tremolo at $|dw||r-1|$" prediction (9 Hz roughness at -2), 20 dB above
 the hop lines. Verdict: hop-rate part refuted; beat-rate modulation confirmed.
 
 ## 3. Churn crackle (caveat 2)
@@ -74,7 +74,7 @@ few-percent churn contribution. A per-frame region-count trace is the direct tes
 
 Predicted: E2+G#2 (0.9 bins apart) share a region; the pair is translated
 rigidly (spacing kept at 21.4 Hz) and FM'd at the beat rate. Measured
-(2^18 Hann over 1-5 s; IF from the analytic signal of 30-200 Hz, 20 ms median):
+($2^{18}$ Hann over 1-5 s; IF from the analytic signal of 30-200 Hz, 20 ms median):
 
 | semis | lines found | expected | spacing (required) | IF p-p wet | static two-tone control | outer beat sidebands |
 |---|---|---|---|---|---|---|
@@ -82,7 +82,7 @@ rigidly (spacing kept at 21.4 Hz) and FM'd at the beat rate. Measured
 | +7 | 128.72, 150.15 Hz | 123.48, 155.57 | 21.42 (32.1) -33 % | 159.6 cents | 12.1 | -24.0 dB |
 
 Spacing is exactly the input 21.42 Hz both ways (each tone 3.5-5 Hz off) and
-the output has lines at 2f1-f2 and 2f2-f1 (-24..-30 dB) that the dry input
+the output has lines at $2f_1-f_2$ and $2f_2-f_1$ (-24..-30 dB) that the dry input
 lacks. IF p-p of a beating pair is inflated by amplitude imbalance alone (static
 two-tone with the measured amplitudes: 65 / 12 cents; dry 4 cents), but the wet
 value is 3-13x larger. Confirmed on both criteria; spacing and outer sidebands
@@ -92,17 +92,17 @@ are the robust evidence, the IF number is indicative only.
 
 - (i) 0.05 DC + 220 Hz at 0.3, +7: hop line at 500 Hz -60.8 dBFS (predicted
   ~-33 dB re the -26 dBFS offset = -59 dBFS), 1000 Hz -73.5 dBFS; mean DC
-  gain 0.725 (predicted 0.636 x 1.10..1.15 = 0.70..0.73). Confirmed, fails
+  gain 0.725 (predicted $0.636 \times 1.10..1.15 = 0.70..0.73$). Confirmed, fails
   -80 dBFS.
 - (ii) E1 41.2 Hz at 0.5, -12 / +12: unshifted ghost at 41.2 Hz is -17.9 /
   -17.8 dB re the shifted line (threshold -40). Confirmed. Shifted line at
   -4.3 dBFS, i.e. +1.7 dB gain (FINDINGS reported a loss at B0/E1; different
   geometry, not investigated).
-- (iii) E2 with 0.5 Hz +-15 cent vibrato at -12: 0 envelope steps > 3 dB over
+- (iii) E2 with 0.5 Hz $\pm 15$ cent vibrato at -12: 0 envelope steps > 3 dB over
   1-5 s (25-60 Hz analytic envelope, max 0.01 dB per ms, same as dry); full-band
   relative sample step 0.011 wet vs 0.021 dry, so no -25 dB clicks either.
   Gain -0.91 dB, inside the predicted 0.5-1.4 dB loss. Clicks refuted for this
-  case, gain loss confirmed. Limitation: +-15 cents may not sweep omega across
+  case, gain loss confirmed. Limitation: $\pm 15$ cents may not sweep omega across
   an integer multiple; a wider sweep was not tried.
 
 ## 6. +12 HF junk reference

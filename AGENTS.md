@@ -41,6 +41,13 @@ take precedence over older research plans.
   Do not overwrite evidence or rerun scripts that write into the checkpoint
   without first arranging separate outputs. Preserve failed cases as evidence.
 
+- For any technical prose in `docs/` or `README.md`, load the technical-writing
+  skill first: `npx skills use "https://github.com/riekelt/technical-writer"
+  --skill "technical-writing"` and follow its hard rules (conclusion first, no
+  em or en dashes, one fact one home, every claim traceable, sentence-case
+  headings). Dated notes in `docs/quality/` are historical records: do not
+  rewrite their wording. Formulas use GitHub LaTeX (`$...$`, `$$...$$`).
+
 Scope changes belong in `PROJECT.md`; the development record belongs in
 `DEVELOPMENT.md` or linked task-specific artifacts. Update this file when working
 rules change.

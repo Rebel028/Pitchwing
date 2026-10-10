@@ -1,118 +1,145 @@
-# Native engine validation — 2026-10-08
+# Native engine validation results (2026-10-08)
 
-The first C++ engine is implemented and builds as `libpitchwing.a`, with a
-standalone offline runner and tests. It is mono and static ratio, supports
-float/double buffers and arbitrary block sizes, and prepares its storage before
-processing. The final implementation passes its contract checks and agrees with
-the explicit deterministic Python variant. It is not yet a production-quality
-or target-native deadline-validated engine.
+This is the dated record of the first native engine validation. On
+2026-10-08 the static C++ engine built as `libpitchwing.a` with the offline
+runner and tests, passed all nine contract test groups in release and
+sanitizer builds, allocated nothing after preparation, and matched the
+deterministic Python variant in all 30 parity cases with a worst error of
+$1.667 \times 10^{-13}$ against a $10^{-10}$ bound. It was not, and is not,
+a target-native deadline-validated or listening-approved engine. The
+procedure is in [native validation](native-validation.md); the contract is in
+[native core](native-core.md).
 
-## What was checked
+## Checks and outcomes
 
-- GCC 9.4/C++17 release and ASan/UBSan builds complete without compiler warnings.
-- All nine test groups pass, covering both windows and every hop phase,
-  reconstruction, blocks, in-place buffers, rejection without state mutation,
-  reset/drain, pitch lifecycle, moves, and configuration validation.
-- No global-new allocations were observed during processing, reset, static
-  pitch setting, or draining, including the first callback. The allocation probe
-  includes aligned new but does not intercept direct malloc/realloc.
-- All 30 final numerical comparisons pass at maximum absolute tolerance 1e-10.
-  Worst observed error is 1.667e-13; the preferred real excerpt is 1.481e-13.
-- ASan/UBSan direct tests pass with fatal findings enabled. Leak validation
-  remains unavailable: the initial leak scan rejected ptrace, an unsandboxed
-  retry was terminated, and another CTest retry exited 137 without a diagnostic.
-  Final direct tests use leak detection off and a bounded 16 MB ASan quarantine.
+Evidence: [build record](results/2026-10-08-native-build.json) and
+[final comparisons](results/2026-10-08-native-parity-final.json).
 
-See the [build record](results/2026-10-08-native-build.json),
-[final comparisons](results/2026-10-08-native-parity-final.json), and
-[core contract](native-core.md). Default scheduled delay is 383 samples:
-8.6848 ms at 44.1 kHz, 7.9792 ms at 48 kHz. This excludes audio-device/host delay
-and does not measure frequency-dependent settling or live playing feel.
+- GCC 9.4, C++17, release (`-O3`) and ASan/UBSan (`-O1 -g`) builds completed
+  without compiler warnings at `-Wall -Wextra -Wpedantic`.
+- All nine test groups passed: unity at every hop phase with both windows,
+  block independence and reset, in-place and rejected buffers for double and
+  float, static pitch and flush lifecycle, float/double parity at 44.1 kHz,
+  moves and moved-from state, no allocations after preparation, and invalid
+  configurations.
+- No global `new` was observed during processing, reset, static pitch setting,
+  or draining, including the first callback. The probe covers aligned `new`
+  and does not intercept direct `malloc` or `realloc`.
+- All 30 parity comparisons passed at maximum absolute tolerance $10^{-10}$.
+  The worst error was $1.667 \times 10^{-13}$; the preferred real excerpt
+  measured $1.481 \times 10^{-13}$.
+- ASan/UBSan tests passed with fatal findings enabled. Leak validation stayed
+  unavailable: the first leak scan rejected `ptrace`, an unsandboxed retry was
+  terminated, and a CTest retry exited 137 without a diagnostic. The recorded
+  sanitizer run used `detect_leaks=0` and a 16 MB ASan quarantine.
 
-## Why the numerical reference changed
+The default scheduled delay is 383 samples: 8.6848 ms at 44.1 kHz and
+7.9792 ms at 48 kHz. This excludes audio-device and host delay and does not
+measure frequency-dependent settling or live playing feel.
 
-The first literal port failed every shifted comparison while reconstructing
-unity correctly. Flat spectra at startup produced different local maxima from
-FFT rounding, which changed persistent inherited phases. Moving onset by one
-sample removed the mismatch; moving it by one full hop retained it. These
-failed results and the thirty small diagnostic probes are retained:
-[initial port](results/2026-10-08-native-parity-initial.json),
-[startup probes](results/2026-10-08-startup-probes.json).
+## Reference change: flat-spectrum peak selection
 
-Native code and `experiments/transport/stable_reference.py` now choose canonical
-bin 1 when positive-interior magnitude spread is at most 1e-12 of the maximum,
-and define ordering at the 64-peak cutoff. The original `engine.py` and the
-user-accepted listening renders remain unchanged. The corrected variant passed
-all 30 checks [before optimization](results/2026-10-08-native-parity-stable.json).
-Final parity measures that variant, not the old prototype. For the preferred
-excerpt, difference from the old waveform is substantial (max 1.126, RMS 0.202);
-these phase-sensitive errors are not a perceptual quality score.
+The literal port failed every shifted comparison while reconstructing unity
+correctly: [initial parity](results/2026-10-08-native-parity-initial.json)
+reports maximum errors of 0.414368 (E1, $-7$ semitones, asymmetric), 0.780470
+(B0 plus C1, $+7$, asymmetric), 0.0657946 (A4, $-1$, asymmetric), and
+0.812590 (preferred excerpt). Block size did not change them. The cause was
+the flat spectrum of a frame whose only nonzero sample is its first: FFT
+rounding chose different local maxima, which seeded different persistent
+inherited phases. Moving the onset by one sample removed the mismatch; moving
+it by one full hop kept it.
+
+The 30 probes in [startup probes](results/2026-10-08-startup-probes.json)
+each used
+
+$$
+x[n] = 0.3 \sin\!\left(2\pi f\,\frac{n}{48000} + 0.23\right), \quad 0 \le n < 4096,
+$$
+
+hop 96, $L = 384$, the release runner, and the original Python reference,
+comparing the complete process-plus-flush output. Maximum absolute errors:
+
+| $f$ / shift / window | Original | Only $x[0] = 0$ | One leading zero |
+|---|---:|---:|---:|
+| 440 Hz / $-1$ / asymmetric | 0.0657946 | 2.01e-15 | 4.26e-15 |
+| 440 Hz / $-1$ / symmetric | 0.0293861 | 3.43e-15 | 3.30e-15 |
+| 41.203445 Hz / $-7$ / asymmetric | 0.0920660 | 6.45e-16 | 7.41e-16 |
+| 41.203445 Hz / $-7$ / symmetric | 0.0550446 | 4.40e-15 | 1.78e-15 |
+| 750 Hz / $+12$ / asymmetric | 0.690337 | 7.05e-15 | 4.95e-15 |
+| 750 Hz / $+12$ / symmetric | 0.568743 | 2.40e-15 | 7.95e-15 |
+
+For every row, 96 leading zeros reproduced the original error and 97 leading
+zeros matched the one-zero result; those two variants complete the five
+variants per row. The probes use phase 0.23 where the harness E1 fixture uses
+0.31, which is why their failing magnitudes differ from the harness report.
+
+The fix in the engine and in `experiments/transport/stable_reference.py`
+selects canonical bin 1 when the interior magnitude spread is at most
+$10^{-12}$ of the maximum, and defines the ordering at the 64-peak cutoff
+([native core](native-core.md) has the rule). The original `engine.py` and the
+user-accepted listening renders are unchanged. The corrected variant passed all
+30 checks before the modulation arithmetic change:
+[stable parity](results/2026-10-08-native-parity-stable.json). Final parity
+measures that variant, not the old prototype. For the preferred excerpt the
+difference from the old waveform is large (maximum 1.126, RMS 0.202); these
+phase-sensitive errors are not a perceptual quality score.
 
 ## Diagnostic performance
 
-Measured on an i9-10900KF under WSL, GCC `-O3`, using the same 6.5-second
-44.1 kHz mono source slice at -7 semitones. Preparation, file I/O, flush, and
-the first 2432 input frames are excluded. No parent build or sanitizer run
-overlapped the final measurements. Timer overhead, the final partial block,
-and operating-system scheduling remain in the measurement.
+Measured on an i9-10900KF under WSL with GCC `-O3`, on the same 6.5-second
+44.1 kHz mono excerpt at $-7$ semitones. Preparation, file I/O, flush, and
+the first 2432 input frames are excluded; timer overhead, the final partial
+block, and operating-system scheduling are included. No other build or
+sanitizer run overlapped the final measurements. Source:
+[final comparisons](results/2026-10-08-native-parity-final.json) against
+[stable parity](results/2026-10-08-native-parity-stable.json).
 
 | Block samples | Audio duration µs | Final mean / p95 / max µs | Calls over duration | Throughput gain versus unoptimized deterministic port |
 | ---: | ---: | ---: | ---: | ---: |
-| 32 | 725.6 | 256.1 / 894.6 / 1593.4 | 1895 / 8882 | 1.353× |
-| 64 | 1451.2 | 508.8 / 893.4 / 9941.7 | 6 / 4441 | 1.382× |
-| 128 | 2902.5 | 994.5 / 1748.6 / 1984.2 | 0 / 2221 | 1.408× |
+| 32 | 725.6 | 256.1 / 894.6 / 1593.4 | 1895 / 8882 | 1.353 |
+| 64 | 1451.2 | 508.8 / 893.4 / 9941.7 | 6 / 4441 | 1.382 |
+| 128 | 2902.5 | 994.5 / 1748.6 / 1984.2 | 0 / 2221 | 1.408 |
 
-The optimization replaces repeated modulation trigonometry with a complex
-recurrence re-anchored every 64 samples and avoids taper cosine outside its
-transition. It leaves persistent phase/region state unchanged. The runs show
-35–41% higher throughput, with numerical agreement retained. They are short
-observations, not a statistically characterized speedup or worst-case bound.
+The gain column compares the final build with the stable-parity build, which
+lacks the anchored complex recurrence and the taper shortcut described in
+[native core](native-core.md). Persistent phase and region state are the same
+in both, and parity held. The 35 to 41 percent higher throughput is a short
+observation, not a characterized speedup or a worst-case bound.
 
-The 96-sample hop still concentrates work in individual callbacks. A good
-average processing rate does not establish that 32-sample callbacks can finish
-in time. The long 64-sample maximum is retained without attributing its cause.
-Even the observed zero misses at 128 samples cannot guarantee target deadlines.
-Reducing per-region inverse-FFT work or distributing it without adding delay is
-the next performance question; measure dense inputs and target-native behavior
-before making a real-time claim.
+The 96-sample hop concentrates work in single callbacks, so a good average
+rate does not show that 32-sample callbacks finish in time. The 9941.7 µs
+maximum at block 64 is recorded without an attributed cause. Zero misses at
+block 128 do not guarantee a target deadline. The next performance question
+is reducing or distributing per-region inverse-FFT work without adding delay,
+measured on dense inputs and target hardware before any real-time claim.
 
-## Native listening artifact
+## Native listening file
 
-[Native 06 at -7 semitones](/tmp/pitchwing-native-listening-20261008/06-minus7.wav)
-is mono float32, 44.1 kHz, 289177 frames, 1156766 bytes. ffprobe confirms the
-format and frame count. It uses the same source interval, channel, 0.5-second
-preroll, and 383-sample scheduled delay as the original example. Audition frames
-are `[22433, 287033)`; there is no normalization, limiting, resampling, or crop.
-The final report contains its hash and recipe. The file is temporary and can be
-recreated with the command below. User listening acceptance is still pending.
+The native render of excerpt 06 at $-7$ semitones was written to
+`/tmp/pitchwing-native-listening-20261008/06-minus7.wav`: mono float32,
+44.1 kHz, 289177 frames, 1156766 bytes, format and frame count confirmed with
+`ffprobe`. It uses the same source interval, channel, 0.5-second preroll, and
+383-sample scheduled delay as the original example; audition frames are
+$[22433, 287033)$ with no normalization, limiting, resampling, or crop. The
+final report holds its hash and recipe. The file is temporary and the
+harness command in [native validation](native-validation.md) recreates it.
+User listening acceptance is still pending.
 
-Compare with the preserved
-[Python 06/-7](/tmp/pitchwing-listening-20261008/06/minus7.wav) and
-[delayed dry](/tmp/pitchwing-listening-20261008/06/dry-delay383.wav).
-Measured low-dyad spacing and DC defects remain unresolved. Stereo, smooth live
-pitch changes, broader sample-rate coverage, below-F#1 real recordings, and
-target-native callback validation remain future work. No VST work is included.
+The comparison files are the preserved Python render
+`/tmp/pitchwing-listening-20261008/06/minus7.wav` and the delayed dry signal
+`/tmp/pitchwing-listening-20261008/06/dry-delay383.wav`, also temporary. The
+measured low-dyad spacing and DC defects remain unresolved. Stereo, smooth
+live pitch changes, broader sample-rate coverage, real recordings below F#1,
+and target-native callback validation remain open. No VST work is included.
 
-## Reproduce
+## Provenance of the recorded run
 
-Use already-installed tools; obtain approval for any missing installation.
-
-```sh
-export PATH="/tmp/pitchwing-env/bin:$PATH"
-cmake -S . -B /tmp/pitchwing-native-release -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-cmake --build /tmp/pitchwing-native-release --parallel 2
-ctest --test-dir /tmp/pitchwing-native-release --output-on-failure
-cmake -S . -B /tmp/pitchwing-native-sanitize -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG='-O1 -g' -DBUILD_TESTING=ON -DPITCHWING_ENABLE_ASAN=ON -DPITCHWING_ENABLE_UBSAN=ON
-cmake --build /tmp/pitchwing-native-sanitize --parallel 2
-ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:quarantine_size_mb=16:thread_local_quarantine_size_kb=64 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 /tmp/pitchwing-native-sanitize/pitchwing_tests
-OPENBLAS_NUM_THREADS=1 /tmp/pitchwing-env/bin/python -B scripts/compare_native.py --runner /tmp/pitchwing-native-release/pitchwing_render --benchmark --output /tmp/new-native-parity.json --listening-output /tmp/new-native-06-minus7.wav
-```
-
-Choose new output names: reports/audio refuse existing paths. In the recorded
-final run, the 27 synthetic comparisons were executed first without timing, then
-the three preferred-excerpt cases used `compare_case` with the already archived
-mono samples. Their hash was verified against the earlier report before reuse.
-This avoided another stem read; the standard command above reproduces the same
-fixtures by seeking directly to the bounded source interval. The initial and
-stable runs each read only that interval, not the full stem or corpus. Build
-products and audio scratch remain under `/tmp`; compact evidence stays here.
+The build, test, and harness commands are in
+[native validation](native-validation.md). In the recorded final run, the 27
+synthetic comparisons ran first without timing; the three preferred-excerpt
+cases then used `compare_case` with the archived mono samples, whose hash was
+checked against the earlier report before reuse. This avoided another read of
+the recording; the standard harness command reproduces the same fixtures by
+seeking to the bounded source interval. The initial and stable runs each read
+only that interval. Build products and audio scratch stayed under `/tmp`; the
+compact evidence is in `docs/results/`.

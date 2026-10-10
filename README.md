@@ -38,7 +38,7 @@ separate them, so the engine models the partials explicitly and moves them:
    solved jointly with a 1 % ridge, bounding the cancelling amplitudes that real
    strums otherwise produce.
 3. **Pitch map**: every partial or residual region is translated by
-   `(ratio − 1)·f` with a phase-continuous rotation integrated from the
+   $(\text{ratio} - 1) \cdot f$ with a phase-continuous rotation integrated from the
    per-sample pitch control, so no extra smoothing is applied to the control.
 4. **Shared Taylor-term resynthesis**: each translation becomes a whole-bin
    circular shift plus a four-term Taylor remainder (≤ −73 dB), so all entries

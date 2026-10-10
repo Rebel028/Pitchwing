@@ -1,51 +1,62 @@
-# ShiftKey consumer requirements and engine decisions
+# ShiftKey consumer requirements
 
-Recorded 2026-10-09 from the sibling checkout, read without changing it.
-Current consumer code takes precedence over historical sketches. The task is
-to adapt the reusable engine, not implement or package a VST in this repository.
+ShiftKey requires a planar stereo float engine that is prepared outside the
+audio thread, accepts a fractional pitch target before every chunk of at
+most 32 samples without smoothing it, reports one fixed audio delay per
+prepared rate, and builds as a C++17 CMake target with the plug-in's Windows
+toolchain. These requirements are read from the sibling checkout
+`../ShiftKey` without changing it; current consumer code takes precedence
+over its historical sketches. The engine's answer to each requirement is the
+contract in [the live engine design](live-engine.md); the consumer-side
+wiring is in [ShiftKey integration](shiftkey-integration.md). The engine is
+adapted here; no VST is implemented or packaged in this repository.
 
-| Consumer evidence | Engine requirement / decision |
+## Requirements
+
+| Consumer evidence | Engine requirement |
 | --- | --- |
-| `../ShiftKey/src/PitchShifter.h:12–22` | Planar stereo float, prepare outside audio callback, allocation-free reset/set/process, queried latency. Add `LiveEngine`; preserve static `Engine`. |
-| `../ShiftKey/src/PluginProcessor.cpp:198–214` | Pitch setter before chunks of at most 32 samples, split at exact MIDI offsets; support one-sample calls and fractional live controls. |
-| `PluginProcessor.cpp:14–17,180,210`; `../ShiftKey/src/Layout.h:50–60,106` | Base ±24 + fine ±1 + curve contribution ±24 = ±49 semitones. Older ±48 prose omits fine tuning. No product clarification needed to support this arithmetic. |
-| `../ShiftKey/.scratch/midi-pitch-blocks/issues/11-pitch-control-signal.md:13–16`; issue 21:56 | No added smoothing ramp. Short curves and immediate note-off returns must be retained. OLA remains intrinsic to the algorithm. |
-| `PluginProcessor.cpp:79,84,88,132,185–186,220–233` | Stable audio latency for host compensation and delayed dry mix. Scale geometry with sample rate. |
-| `PluginProcessor.cpp:30–31,135,148`; issue `15-measure-pitch-offset.md:13–17`; `../ShiftKey/tools/pitch_offset.cpp` | Curve-clock offset is distinct from audio latency. Measure 220 Hz step response using 1024-sample Hann old/new-frequency amplitude share; report t50 minus event minus audio delay, plus transition width and phase dependence. |
-| `PitchShifter.h:118–136` | Existing backend allows no-op formant control; report Pitchwing formants/quality selection as unsupported. |
-| ShiftKey build documentation; `../ShiftKey/CMakeLists.txt:1–5` | C++17, Windows x64 MSVC 14.29/VS2019; consumer requires CMake 3.24+, engine requires 3.20+. No native target validation can be inferred from Linux builds. |
+| `src/PitchShifter.h:15-26` | Planar stereo float with input and output distinct; `prepare()` may allocate; `reset`, the setter, `process`, and `latencySamples` run on the audio thread without allocating. The static `Engine` is preserved and `LiveEngine` added beside it. |
+| `src/PluginProcessor.cpp:207-220` | The pitch setter runs before chunks of at most 32 samples, split at exact MIDI event offsets, so one-sample calls and fractional live controls are required. |
+| `src/PluginProcessor.cpp:13-17`; `src/Layout.h:106` | Base $\pm 24$ semitones plus fine $\pm 100$ cents plus curve amount $\pm 24$ semitones sum to $\pm 49$ semitones, applied with no clamp (`PluginProcessor.cpp:219`). Older $\pm 48$ prose omits fine tuning. |
+| `.scratch/midi-pitch-blocks/issues/11-pitch-control-signal.md`; `issues/21-block-playback.md` | No added smoothing ramp: short curves and immediate note-off returns keep their authored timing. Overlap-add settling intrinsic to the algorithm is accepted. |
+| `src/PluginProcessor.cpp:88`, `:97`, `:141` | A stable audio latency per prepared rate for host compensation and the delayed dry mix; geometry scales with the sample rate. |
+| `src/PluginProcessor.cpp:31-36`, `:144`; `issues/15-measure-pitch-offset.md`; `tools/pitch_offset.cpp` | The curve-clock offset is distinct from audio latency. Measure the 220 Hz step response with the 1024-sample Hann old/new amplitude share and report $t_{50}$ minus the event minus the audio delay, the transition width, and the phase dependence. |
+| `src/PitchShifter.h:22`, `:25`, `:139` | Formant and quality callbacks exist and an existing backend ignores them; the engine may report both as unsupported. |
+| `README.md:98`; `CMakeLists.txt:1-5` | C++17; Windows x64 with VS2019 Build Tools (MSVC 14.29); the consumer requires CMake 3.24, the engine 3.20. A Linux build infers nothing about the native target. |
 
-No consumer sample-rate whitelist or numerical CPU allowance was found. Validate
-44.1/48/96 kHz first and measure callback deadlines against each block duration.
-Instances require exclusive caller access; setters/process belong on the audio
-thread, with consumer parameter handoff outside this engine's contract.
+The consumer has no sample-rate whitelist and no numerical CPU allowance.
+The engine therefore validates 44.1, 48, and 96 kHz first and measures
+callback time against each block duration. Instances require exclusive
+caller access; setters and `process` belong on the audio thread, and the
+consumer's parameter handoff is outside this engine's contract.
 
-## Implementation design and review
+## Engine decisions taken from these requirements
 
-`LiveEngine` uses joint stereo magnitudes and summed per-channel phase
-cross-products, preserving anti-phase inputs without downmixing. Near-cancelling
-cross-products need a coherence gate and parabolic-frequency fallback. Shared
-regions can interact across channels; channel swapping, dual mono, anti-phase
-and silent-channel invariants are tested rather than claiming independent DSP.
+- Stereo is analysed jointly and rendered per channel without downmixing, so
+  anti-phase, swapped, dual-mono, and silent-channel inputs keep their
+  relations; the tests for these invariants are listed in
+  [live validation](live-validation.md).
+- The geometry is a function of the sample rate with a delay of about 10 ms
+  at every rate; the formulas are in [the live engine
+  design](live-engine.md#rate-dependent-geometry-and-scheduling).
+- Spectra, entries, control snapshot, and output destination of a frame are
+  immutable until the frame completes, and the frame's inverse transforms are
+  spread across the following hop. Frame analysis remains a burst and is
+  timed, not proven.
+- Pitch controls are integrated per sample over each hop, so a command shorter
+  than a hop still contributes; startup prehistory is zero. Discrepancy with
+  the original requirement text: the per-sample support correction over
+  $(\text{sourceSample}, \text{currentFrame}]$ is replaced by the frame's
+  mean control, see [pitch control
+  integration](live-engine.md#pitch-control-integration).
+- Sustained zero control reacquires exact delayed identity after the earlier
+  overlap-add contributions drain, without discarding input history; the
+  transition can still dip and needs listening.
+- Frame-end Nyquist guarding does not guarantee alias prevention for a brief
+  upward excursion that ends before the frame boundary, and neither the
+  interface range nor the invariant tests establish extreme-shift audio
+  quality.
 
-At sample rate Fs: H=floor(0.002 Fs), L=4H, N=FFT-fast-size-at-least
-ceil(2048 Fs/48000), audio delay D=L−1+H. The extra hop spreads regional inverse
-transforms across samples while keeping about 10 ms delay. Spectra, regions,
-phase/control integrals, unity flag and guard ratio must stay immutable until
-the frame completes. Frame analysis remains a burst and must be timed.
-
-Integrate ratio minus one over `(previousFrame, currentFrame]`, with source
-support correction over `(sourceSample, currentFrame]`; startup prehistory is
-zero. This retains commands shorter than a hop. Full-support unity control
-reacquires exact delayed identity after prior OLA contributions drain, without
-discarding input history. Transition phase/gain dips remain possible and need
-listening. Frame-end Nyquist guarding cannot guarantee alias prevention for a
-brief upward excursion ending before the frame boundary. Neither the interface
-range nor invariant tests establish extreme-shift audio quality.
-
-Independent bounded subagents reviewed consumer requirements, CMake/API needs,
-and frame-scheduling invariants; edits have separate ownership. Builds and
-measurements are coordinated by the main agent under `/tmp` to avoid duplicate
-I/O. Detailed API and consumer instructions live in [live-engine.md](live-engine.md)
-and [shiftkey-integration.md](shiftkey-integration.md). Existing DC and low-dyad
-defects, target-native performance, and new listening remain tracked limitations.
+Shifted DC and low-dyad defects within the limits stated in the design
+document, target-native performance, and new listening remain tracked
+limitations.

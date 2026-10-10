@@ -5,21 +5,21 @@ seven repository documents listed at the end plus targeted web reads made
 today. Every "expected" statement below is a hypothesis; the only measurements
 are those in `experiments/transport/FINDINGS.md` and the cited papers.
 
-Fixed constraints (not negotiable here): N=2048 past-heavy analysis, L=384
-synthesis support, H=96, D=479 samples at 48 kHz, frame work finished inside
+Fixed constraints (not negotiable here): $N=2048$ past-heavy analysis, $L=384$
+synthesis support, $H=96$, $D=479$ samples at 48 kHz, frame work finished inside
 the hop. Every candidate adds 0 samples of scheduled delay unless stated.
 CPU baseline per 96-sample hop: ~2 FFT(2048) analysis + up to 64 region
 IFFT(2048) per channel (stereo: separate region IFFTs per channel). A radix-2
-complex FFT(2048) is roughly 5*N*log2(N) ~ 1.1e5 flop, so the region IFFTs
+complex FFT(2048) is roughly $5 \cdot N \cdot \log_2(N)$ ~ 1.1e5 flop, so the region IFFTs
 dominate at ~7e6 flop/hop/channel when 64 regions are live.
 
 ## One new diagnosis from existing data
 
 FINDINGS reports isolated E2 errors of +7.03 cents at -7 st and -4.71 cents at
 +7 st. If the transport is exact and only the region frequency estimate
-omega_hat is biased, the output lands at `omega + (r-1)*omega_hat`, so the
-cents error scales as `(r-1)/r`: -0.5 for r=2^(-7/12) and +0.333 for
-r=2^(7/12), ratio -1.5. Measured ratio 7.03/-4.71 = -1.49. So the E2 defect is a
+$\hat{\omega}$ is biased, the output lands at $\omega + (r-1)\hat{\omega}$, so the
+cents error scales as $(r-1)/r$: -0.5 for $r=2^{-7/12}$ and +0.333 for
+$r=2^{7/12}$, ratio -1.5. Measured ratio $7.03/-4.71 = -1.49$. So the E2 defect is a
 frequency-estimate bias of about -14 cents (0.03 bin at bin 3.5), not a
 transport fault. Candidate 2 targets exactly this; its test is cheap.
 
@@ -45,7 +45,7 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   peak admission hysteresis: enter at floor*2, leave at floor/2 (per-region).
   confidence c_p = min(1, age_p/4) * phase_consistency_p   (feeds 6, 7)
   ```
-  Birth with theta=0 is the correct default for this engine: the synthesis
+  Birth with $\theta=0$ is the correct default for this engine: the synthesis
   support is the newest windowed input, so zero rotation reproduces the fresh
   waveform at the translated frequency with no history assumption.
 - Evidence: architecture.md B and D08 call this "likely a larger quality lever
@@ -55,15 +55,15 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   only). McAulay-Quatieri/PARSHL birth-death matching is the classical form
   (https://ccrma.stanford.edu/~jos/parshl/parshl.pdf). No source measures the
   audible effect in a fixed-delay shifter; the FINDINGS defect is observational.
-- Latency: 0. CPU: negligible (<=64 regions, O(R) matching).
+- Latency: 0. CPU: negligible (<=64 regions, $O(R)$ matching).
 - Risks: a gate that is too tight re-births vibrato/bends every frame (phase
   restart = click-like AM); too loose keeps today's behaviour. Zombie frames can
   mis-link a genuinely new note to a just-died one at the same bin.
 - Test: 4 s A3 (220 Hz, 8 harmonics) + at t=2 s C#4 (277 Hz, -6 dB) + at
-  t=3 s a 0.5 Hz, +/-12 dB tremolo on C#4. Shift +7. Metric: NumPy STFT (4096,
-  hop 256) of output; track peak-bin phase of r*220 Hz; `max|unwrap(phase) -
-  linear fit|` over 1.8-3.8 s. Pass < 0.15 rad (no phase kick on neighbour
-  birth/death). Second metric: output energy at r*277 Hz in the 20 ms before
+  t=3 s a 0.5 Hz, $\pm 12$ dB tremolo on C#4. Shift +7. Metric: NumPy STFT (4096,
+  hop 256) of output; track peak-bin phase of $r \cdot 220$ Hz;
+  $\max|\mathrm{unwrap}(\text{phase}) - \text{linear fit}|$ over 1.8-3.8 s. Pass < 0.15 rad (no phase kick on neighbour
+  birth/death). Second metric: output energy at $r \cdot 277$ Hz in the 20 ms before
   t=2 s < -60 dB re its steady level (no pre-echo from stolen ancestry).
 
 ### 2. Window-matched / phase-based region frequency estimate
@@ -94,13 +94,13 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   (ill-conditioned near beat nulls, D07); keep the gate and the age criterion.
 - Test: 10 s mono, 20 tones of 0.5 s each, frequencies at bins 2.0, 2.3, ...,
   9.7 (47-227 Hz), shifts -7 and +7. Metric: zero-padded FFT (2^18) on the
-  middle 0.3 s of each tone, parabolic peak, cents vs r*f. Pass: |error| < 1
+  middle 0.3 s of each tone, parabolic peak, cents vs $r \cdot f$. Pass: $|\text{error}| < 1$
   cent for all 40 cases (today's E2 point fails at 7 cents).
 
 ### 3. Soft region boundaries at magnitude valleys (within-region phase locking)
 
 - Defect: regions are partitioned at midpoints; a bin that changes region
-  between frames jumps from rotation theta_A to theta_B, an abrupt phase step on
+  between frames jumps from rotation $\theta_A$ to $\theta_B$, an abrupt phase step on
   that bin's leakage energy (hop-rate AM/clicks). Not yet measured here.
 - Mechanism (no extra transforms: masks overlap, IFFT count unchanged):
   ```
@@ -119,11 +119,11 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   masks are an inference, unmeasured.
 - Latency: 0. CPU: +2 bins per boundary per IFFT input, negligible.
 - Risks: the valley wanders by several bins when partials beat, so the ramp
-  moves anyway; w>2 blurs the translation of close partials.
-- Test: 8 s mono: 300 Hz + 345 Hz (2 bins apart), 345 Hz with 0.5 Hz, +/-10 dB
+  moves anyway; $w>2$ blurs the translation of close partials.
+- Test: 8 s mono: 300 Hz + 345 Hz (2 bins apart), 345 Hz with 0.5 Hz, $\pm 10$ dB
   tremolo; shift +7. Metric: output STFT (8192, hop 96); energy outside
-  +/-4 Hz of r*300 and r*345 (excluding tremolo sidebands at +/-0.5 Hz)
-  relative to total, and spectrum of the r*300 envelope at 500 Hz (hop rate).
+  $\pm 4$ Hz of $r \cdot 300$ and $r \cdot 345$ (excluding tremolo sidebands at $\pm 0.5$ Hz)
+  relative to total, and spectrum of the $r \cdot 300$ envelope at 500 Hz (hop rate).
   Pass: sideband energy < -50 dBc and hop-rate envelope line < -50 dB re DC.
   Measure the current engine first; if it already passes, drop this item.
 
@@ -148,14 +148,14 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
 - Risks: at +12 st everything above 12 kHz is dropped: audible on bright DI only.
 - Test: 6 s mono bandlimited sawtooth at 1 kHz (partials to 23.9 kHz); shift
   +12 steady, then a 50 ms ramp from 0 to +12 at t=3 s. Metric: STFT (8192);
-  energy at bins farther than +/-6 Hz from any multiple of r(t)*1 kHz relative
+  energy at bins farther than $\pm 6$ Hz from any multiple of $r(t) \cdot 1$ kHz relative
   to total, in the 4-24 kHz band. Pass: < -60 dB both during and after the ramp.
 
 ### 5. Explicit DC / sub-bin policy
 
 - Defect (measured): constant 0.2 -> mean 0.023 (+7) / 0.279 (-7) with AC
   residue (FINDINGS). Cause: the windowed constant occupies bins 0..~2; the peak
-  picker puts a region on the leakage, translates it by (r-1)*omega_region, and
+  picker puts a region on the leakage, translates it by $(r-1)\omega_{\mathrm{region}}$, and
   the analytic (positive-frequency-only) reconstruction of a DC-centred lobe is
   not Hermitian-correct.
 - Mechanism (two policies; pick one and write it into PROJECT.md):
@@ -173,18 +173,18 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   explicitly"). No external source measures DC in shifters; it is a design gap.
 - Latency: 0. CPU: negligible.
 - Risks: Policy A's fixed region can capture the lower lobe of B0/E1 fundamentals
-  (bins 1.3 and 1.76) if omega_dc is set above ~25 Hz; bass extension (E1 =
-  41 Hz) bounds omega_dc from above.
+  (bins 1.3 and 1.76) if $\omega_{\mathrm{dc}}$ is set above ~25 Hz; bass extension (E1 =
+  41 Hz) bounds $\omega_{\mathrm{dc}}$ from above.
 - Test: 6 s mono: 0.2 DC + E2 (82.4 Hz) at 0.1 + E1 (41.2 Hz) at 0.1, shifts
-  +/-7. Policy A pass: mean over 1-5 s within 0.2 +/- 0.002 and shifted E2/E1
-  line levels within 0.2 dB of the no-DC run. Policy B pass: |mean| < 1e-3 and
+  $\pm 7$. Policy A pass: mean over 1-5 s within $0.2 \pm 0.002$ and shifted E2/E1
+  line levels within 0.2 dB of the no-DC run. Policy B pass: $|\text{mean}| < 10^{-3}$ and
   E2/E1 line levels within 0.2 dB of the no-DC run, AC residue < 1e-3 RMS.
 
 ### 6. Past-only onset score with region-local phase re-anchor and region widening
 
 - Defect: no transient handling; +7 low-chord onset crosses the envelope
   threshold ~3.27 ms late (FINDINGS, 20 ms RMS diagnostic). Mechanism of the
-  lag: a region mask of B bins is a bandpass with a ~N/B-sample kernel; narrow
+  lag: a region mask of $B$ bins is a bandpass with a ~$N/B$-sample kernel; narrow
   regions smear a fresh attack over hundreds of samples before translation.
   Stale ancestry rotation on the attack adds phase inconsistency.
 - Mechanism:
@@ -218,20 +218,20 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   has no transient handling through tag 1.4.0 (design note + tags page).
   The widening step is an inference from the mask-kernel argument; unmeasured.
 - Latency: 0 (uses only past samples). CPU: +1 FFT(512) per hop (~+2% of the
-  64-region baseline) plus O(R).
+  64-region baseline) plus $O(R)$.
 - Risks: false onsets on bends/vibrato (2024 paper on ornamentation false
   positives, https://arxiv.org/html/2408.13734v1, abstract) re-anchor sustained
   notes and produce AM; widening detunes partials near the widened band for a
   few frames; picks with pitched content get the band's omega, not their own.
 - Test: 8 s mono: silence 0.5 s, then every 1 s an alternating synthetic chord
   (E2-B2-E3-G#3 / D2-A2-D3-F#3, 10 harmonics each, 1 ms attack, 0.5 s decay)
-  on top of a continuous A4 at -20 dB; shifts +/-7. Metrics after D alignment:
-  (a) 50% RMS-envelope (5 ms window) crossing delay vs the r-scaled reference
+  on top of a continuous A4 at -20 dB; shifts $\pm 7$. Metrics after D alignment:
+  (a) 50% RMS-envelope (5 ms window) crossing delay vs the $r$-scaled reference
   chord; pass < 1.5 ms (re-measure today's engine with this exact fixture
   first). (b) energy in the 10 ms before each onset < -60 dB re peak. (c) phase
-  of r*A4 (STFT 4096 peak-bin, unwrapped) deviation from linear < 0.15 rad
+  of $r \cdot \text{A4}$ (STFT 4096 peak-bin, unwrapped) deviation from linear < 0.15 rad
   across all onsets (region-locality). (d) chord pitch lines at 100-300 ms
-  after onset within 3 cents of r*f.
+  after onset within 3 cents of $r \cdot f$.
 
 ### 7. Low-band long-history estimator with parametric transport for unresolved partials
 
@@ -240,7 +240,7 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   spacing is 23.4 Hz, so E2+G2 (15.6 Hz), E2+A2 (27.6 Hz), D2+A2 (36.6 Hz) are
   also one lobe. Rigid translation cannot fix this (D07); nor can better
   single-frequency estimates (FINDINGS decision).
-- Mechanism (low band only, e.g. regions with omega_p < 350 Hz):
+- Mechanism (low band only, e.g. regions with $\omega_p < 350$ Hz):
   ```
   (a) zoom analysis: decimate input by 8 (halfband chain, past-only), keep a
       16384-sample history at 6 kHz (2.7 s) but use FFT(2048) over the newest
@@ -287,10 +287,10 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
   met by this candidate (say so in the acceptance). Decimation filter group
   delay only affects the estimator, not output timing.
 - Test: 9 s mono: E2+F2 (4.9 Hz) 0-3 s, E2+A2 (27.6 Hz) 3-6 s, E1+F1 (2.45 Hz)
-  6-9 s, equal amplitudes; shifts +/-7. Metric (existing FINDINGS method):
-  2^17-point FFT of the last 1.5 s of each segment; spacing of the two
-  strongest lines; pass |spacing - r*df|/(r*df) < 5% and >= 80% of AC energy
-  within +/-1 Hz of the two expected lines for E2+F2 and E2+A2; report E1+F1
+  6-9 s, equal amplitudes; shifts $\pm 7$. Metric (existing FINDINGS method):
+  $2^{17}$-point FFT of the last 1.5 s of each segment; spacing of the two
+  strongest lines; pass $|\text{spacing} - r \cdot df|/(r \cdot df) < 5\%$ and >= 80% of AC energy
+  within $\pm 1$ Hz of the two expected lines for E2+F2 and E2+A2; report E1+F1
   as informational (expected to need longer history). Baseline: 0.2-3.8%.
 
 ### 8. Cheaper synthesis: direct support evaluation (per-bin modulation at fixed cost)
@@ -323,23 +323,23 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
 - Risks: 8a recurrence drift (mitigated by re-anchoring); SIMD layout work;
   8b breaks the per-sample control contract in live-engine.md.
 - Test: 8a must be a null test: tone and dyad fixtures from FINDINGS, shift
-  +/-7, `max|y_8a - y_current| < 1e-6` (double) or < 1e-4 (float). 8b: pure
+  $\pm 7$, $\max|y_{8a} - y_{\mathrm{current}}| < 10^{-6}$ (double) or < 1e-4 (float). 8b: pure
   1 kHz tone at +7 (fractional-bin shift), sideband level via STFT(8192) at
-  +/-500 Hz (hop rate) multiples; pass < -50 dBc. WSL wall-time ratio is a
+  $\pm 500$ Hz (hop rate) multiples; pass < -50 dBc. WSL wall-time ratio is a
   diagnostic only, not a callback bound.
 
 ### 9. Stereo: per-channel frequency refinement when channels disagree
 
-- Defect: shared omega_p is right only if both channels carry the same partial.
+- Defect: shared $\omega_p$ is right only if both channels carry the same partial.
   With independent material (double-tracked guitars, wide stereo synth), a
-  partial at omega' != omega_p in channel R lands at omega' + (r-1)*omega_p,
-  error (r-1)(omega' - omega_p): small for detunes under a bin, so this is a
+  partial at $\omega' \neq \omega_p$ in channel R lands at $\omega' + (r-1)\omega_p$,
+  error $(r-1)(\omega' - \omega_p)$: small for detunes under a bin, so this is a
   low-priority refinement. The current design already preserves inter-channel
   phase (same rotation on both channels) and uses the cross-product sum, which
   does not cancel anti-phase channels.
-- Mechanism: compute per-channel phase-increment estimates w_L, w_R for stable
-  regions; if |w_L - w_R| > 0.25 bin and both channel magnitudes > 0.25*max,
-  use per-channel delta_p and theta_p for that region (the IFFTs are already
+- Mechanism: compute per-channel phase-increment estimates $w_L, w_R$ for stable
+  regions; if $|w_L - w_R| > 0.25$ bin and both channel magnitudes $> 0.25 \cdot \max$,
+  use per-channel $\delta_p$ and $\theta_p$ for that region (the IFFTs are already
   per channel). Otherwise keep the shared estimate.
 - Evidence: Signalsmith Stretch predicts phase from the loudest channel and
   copies inter-channel phase differences (design note, claim); Rubber Band
@@ -349,21 +349,21 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
 - Risks: breaks exact inter-channel phase preservation for that region (that is
   the point); mono-compatibility of such regions must be checked.
 - Test: 6 s stereo: L = 1000 Hz, R = 1010 Hz (same region), equal levels,
-  shift +7: per-channel peak cents error < 2. Plus L = -R 300 Hz: |L+R| output
+  shift +7: per-channel peak cents error < 2. Plus $L = -R$ 300 Hz: $|L+R|$ output
   < -60 dB re L (anti-phase preserved).
 
 ### 10. Tonality limit (option, off by default)
 
-- What: above a corner frequency f_c, use translation (delta = (r-1)*2*pi*f_c)
+- What: above a corner frequency $f_c$, use translation ($\delta = (r-1) \cdot 2\pi f_c$)
   instead of scaling; keeps high partials' spacing and reduces upper-band
   remapping artifacts at the cost of inharmonic high partials.
-- Evidence: Signalsmith Stretch design note: corner = limit * sqrt(F); benefits
+- Evidence: Signalsmith Stretch design note: $\text{corner} = \text{limit} \cdot \sqrt{F}$; benefits
   supported by audio examples only (vendor/author claim, no measurement).
   papers.md 5 already says it must be a named option.
-- Latency 0, CPU negligible. Risk: not a transposition above f_c; must never be
+- Latency 0, CPU negligible. Risk: not a transposition above $f_c$; must never be
   on in a tuning-accuracy test.
 - Test: harmonic 1 kHz sawtooth, +7; with limit 8 kHz, partials below 8 kHz
-  within 1 cent of r*f, partials above within 1 cent of f + (r-1)*8 kHz.
+  within 1 cent of $r \cdot f$, partials above within 1 cent of $f + (r-1) \cdot 8$ kHz.
 
 ## What NOT to do (negative evidence)
 
@@ -388,8 +388,8 @@ and carry the most risk; 8 is an enabler; 9-10 are options.
 - Time-stretch + resampler pipelines (Rubber Band live API: >= 50 ms
   documented; ratio-dependent resampler delay) and Ocean-style integer-bin
   remapping (measured detuning/AM, D04).
-- Envelope time-rescaling of unresolved regions (compress |z_p[n]| by r): each
-  frame would re-anchor the envelope, successive frames disagree by (r-1)H per
+- Envelope time-rescaling of unresolved regions (compress $|z_p[n]|$ by $r$): each
+  frame would re-anchor the envelope, successive frames disagree by $(r-1)H$ per
   hop, and the OLA does not scale the beat. Rejected by construction.
 - Randomised residual/noise phases (architecture.md B): smears picks and
   stereo; keep residual bins on the same continuous transport.

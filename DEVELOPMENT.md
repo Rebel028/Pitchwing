@@ -1397,3 +1397,38 @@ in `/mnt/e/Reaper render/shiftkey test/` against the Neural DSP references;
 job; (3) `FetchContent` of Pitchwing from the private repository in ShiftKey;
 (4) the session-4 open items (spread `prepareFrame` across the hop, cheaper
 `fitPeaks`, inter-harmonic phase, dyad bends +7, hf_junk, split-count flicker).
+
+### Session 5 addendum: docs rewrite and LaTeX pass
+
+Purpose: make `docs/` readable and verifiable before the engine work resumes.
+User asked for the `technical-writing` skill
+(`npx skills use "https://github.com/riekelt/technical-writer" --skill "technical-writing"`)
+and GitHub LaTeX for all formulas; experiments/ and research/ stay (every
+experiments/ script is a quality gate or its reference; research/ is provenance).
+
+Changes: the eight living docs in `docs/*.md` were rewritten conclusion-first
+with every claim tied to a code line, test, or result file; the eight dated
+notes in `docs/quality/` and the README "How it works" section got a
+LaTeX-only pass (wording untouched, 216 expressions). `AGENTS.md` now records
+the skill as the rule for technical prose.
+
+Findings while verifying docs against code (fixed in the docs, not the code):
+`lobeRange` is 48 bins, the transported span 24 (`LiveEngine.cpp:20,28`);
+the jointFit ridge is 1 % of the mean Gram diagonal, 1e-12 is only the 2x2
+determinant guard (`:518-529`, `:303`); the scheduler runs R + 2*taylorTerms
+tasks with a 160-entry cap (`:788-797`, `:1065`, `:26`); failed flush returns
+`BufferTooSmall` before `InvalidBuffer` (`:742-747`) and `PitchLocked` is
+never returned; the old per-region modulation recurrence no longer exists,
+frame translation uses the mean control; E2 IF-estimator bias is -16 cents
+(`docs/results/2026-10-10-estimator-probe.txt`). Static engine: findRegions
+falls back to the largest interior bin (`Engine.cpp:252-254`), ratio 1
+bypasses transport (`:320-331`); `--tolerance` of `pitchwing_render` was
+undocumented. Numbers carried over without a located result file: -0.23 dB E2
+gain, 0.2 DC ripple, "about 420 hops" (labelled estimates in the docs).
+
+Validation: no em/en dashes or ` -- ` in `docs/*.md`; `$` balanced on every
+non-code line of the 17 files; all relative links resolve; README anchors
+"Amplitude ridge" and "Shared synthesis" exist. Not rendered on GitHub.
+
+Remaining: ShiftKey-side docs untouched; `DEVELOPMENT.md` and `PROJECT.md`
+keep their own conventions (record and scope, not rewritten).
