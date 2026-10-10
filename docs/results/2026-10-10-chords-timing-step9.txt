@@ -1,0 +1,21 @@
+Stationary low chords, late-window (0.95-1.20 s) fit of the ideally shifted partials (evaluate.fit_lines),
+8 harmonics per note (evaluate.harmonic_sound), 48 kHz. Columns: step4 -7, step4 +7, step9 -7, step9 +7.
+E1+B1+E2    [0.223, 0.122, 0.951, 0.945]
+E1 alone    [0.831, 0.797, 0.947, 0.947]
+B1 alone    [0.836, 0.866, 1.0, 1.0]
+E2 alone    [0.972, 0.976, 1.0, 1.0]
+B1+E2       [0.263, 0.187, 0.941, 0.935]
+E1+B1       [0.156, 0.072, 0.978, 0.98]
+first chord [0.319, 0.09, 0.898, 0.882]
+
+WSL timing probe step 9 (oscillator components), automation off:
+44100 32 mean 213 p95 535 miss 0 / 689
+44100 64 mean 433 p95 620 miss 0 / 344
+44100 128 mean 843 p95 1139 miss 0 / 172
+48000 32 mean 195 p95 395 miss 0 / 750
+48000 64 mean 389 p95 569 miss 0 / 375
+48000 128 mean 774 p95 999 miss 0 / 187
+96000 32 mean 153 p95 459 miss 257 / 1500
+96000 64 mean 310 p95 540 miss 2 / 750
+96000 128 mean 612 p95 883 miss 0 / 375
+Before oscillator components (each component an IFFT): 48000 64 mean 712 p95 897; 96000 32 misses 315/1500.

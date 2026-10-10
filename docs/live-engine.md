@@ -165,6 +165,14 @@ is repeated by four parabolic steps from the pass-1 centre (spacing 0.15 bin —
 quality (≤ 2 %). Subtracting non-credible fits (DC-lobe sidelobes) broke pure
 DC at +7.
 
+Split groups (step 9) hold up to 32 components (a low chord's harmonic series
+chains into one group below 700 Hz; the former cap of 4 left real chords
+unsplit). The long-frame frequencies use a single fit plus two local refits on
+bins cleaned of the other components' lobes (the joint coordinate descent was
+O(m³) per sweep). Components are rendered as oscillators,
+`Re(2a·n·w[n−L+q]·e^{jω(n−L+q)}·modulation[q])` — the exact IFFT of their lobe
+plus mirrored image, untruncated — instead of an n-point IFFT each.
+
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
 channel relations without mixing samples between channels. A silent channel

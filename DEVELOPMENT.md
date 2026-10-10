@@ -1101,3 +1101,29 @@ through step 8. Open, in priority order: (1) split dyads while bending
 (3) onset lag at +7 (0.78 ms, shift-caused, unchanged); (4) user listening of
 step 8; (5) profiling (sort, model fill), 44.1 kHz fixture runs, stereo checks,
 MSVC notes.
+
+Dense low chords (step 9). The crossfade fixture's late fit (0.24/0.12) turned
+out to be a stationary problem: through every build so far a stationary
+E1+B1+E2 chord (8 harmonics each) fitted 0.22/0.12, E1+B1 0.16/0.07, B1 alone
+0.84/0.87, E1 alone 0.83/0.80 (`experiments/quality/chord_fit.py`,
+[docs/results/2026-10-10-chords-timing-step9.txt](docs/results/2026-10-10-chords-timing-step9.txt)).
+Low harmonic series sit 1.8–2.6 short bins apart, their long peaks chain into
+one group, and `maxSplit = 4` rejected every real chord. Now 32 components per
+group, local two-pass long refits instead of the joint coordinate descent, and
+oscillator rendering of components (the IFFT-per-component version doubled the
+WSL mean cost: 48 kHz block 64 345 → 712 µs; with oscillators 389 µs).
+Results ([matrix](docs/results/2026-10-10-live-step9-chords-full.json),
+[fixtures](docs/results/2026-10-10-fixtures-step9-chords.json)): stationary
+chords 0.94–0.98 (first chord B0+F#1+B1 0.32/0.09 → 0.90/0.88), single notes
+1.0 (E1 0.95); low_chord_crossfade late fit 0.24/0.12 → 0.94/0.95, envelope
+gain 0.78/0.76 → 0.96/1.0; B0 gate late fit 0.87/0.86 → 0.98/0.95; warble IF
+p-p 3.8–5/2 c. Regressions/open: B0 gate −7 envelope NRMSE 0.25 → 0.32 with
+best lag −12 ms (output envelope early) — hypothesis: a split group's residual,
+which carries the onset's time structure, is translated with the erratic merged
+short-frame ω instead of each component's; churn flux +8…+30 % on the clean and
+noisy chord (flux ratios within ±0.2, one borderline event); WSL 96 kHz block
+32 misses 257/1500 (once per hop: the synchronous analysis in prepareFrame;
+gprof: FFT 34 %, renderRegion 15 %, splitRegion 12 %, jointFit 9 %, fitPeaks
+5 %). Fix candidates: give each component the residual bins nearest to it
+(IFFT only when that residual is significant), and split prepareFrame into two
+phases inside the hop (no latency change).

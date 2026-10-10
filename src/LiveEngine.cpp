@@ -22,8 +22,8 @@ constexpr std::size_t lobeOversample = 64;
 constexpr std::size_t longFactor = 4;      // long analysis spans 4 n; supplies omega only
 constexpr double decimatedRate = 6000.0;   // long analysis runs decimated to about this rate
 constexpr double longLimitHz = 700.0;      // long peaks are searched below this
-constexpr std::size_t maxSplit = 4;        // components per split region
-constexpr std::size_t maxEntries = maxRegions + 16;
+constexpr std::size_t maxSplit = 32;       // components per split group (a low chord's harmonics)
+constexpr std::size_t maxEntries = maxRegions + 96;
 constexpr double minSplitBins = 0.35;      // short-bin spacing below which a split is ill-conditioned
 constexpr std::size_t lobeSpan = 24;       // bins each side a fitted lobe is transported with its partial
 constexpr double lobeQuality = 0.02;       // max residual/energy of a 3-bin fit that earns a lobe
@@ -166,6 +166,7 @@ struct LiveEngine::Impl {
             longSpectrum[channel].resize(nDecimated);
             model[channel].resize(bins);
             cleaned[channel].resize(bins);
+            cleanedLong[channel].resize(longLimit + 2);
         }
         // Both windows: sine rise to N - L/2, cosine fall over the last L/2.
         auto makeWindow = [](std::vector<double>& window, std::vector<Complex>& table, double& sum,
@@ -396,9 +397,9 @@ struct LiveEngine::Impl {
 
     // First pass (refine = false): 13-point grid over the peak bin +-0.6, then
     // parabolic steps; refit: parabolic steps from `start` only.
-    PeakFit fitPeak(const std::array<std::vector<Complex>, 2>& source, std::size_t peak, double start,
-                    bool refine) const noexcept {
-        auto cost = [&](double c) { return lobeFitCost(source, lobe, analysisSum, peak, c); };
+    static PeakFit fitPeak(const std::array<std::vector<Complex>, 2>& source, const std::vector<Complex>& table,
+                           double sum, std::size_t peak, double start, bool refine) noexcept {
+        auto cost = [&](double c) { return lobeFitCost(source, table, sum, peak, c); };
         auto found = start;
         if (!refine) {
             // The range reaches 0 so a DC lobe fits as an untranslated w = 0 tone.
@@ -416,7 +417,7 @@ struct LiveEngine::Impl {
         }
         found = refineParabola(found, refine ? 0.15 : 0.1, refine ? 4 : 4, 0.0, cost);
         PeakFit fit;
-        fit.centre = std::clamp(found, 0.0, 0.5 * static_cast<double>(n) - 0.5);
+        fit.centre = std::max(found, 0.0);
         auto energy = 0.0;
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             for (auto bin = peak - 1; bin <= peak + 1; ++bin) {
@@ -425,7 +426,7 @@ struct LiveEngine::Impl {
         }
         // Below one bin (a DC lobe) the positive/image split of the lobe is
         // ill-conditioned; such regions keep bins only and bin 0 stays DC.
-        const auto residual = lobeFitCost(source, lobe, analysisSum, peak, fit.centre, &fit.amplitude);
+        const auto residual = lobeFitCost(source, table, sum, peak, fit.centre, &fit.amplitude);
         fit.good = residual <= lobeQuality * energy && fit.centre >= 1.0;
         fit.credible = residual <= credibleQuality * energy && fit.centre >= 1.0;
         return fit;
@@ -439,7 +440,8 @@ struct LiveEngine::Impl {
     // neighbour's shift (E2's 2nd harmonic: a -14 dB line at h2 + delta(h1)).
     void fitPeaks(std::size_t count) noexcept {
         for (std::size_t i = 0; i < count; ++i) {
-            fits[i] = fitPeak(spectrum, peaks[i], 0.0, false);
+            fits[i] = fitPeak(spectrum, lobe, analysisSum, peaks[i], 0.0, false);
+            fits[i].centre = std::min(fits[i].centre, 0.5 * static_cast<double>(n) - 0.5);
         }
         for (std::size_t i = 0; i < count; ++i) {
             const auto peak = peaks[i];
@@ -468,7 +470,8 @@ struct LiveEngine::Impl {
             }
             if (neighbours) {
                 // The neighbour shifts the estimate by well under 0.15 bin.
-                refits[i] = fitPeak(cleaned, peak, fits[i].centre, true);
+                refits[i] = fitPeak(cleaned, lobe, analysisSum, peak, fits[i].centre, true);
+                refits[i].centre = std::min(refits[i].centre, 0.5 * static_cast<double>(n) - 0.5);
             }
         }
         std::copy_n(refits.begin(), count, fits.begin());
@@ -616,27 +619,40 @@ struct LiveEngine::Impl {
         if (count < 2 || count + 1 > room || end - begin < count + 1) {
             return 0;
         }
-        std::array<double, maxSplit> fitted{};
+        // Single fits, then two local refits on bins cleaned of the other
+        // components' lobes (a joint coordinate descent was O(m^3) per sweep
+        // and unaffordable for a chord's harmonic series).
         for (std::size_t c = 0; c < count; ++c) {
-            const auto peak = chosen[c];
-            fitted[c] = searchCentre(peak <= 1 ? 0.0 : static_cast<double>(peak) - 0.6,
-                                     static_cast<double>(peak) + 0.6, 5, 13, [&](double centre) {
-                                         return lobeFitCost(longSpectrum, longLobe, longSum, peak, centre);
-                                     });
+            longFits[c] = fitPeak(longSpectrum, longLobe, longSum, chosen[c], 0.0, false);
         }
-        const auto low = chosen[0] > 1 ? chosen[0] - 1 : 0;
-        const auto high = chosen[count - 1] + 2;
-        for (int sweep = 0; sweep < 3; ++sweep) {
+        for (int pass = 0; pass < 2; ++pass) {
             for (std::size_t c = 0; c < count; ++c) {
-                const auto start = fitted[c];
-                fitted[c] = searchCentre(std::max(start - 0.6, 0.0), start + 0.6, 4, 9, [&](double centre) {
-                    fitted[c] = centre;
-                    return jointFit(longSpectrum, longLobe, low, high, fitted.data(), count, nullptr);
-                });
+                const auto peak = chosen[c];
+                for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                    for (auto bin = peak - 1; bin <= peak + 1; ++bin) {
+                        cleanedLong[channel][bin] = longSpectrum[channel][bin];
+                    }
+                }
+                for (std::size_t d = 0; d < count; ++d) {
+                    if (d == c || !longFits[d].credible) {
+                        continue;
+                    }
+                    for (auto bin = peak - 1; bin <= peak + 1; ++bin) {
+                        const auto k = static_cast<double>(bin);
+                        const auto p = lobeAt(longLobe, k - longFits[d].centre);
+                        const auto m = lobeAt(longLobe, k + longFits[d].centre);
+                        for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                            const auto& a = longFits[d].amplitude[channel];
+                            cleanedLong[channel][bin] -= a * p + std::conj(a) * m;
+                        }
+                    }
+                }
+                longRefits[c] = fitPeak(cleanedLong, longLobe, longSum, peak, longFits[c].centre, true);
             }
+            std::copy_n(longRefits.begin(), count, longFits.begin());
         }
         for (std::size_t c = 0; c < count; ++c) {
-            centres[c] = fitted[c] / static_cast<double>(longFactor);
+            centres[c] = longFits[c].centre / static_cast<double>(longFactor);
             if (c > 0 && centres[c] - centres[c - 1] < minSplitBins) {
                 return 0;
             }
@@ -1066,6 +1082,32 @@ struct LiveEngine::Impl {
             // Cache the weighted modulator once for both channel transforms.
             modulation[q] = current * transportSynthesis[q];
         }
+        if (region.kind == Kind::Component) {
+            // A component is an exact windowed sinusoid: the IFFT of its lobe
+            // (positive term plus mirrored image) is 2*a*w[m]*e^{j*w*m}, so
+            // render it as an oscillator instead of an n-point transform.
+            const auto start = static_cast<double>(n - length);
+            const auto step = Complex{std::cos(region.omega), std::sin(region.omega)};
+            const auto scale = 2.0 * static_cast<double>(n);
+            for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                auto phasor = std::polar(scale, region.omega * start) * region.amplitude[channel];
+                auto destination = frameOutputStart;
+                for (std::size_t q = 0; q < length; ++q) {
+                    if (q % 64 == 0) {  // re-anchor against rounding drift
+                        phasor = std::polar(scale, region.omega * (start + static_cast<double>(q))) *
+                                 region.amplitude[channel];
+                    }
+                    const auto value = phasor * analysis[n - length + q];
+                    const auto& weight = modulation[q];
+                    output[channel][destination] += value.real() * weight.real() - value.imag() * weight.imag();
+                    phasor *= step;
+                    if (++destination == ringSize) {
+                        destination = 0;
+                    }
+                }
+            }
+            return;
+        }
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             std::fill(inverseSpectrum.begin(), inverseSpectrum.end(), Complex{});
             if (region.lobe) {
@@ -1159,6 +1201,9 @@ struct LiveEngine::Impl {
     std::array<std::vector<Complex>, 2> cleaned;
     std::array<PeakFit, maxRegions> fits{};
     std::array<PeakFit, maxRegions> refits{};
+    std::array<PeakFit, maxSplit> longFits{};
+    std::array<PeakFit, maxSplit> longRefits{};
+    std::array<std::vector<Complex>, 2> cleanedLong;
     std::array<Region, maxEntries> regions{};
     std::array<Region, maxEntries> previousRegions{};
     std::array<double, 2> binZeroShare{};
