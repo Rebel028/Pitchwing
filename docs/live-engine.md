@@ -85,15 +85,29 @@ on either WSL or the consuming Windows machine.
 ## Linked stereo analysis
 
 Use a shared peak magnitude `hypot(abs(X_left),abs(X_right))`, then the existing
-local maxima, 64-region cap, relative floor `1e-4`, log-parabolic bootstrap, and
-stable flat-spectrum/tie policy. Both channels retain their own complex spectra.
-Temporal frequency estimation uses
-`X_left*conj(previous_left) + X_right*conj(previous_right)`. Anti-phase channels
-therefore add temporal energy instead of cancelling through a mono downmix.
-When the magnitude of that sum is no greater than `1e-6` times the sum of the
-individual product magnitudes, use the spectral estimate instead: conflicting
-temporal rotations do not supply a trustworthy joint phase. This relative gate
-is a numerical guard, not a validated psychoacoustic tracking-confidence model.
+local maxima, 64-region cap, relative floor `1e-4`, and stable
+flat-spectrum/tie policy. Both channels retain their own complex spectra. The
+region frequency is a least-squares fit of the three peak bins of both channels
+to `X[k] = a*A(w_k - w) + conj(a)*A(w_k + w)`, where `A` is the tabulated
+spectrum of the analysis window (1/64 bin over ±24 bins) and `a` is solved per
+channel; `w` is found by a nested 13-point grid search over ±0.6 bin (from 0
+for peaks at bin 1). The image term matters: without it the previous
+log-parabola and cross-frame phase-difference estimates wobbled 150–680 cents
+frame to frame below bin 4 and carried a −15 cent bias at E2
+(`docs/results/2026-10-10-estimator-probe.txt`). The fit is a single-sinusoid
+model; it does nothing for unresolved dyads. Near `w = 0` only `Re(a)` is
+determined (a DC lobe) and the fit falls back to that real-only solution, also
+when the two-parameter amplitude exceeds four times the data (ill-conditioning).
+
+The lowest region owns DFT bin 0: its fitted tone share `2*a*A(-w)` is translated
+with the region, and the remaining `X[0] - a*A(-w) - conj(a)*A(w)`, divided by
+the window sum, is the true DC and is rendered untranslated with the exact
+partition-of-unity window `analysis*synthesis = (1-cos)/4`. Measured: 0.05 DC +
+220 Hz at +7 hop lines −61 → −148 dBFS, DC gain 0.725 → 1.00; the unshifted
+41 Hz ghost of E1 fell from −18 dB to −75 dB. Destinations below zero are no
+longer dropped: `Re(z*e^{j*delta*n})` folds them to `|destination|`, which is
+the conjugate reflection of a real signal's lobe; low-tone gain loss at −7 fell
+from −1.1…−1.5 dB to −0.7…−0.9 dB (E2: −0.23 dB).
 
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
@@ -166,9 +180,11 @@ reconstruction without clearing audio history (measured per-partial dips
 ## Preserved limitations and validation ownership
 
 The implementation keeps rigid region translation, ungated nearest-frequency
-ancestry, shifted DFT-bin-zero retention, Nyquist omission outside exact unity,
-and the two-bin high-frequency taper. It does not solve DC leakage, unresolved
-low-dyad spacing, low-note settling, or spectral collisions. The alias guard
+ancestry (rotations with a per-hop translation advance below 1e-3 rad are slewed
+to zero), Nyquist omission outside exact unity, and the two-bin high-frequency
+taper. It does not solve unresolved low-dyad spacing, low-note settling, or
+spectral collisions; a DC offset at a nonzero shift keeps a small ripple
+(0.2 DC: 0.005 RMS at −7, 0.019 at +7). The alias guard
 uses the frame-end ratio only. A short high-ratio excursion inside the saved
 support can therefore exceed the guard's assumed destination range; there is
 no proof of dynamic alias suppression. Extreme target values are accepted

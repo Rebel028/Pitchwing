@@ -879,3 +879,41 @@ settling. Fixture `unity_transition` before/after: per-partial worst dips
 steady control 0.0). Quick evaluation matrix unchanged (identical numbers).
 The eventual-unity test now waits 420 hops for the glide. Cost: region
 rendering continues up to ~0.8 s after a return to exactly 0.
+
+Estimator, DC and fold step (one commit, three mechanisms measured one at a
+time with `evaluate.py --quick`; full run in
+[docs/results/2026-10-10-live-step3-full.json](docs/results/2026-10-10-live-step3-full.json),
+fixtures in [docs/results/2026-10-10-fixtures-step3.json](docs/results/2026-10-10-fixtures-step3.json)):
+
+- Image-aware lobe fit replaces parabola + cross-frame IF (`fitOmega`,
+  `lobeFitCost`, window-spectrum table built once per instance, 5 × 13 cost
+  evaluations per region per hop). E2 ±7: +6.96/−4.66 cents → 0.00/0.01, fit
+  0.94/0.87 → 0.999; all tone fits 0.96–0.98 → 0.98–0.99; −7 gains unchanged
+  at this step, +7 gains improved 0.25–0.5 dB. The quick DC case regressed
+  (ripple 0.001 → 0.098) because the DC lobe was fitted as a 0.5–1.6 bin tone.
+- Bin-0 split + partition-of-unity DC term (see `docs/live-engine.md`). DC+tone
+  fixture hop lines −61 → −148 dBFS, DC gain 0.725 → 1.0, E1 ghost −18 → −75 dB.
+  Two defects found and fixed on the way: (a) for peak bin 1 the fit range did
+  not reach 0, so pure DC was still translated; (b) a region at ω≈0 (DC lobe)
+  kept the rotation inherited during the startup transient and emitted
+  0.2·cos θ (−0.19 for 0.2 DC) — the unity slew is now applied to any region
+  whose per-hop advance is below 1e-3 rad; (c) near ω≈0 the two-parameter
+  amplitude is ill-conditioned (two huge cancelling terms) and its positive
+  share blew up the temporal fixtures (envelope gain 32–57×, nrmse 23–113 at
+  +7, masked at −7 by the old sub-zero drop) — bounded by falling back to the
+  real-only solution when |a|·ΣA > 4·‖X‖.
+- Fold instead of drop for sub-zero destinations: −7 low-tone gain −1.1…−1.37
+  → −0.80/−0.84/−0.71 dB (B0/E1/F#1), E2 −0.90 → −0.23 dB. No click fixture
+  change (none existed).
+
+Full-matrix deltas vs the baseline: every tone's cents error ≤ 0.1 (was up to
+7.0), fits 0.98–0.999, gain losses −0.7…−0.9 dB (was −1.0…−1.5); dyads
+unchanged (expected); DC 0.2 → 0.199/0.211 mean with ripple 0.005/0.019 (was
+0.018/0.146 mean); temporal mixed and small: B0 gate −7 onset diff 1.25 →
+1.94 ms and late fit 0.85 → 0.77 (worse), +7 late fit 0.73 → 0.82, chord
+crossfade late fit 0.17/0.04 → 0.24/0.14 (better), envelope NRMSE within
+±0.03. Fixture `warble` unchanged (dyad spacing still 21.42 Hz), `hf_junk`
+unchanged (4.4×). Listening renders of the new engine (not yet heard):
+`/tmp/pitchwing-listening-step3/` — `06-dry.wav`, `06-step3--7.wav`,
+`06-step3--2.wav` (the 2026-10-08 excerpt source, 44.1 kHz), and the chord DI
+14–19 s dry/+12/−12. Tests green (ctest, 2 suites).

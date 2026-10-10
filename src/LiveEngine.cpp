@@ -17,6 +17,8 @@ namespace {
 constexpr double pi = 3.141592653589793238462643383279502884;
 constexpr double twoPi = 2.0 * pi;
 constexpr std::size_t maxRegions = 64;
+constexpr std::size_t lobeRange = 24;      // bins; |A| is below -59 dB beyond
+constexpr std::size_t lobeOversample = 64;
 using Complex = std::complex<double>;
 using Transform = signalsmith::linear::SplitFFT<double>;
 
@@ -96,15 +98,14 @@ struct LiveEngine::Impl {
           tail(n + delay + hop), ratioMinusOne(std::exp2(config.pitchSemitones / 12.0) - 1.0),
           binWidth(twoPi / static_cast<double>(n)), inverseN(1.0 / static_cast<double>(n)),
           settleFloorOmega(twoPi * 100.0 / config.sampleRate),
-          fft(n), analysis(n), synthesis(length), transportSynthesis(length), controlHistory(length),
+          fft(n), analysis(n), synthesis(length), transportSynthesis(length), dcWindow(length), controlHistory(length),
           frameControl(length), negativeSuffix(length), magnitude(bins),
           binOmega(bins), peaks(bins), time(n), inverseSpectrum(n), inverseTime(n),
-          modulation(length), taper(n / 2) {
+          modulation(length), taper(n / 2), lobe(2 * lobeRange * lobeOversample + 1) {
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             history[channel].resize(n);
             output[channel].resize(ringSize);
             spectrum[channel].resize(n);
-            previousSpectrum[channel].resize(bins);
         }
         const auto pivot = n - length / 2;
         for (std::size_t index = 0; index < n; ++index) {
@@ -121,18 +122,130 @@ struct LiveEngine::Impl {
                                                static_cast<double>(length))) / 4.0;
             synthesis[q] = product / analysis[n - length + q];
             transportSynthesis[q] = synthesis[q] * inverseN;
+            dcWindow[q] = product;  // analysis * synthesis: exact partition of unity
+        }
+        for (std::size_t index = 0; index < n; ++index) {
+            analysisSum += analysis[index];
         }
         for (std::size_t bin = 0; bin < bins; ++bin) {
             binOmega[bin] = twoPi * static_cast<double>(bin) / static_cast<double>(n);
         }
+        // Window spectrum A(theta) = sum_n analysis[n] e^{-j theta n}, tabulated at
+        // 1/lobeOversample bin over +-lobeRange bins for the region frequency fit.
+        for (std::size_t entry = 0; entry < lobe.size(); ++entry) {
+            const auto theta = (static_cast<double>(entry) / static_cast<double>(lobeOversample) -
+                                static_cast<double>(lobeRange)) * binWidth;
+            const auto step = Complex{std::cos(theta), -std::sin(theta)};
+            auto phasor = Complex{1.0, 0.0};
+            auto sum = Complex{};
+            for (std::size_t index = 0; index < n; ++index) {
+                sum += analysis[index] * phasor;
+                phasor *= step;
+            }
+            lobe[entry] = sum;
+        }
         reset();
+    }
+
+    Complex lobeAt(double offsetBins) const noexcept {
+        const auto range = static_cast<double>(lobeRange);
+        if (offsetBins <= -range || offsetBins >= range) {
+            return Complex{};
+        }
+        const auto position = (offsetBins + range) * static_cast<double>(lobeOversample);
+        const auto lower = static_cast<std::size_t>(position);
+        const auto fraction = position - static_cast<double>(lower);
+        return lobe[lower] * (1.0 - fraction) + lobe[lower + 1] * fraction;
+    }
+
+    // Least-squares residual of X[k] = a A(w_k - w) + conj(a) A(w_k + w) over the
+    // three peak bins, summed over channels (a per channel). The image term is
+    // what the parabola and phase-difference estimates lacked: without it the
+    // estimate wobbled 150-680 cents frame to frame below bin 4
+    // (docs/results/2026-10-10-estimator-probe.txt).
+    double lobeFitCost(std::size_t peak, double centreBins,
+                       std::array<Complex, 2>* amplitude = nullptr) const noexcept {
+        std::array<double, 3> a0{}, a1{}, b0{}, b1{};
+        for (std::size_t i = 0; i < 3; ++i) {
+            const auto k = static_cast<double>(peak + i) - 1.0;
+            const auto p = lobeAt(k - centreBins);
+            const auto m = lobeAt(k + centreBins);
+            a0[i] = p.real() + m.real();
+            a1[i] = m.imag() - p.imag();
+            b0[i] = p.imag() + m.imag();
+            b1[i] = p.real() - m.real();
+        }
+        auto cost = 0.0;
+        for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+            double g00 = 0.0, g01 = 0.0, g11 = 0.0, h0 = 0.0, h1 = 0.0, energy = 0.0;
+            for (std::size_t i = 0; i < 3; ++i) {
+                const auto& x = spectrum[channel][peak + i - 1];
+                g00 += a0[i] * a0[i] + b0[i] * b0[i];
+                g01 += a0[i] * a1[i] + b0[i] * b1[i];
+                g11 += a1[i] * a1[i] + b1[i] * b1[i];
+                h0 += a0[i] * x.real() + b0[i] * x.imag();
+                h1 += a1[i] * x.real() + b1[i] * x.imag();
+                energy += std::norm(x);
+            }
+            const auto determinant = g00 * g11 - g01 * g01;
+            if (g00 <= 0.0) {
+                cost += energy;
+                continue;
+            }
+            // At w = 0 the image coincides with the lobe and only Re(a) is
+            // determined (a DC lobe); fall back to that one-parameter fit.
+            auto re = (g11 * h0 - g01 * h1) / determinant;
+            auto im = (g00 * h1 - g01 * h0) / determinant;
+            // Near w = 0 the two basis vectors are almost parallel and the
+            // solution cancels two huge terms; an amplitude far above the data
+            // is that ill-conditioning, not signal.
+            if (determinant <= 1e-12 * g00 * g00 ||
+                std::hypot(re, im) * analysisSum > 4.0 * std::sqrt(3.0 * energy)) {
+                re = h0 / g00;
+                im = 0.0;
+            }
+            cost += std::max(0.0, energy - (re * h0 + im * h1));
+            if (amplitude != nullptr) {
+                (*amplitude)[channel] = Complex{re, im};
+            }
+        }
+        return cost;
+    }
+
+    double fitOmega(std::size_t peak) noexcept {
+        // The range reaches 0 so a DC lobe fits as an untranslated w = 0 tone.
+        auto low = peak <= 1 ? 0.0 : static_cast<double>(peak) - 0.6;
+        auto high = static_cast<double>(peak) + 0.6;
+        for (int round = 0; round < 5; ++round) {
+            const auto step = (high - low) / 12.0;
+            auto best = std::numeric_limits<double>::max();
+            auto centre = low;
+            for (int i = 0; i <= 12; ++i) {
+                const auto candidate = low + step * i;
+                const auto cost = lobeFitCost(peak, candidate);
+                if (cost < best) {
+                    best = cost;
+                    centre = candidate;
+                }
+            }
+            low = centre - step;
+            high = centre + step;
+        }
+        const auto centre = std::clamp(0.5 * (low + high), 0.0, 0.5 * static_cast<double>(n) - 0.5);
+        if (peak == peaks[0]) {
+            // Lowest region: split bin 0 into the fitted tone's share (translated
+            // with the region) and the true DC residual (rendered untranslated).
+            lobeFitCost(peak, centre, &lowestAmplitude);
+            lowestImage = lobeAt(centre);
+            lowestPositive = lobeAt(-centre);
+        }
+        return centre * binWidth;
     }
 
     void reset() noexcept {
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             std::fill(history[channel].begin(), history[channel].end(), 0.0);
             std::fill(output[channel].begin(), output[channel].end(), 0.0);
-            std::fill(previousSpectrum[channel].begin(), previousSpectrum[channel].end(), Complex{});
         }
         std::fill(controlHistory.begin(), controlHistory.end(), 0.0);
         historyPosition = 0;
@@ -144,7 +257,6 @@ struct LiveEngine::Impl {
         previousRegionCount = 0;
         completedRegions = 0;
         hopArea = 0.0;
-        previousValid = false;
         settling = false;
         closed = false;
     }
@@ -283,32 +395,7 @@ struct LiveEngine::Impl {
         }
         for (std::size_t index = 0; index < count; ++index) {
             const auto peak = peaks[index];
-            const auto a = std::log(std::max(magnitude[peak - 1], 1e-300));
-            const auto b = std::log(std::max(magnitude[peak], 1e-300));
-            const auto c = std::log(std::max(magnitude[peak + 1], 1e-300));
-            const auto denominator = a - 2.0 * b + c;
-            const auto fraction = std::abs(denominator) > 1e-12 ? 0.5 * (a - c) / denominator : 0.0;
-            auto omega = binWidth * (static_cast<double>(peak) + std::clamp(fraction, -0.5, 0.5));
-            const auto oldMagnitude = std::hypot(std::abs(previousSpectrum[0][peak]),
-                                                 std::abs(previousSpectrum[1][peak]));
-            if (previousValid && oldMagnitude > largest * 1e-6) {
-                // Joint temporal products add energy, including anti-phase
-                // stereo, instead of cancelling channels before analysis.
-                const auto crossLeft = spectrum[0][peak] * std::conj(previousSpectrum[0][peak]);
-                const auto crossRight = spectrum[1][peak] * std::conj(previousSpectrum[1][peak]);
-                const auto cross = crossLeft + crossRight;
-                const auto crossScale = std::abs(crossLeft) + std::abs(crossRight);
-                // Opposing temporal rotations in unrelated channels can nearly
-                // cancel their joint phase. Prefer the spectral estimate then.
-                if (std::abs(cross) > crossScale * 1e-6) {
-                    const auto residual = principal(std::arg(cross) - binOmega[peak] * static_cast<double>(hop));
-                    const auto instantaneous = binOmega[peak] + residual / static_cast<double>(hop);
-                    if (instantaneous > 0.0 && instantaneous < pi &&
-                        std::abs(instantaneous - omega) <= 2.0 * binWidth) {
-                        omega = instantaneous;
-                    }
-                }
-            }
+            const auto omega = fitOmega(peak);
             auto rotation = 0.0;
             if (previousRegionCount > 0) {
                 auto nearest = std::size_t{0};
@@ -321,15 +408,18 @@ struct LiveEngine::Impl {
                     }
                 }
                 const auto& ancestor = previousRegions[nearest];
-                rotation = principal(ancestor.rotation + 0.5 * (ancestor.omega + omega) * hopArea);
-                if (unitySupport) {
-                    // Resetting rotations to zero would mix rotated and unrotated
-                    // copies of each partial in the overlap ring (measured dips to
-                    // -15 dB). Slew them out instead: at most a 10-cent glide, with
-                    // a 100 Hz floor so sub-bass regions settle within ~1 s.
+                const auto advance = 0.5 * (ancestor.omega + omega) * hopArea;
+                rotation = principal(ancestor.rotation + advance);
+                if (std::abs(advance) < 1e-3) {
+                    // Zero translation (unity frames, a DC lobe at omega ~ 0): an
+                    // inherited rotation is then an audible constant phase or sign
+                    // error, and resetting it would mix rotated and unrotated copies
+                    // in the overlap ring (measured dips to -15 dB). Slew it out
+                    // instead: at most a 10-cent glide, with a 100 Hz floor so
+                    // sub-bass regions settle within ~1 s.
                     const auto slew = std::max(omega, settleFloorOmega) * static_cast<double>(hop) * 0.006;
                     rotation -= std::clamp(rotation, -slew, slew);
-                    settling = settling || rotation != 0.0;
+                    settling = settling || (unitySupport && rotation != 0.0);
                 }
             }
             regions[index] = Region{peak, omega, rotation};
@@ -376,14 +466,20 @@ struct LiveEngine::Impl {
         const auto exactUnity = unitySupport && !settling;
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             auto destination = frameOutputStart;
-            const auto dc = spectrum[channel][0].real() * inverseN;
+            auto dc = spectrum[channel][0].real();
+            if (regionCount > 0) {
+                const auto& a = lowestAmplitude[channel];
+                dc -= (a * lowestPositive + std::conj(a) * lowestImage).real();
+            }
+            dc /= analysisSum;
             auto source = historyPosition + n - length;
             if (source >= n) {
                 source -= n;
             }
             for (std::size_t q = 0; q < length; ++q) {
-                const auto value = exactUnity ? history[channel][source] * analysis[n - length + q] : dc;
-                output[channel][destination] += value * synthesis[q];
+                output[channel][destination] += exactUnity
+                    ? history[channel][source] * analysis[n - length + q] * synthesis[q]
+                    : dc * dcWindow[q];
                 if (++destination == ringSize) {
                     destination = 0;
                 }
@@ -391,11 +487,9 @@ struct LiveEngine::Impl {
                     source = 0;
                 }
             }
-            std::copy_n(spectrum[channel].begin(), bins, previousSpectrum[channel].begin());
         }
         std::copy_n(regions.begin(), regionCount, previousRegions.begin());
         previousRegionCount = regionCount;
-        previousValid = true;
         if (exactUnity) {
             // No region inverse transforms are needed for exact delayed unity.
             regionCount = 0;
@@ -404,14 +498,16 @@ struct LiveEngine::Impl {
 
     void renderRegion(std::size_t index) noexcept {
         const auto& region = regions[index];
-        const auto begin = index == 0 ? 1 : (regions[index - 1].peak + region.peak) / 2 + 1;
+        const auto begin = index == 0 ? 0 : (regions[index - 1].peak + region.peak) / 2 + 1;
         const auto end = index + 1 == regionCount ? n / 2 : (region.peak + regions[index + 1].peak) / 2 + 1;
         const auto delta = region.omega * frameRatioMinusOne;
         const auto guard = 2.0 * binWidth;
         for (auto bin = begin; bin < end; ++bin) {
             const auto destination = binOmega[bin] + delta;
+            // Destinations below zero fold to |destination| through the real
+            // part: the conjugate reflection of a real signal's lobe, not a loss.
             auto value = 0.0;
-            if (destination > 0.0 && destination < pi) {
+            if (destination < pi) {
                 value = destination <= pi - guard ? 1.0 :
                     0.5 - 0.5 * std::cos(pi * (pi - destination) / guard);
             }
@@ -440,6 +536,9 @@ struct LiveEngine::Impl {
             std::fill(inverseSpectrum.begin(), inverseSpectrum.end(), Complex{});
             for (auto bin = begin; bin < end; ++bin) {
                 inverseSpectrum[bin] = 2.0 * spectrum[channel][bin] * taper[bin];
+            }
+            if (begin == 0) {
+                inverseSpectrum[0] = 2.0 * lowestAmplitude[channel] * lowestPositive * taper[0];
             }
             fft.ifft(inverseSpectrum.data(), inverseTime.data());
             auto destination = frameOutputStart;
@@ -471,6 +570,7 @@ struct LiveEngine::Impl {
     std::vector<double> analysis;
     std::vector<double> synthesis;
     std::vector<double> transportSynthesis;
+    std::vector<double> dcWindow;
     std::array<std::vector<double>, 2> history;
     std::array<std::vector<double>, 2> output;
     std::vector<double> controlHistory;
@@ -481,11 +581,15 @@ struct LiveEngine::Impl {
     std::vector<std::size_t> peaks;
     std::vector<Complex> time;
     std::array<std::vector<Complex>, 2> spectrum;
-    std::array<std::vector<Complex>, 2> previousSpectrum;
     std::vector<Complex> inverseSpectrum;
     std::vector<Complex> inverseTime;
     std::vector<Complex> modulation;
     std::vector<double> taper;
+    std::vector<Complex> lobe;
+    double analysisSum = 0.0;
+    std::array<Complex, 2> lowestAmplitude{};
+    Complex lowestPositive{};
+    Complex lowestImage{};
     std::array<Region, maxRegions> regions{};
     std::array<Region, maxRegions> previousRegions{};
     std::size_t historyPosition = 0;
@@ -500,7 +604,6 @@ struct LiveEngine::Impl {
     double frameRatioMinusOne = 0.0;
     bool unitySupport = true;
     bool settling = false;
-    bool previousValid = false;
     bool closed = false;
 };
 
