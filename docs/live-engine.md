@@ -188,6 +188,23 @@ peaks 359× full scale). `jointFit` now adds 1 % of the mean Gram diagonal,
 bounding `|a|·|A(0)|` to about 5× the data; the shrunk remainder stays in the
 residual cells. Checked by `scripts/real_material_gate.py`.
 
+Shared synthesis (step 12). Every entry used to be rendered by its own n-point
+inverse transform per channel, multiplied by its own modulator
+`e^{j(rotation + ω·S(q))}`. Real guitar gives ~62 entries per 2 ms hop (~117
+transforms), 80–95 % of real time on one core, which made ShiftKey crackle live
+at any shift. Now the frame uses the mean control `c` (S(q) linear through its
+end points; the per-hop rotation still integrates every control sample through
+`hopArea`), and each entry's translation `δ = ω·c` is split into the nearest
+whole-bin shift `s` (an exact circular shift of its bins) and a remainder
+`ε = δ − s·2π/n`, |ε| ≤ π/n. The remainder `e^{jε(m − m_c)}` around the output
+centre `m_c` is expanded in four Taylor terms (|εx| ≤ 0.27, remainder ≤ −73 dB),
+so all entries add into 4 spectra per channel and a frame costs 8 inverse
+transforms. Components render through their (±24-bin) lobe like plain entries
+instead of an untruncated oscillator. Intra-frame control shape is linear
+(a sub-frame step is spread over the frame instead of placed at its sample).
+Work is spread as before: one task per entry (spectral accumulation), then one
+per Taylor term and channel.
+
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
 channel relations without mixing samples between channels. A silent channel

@@ -1,0 +1,10 @@
+WSL timing probe, step 12 (shared synthesis: 2x4 Taylor-term IFFTs per hop instead of one per entry and channel), automation off, diagnostic only. Synthetic probe signal; real-material wall time (06 excerpt, 6.5 s, block 64): step 11 6.2 s, step 12 1.80 s.
+44100 32 mean 188 p95 476 max 681 miss 0 / 689
+44100 64 mean 373 p95 526 max 903 miss 0 / 344
+44100 128 mean 738 p95 1020 max 1062 miss 0 / 172
+48000 32 mean 165 p95 362 max 406 miss 0 / 750
+48000 64 mean 345 p95 563 max 853 miss 0 / 375
+48000 128 mean 665 p95 894 max 917 miss 0 / 187
+96000 32 mean 115 p95 389 max 422 miss 223 / 1500
+96000 64 mean 229 p95 414 max 593 miss 0 / 750
+96000 128 mean 456 p95 674 max 718 miss 0 / 375

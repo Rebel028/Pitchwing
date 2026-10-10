@@ -27,7 +27,8 @@ constexpr std::size_t maxEntries = maxRegions + 96;
 constexpr double minSplitBins = 0.35;      // short-bin spacing below which a split is ill-conditioned
 constexpr std::size_t lobeSpan = 24;       // bins each side a fitted lobe is transported with its partial
 constexpr double lobeQuality = 0.02;       // max residual/energy of a 3-bin fit that earns a lobe
-constexpr double residualFloor = 1e-3;     // cell residual energy (re cell) that earns a component an IFFT
+constexpr std::size_t taylorTerms = 4;     // shared synthesis: remainder <= 0.27^4/4! (-73 dB)
+constexpr double residualFloor = 1e-3;     // cell residual energy (re cell) below which a component drops it
 constexpr double credibleQuality = 0.3;    // ... that is removed from neighbours before their refit
 using Complex = std::complex<double>;
 using Transform = signalsmith::linear::SplitFFT<double>;
@@ -124,8 +125,8 @@ struct LiveEngine::Impl {
     // A transport entry. Well-fitted partials own their whole lobe (+-lobeSpan
     // bins, image on the mirrored bins) so their window skirts move with them;
     // every entry owns its bins minus every lobe there. Plain: a region (lobe
-    // if its fit is good); Component: one fitted lobe of a split group (an
-    // oscillator) plus the group's bins nearest to it.
+    // if its fit is good); Component: one fitted lobe of a split group plus the
+    // group's bins nearest to it.
     enum class Kind { Plain, Component };
     struct Region {
         std::size_t peak = 0;
@@ -154,8 +155,7 @@ struct LiveEngine::Impl {
               std::ceil(longLimitHz / config.sampleRate * static_cast<double>(nLong))))),
           fft(n), longFft(nDecimated), analysis(n), longAnalysis(nDecimated), synthesis(length), transportSynthesis(length), dcWindow(length), controlHistory(length),
           frameControl(length), negativeSuffix(length), magnitude(bins),
-          binOmega(bins), peaks(bins), time(n), inverseSpectrum(n), inverseTime(n),
-          modulation(length), taper(n / 2), lobe(2 * lobeRange * lobeOversample + 1),
+          binOmega(bins), peaks(bins), time(n), inverseTime(n), taper(n / 2), lobe(2 * lobeRange * lobeOversample + 1),
           longLobe(lobe.size()), longMagnitude(longLimit + 2), longPeaks(longLimit + 2),
           longOmega(longLimit + 2) {
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
@@ -167,6 +167,9 @@ struct LiveEngine::Impl {
             model[channel].resize(bins);
             cleaned[channel].resize(bins);
             cleanedLong[channel].resize(longLimit + 2);
+        }
+        for (auto& term : termSpectrum) {
+            term.resize(n);
         }
         // Both windows: sine rise to N - L/2, cosine fall over the last L/2.
         auto makeWindow = [](std::vector<double>& window, std::vector<Complex>& table, double& sum,
@@ -685,7 +688,10 @@ struct LiveEngine::Impl {
         hopPhase = 0;
         regionCount = 0;
         previousRegionCount = 0;
-        completedRegions = 0;
+        completedTasks = 0;
+        for (auto& term : termSpectrum) {
+            std::fill(term.begin(), term.end(), Complex{});
+        }
         hopArea = 0.0;
         settling = false;
         closed = false;
@@ -780,9 +786,14 @@ struct LiveEngine::Impl {
             prepareFrame();
             hopArea = 0.0;
         }
-        const auto due = (hopPhase + 1) * regionCount / hop;
-        while (completedRegions < due) {
-            renderRegion(completedRegions++);
+        const auto due = (hopPhase + 1) * taskCount / hop;
+        while (completedTasks < due) {
+            const auto task = completedTasks++;
+            if (task < regionCount) {
+                accumulateRegion(task);
+            } else {
+                renderTerm(task - regionCount);
+            }
         }
         const auto result = std::array<double, 2>{output[0][outputPosition], output[1][outputPosition]};
         output[0][outputPosition] = 0.0;
@@ -981,7 +992,7 @@ struct LiveEngine::Impl {
         if (frameOutputStart >= ringSize) {
             frameOutputStart -= ringSize;
         }
-        completedRegions = 0;
+        completedTasks = 0;
         unitySupport = true;
         auto controlSource = controlPosition;
         for (std::size_t q = 0; q < length; ++q) {
@@ -996,7 +1007,9 @@ struct LiveEngine::Impl {
             negativeSuffix[q] = suffix;
             suffix -= frameControl[q];
         }
-        frameRatioMinusOne = frameControl[length - 1];
+        // The frame's mean control (S(q) linear through its end points); the
+        // per-hop rotation still integrates every control sample (hopArea).
+        frameRatioMinusOne = -negativeSuffix[0] / static_cast<double>(length - 1);
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             auto source = historyPosition;
             for (std::size_t index = 0; index < n; ++index) {
@@ -1048,9 +1061,18 @@ struct LiveEngine::Impl {
             // No region inverse transforms are needed for exact delayed unity.
             regionCount = 0;
         }
+        taskCount = exactUnity ? 0 : regionCount + 2 * taylorTerms;
     }
 
-    void renderRegion(std::size_t index) noexcept {
+    // Shared synthesis. Each entry's bins are translated by delta = omega * c
+    // (c: the frame's mean control): as an exact circular shift by the nearest
+    // whole bin s, plus a remainder e^{j eps (m - mc)}, |eps| <= pi / n, which is
+    // expanded in a Taylor series around the output centre mc (|eps x| <= 0.27
+    // over the synthesis length). Every entry adds into the same taylorTerms
+    // spectra per channel, so a frame costs 2 * taylorTerms inverse transforms
+    // instead of two per entry (~117 per 2 ms hop on real guitar, 95 % of real
+    // time; docs/live-engine.md "Shared synthesis").
+    void accumulateRegion(std::size_t index) noexcept {
         const auto& region = regions[index];
         const auto begin = region.begin;
         const auto end = region.end;
@@ -1074,53 +1096,28 @@ struct LiveEngine::Impl {
             }
             taper[bin] = value;
         }
-        auto previousControl = std::numeric_limits<double>::quiet_NaN();
-        auto step = Complex{};
-        auto current = Complex{};
-        for (std::size_t q = 0; q < length; ++q) {
-            if (q % 64 == 0) {
-                const auto angle = region.rotation + region.omega * negativeSuffix[q];
-                current = Complex{std::cos(angle), std::sin(angle)};
-            } else {
-                // q-1 -> q integrates the command belonging to source sample q.
-                if (frameControl[q] != previousControl) {
-                    const auto angle = region.omega * frameControl[q];
-                    step = Complex{std::cos(angle), std::sin(angle)};
-                    previousControl = frameControl[q];
-                }
-                current *= step;
-            }
-            // Cache the weighted modulator once for both channel transforms.
-            modulation[q] = current * transportSynthesis[q];
+        const auto whole = std::round(delta / binWidth);
+        const auto epsilon = delta - whole * binWidth;
+        const auto end_ = static_cast<double>(n - 1);
+        const auto middle = static_cast<double>(n) - 0.5 * static_cast<double>(length) - 0.5;
+        // Angle at output sample m: rotation + delta (m - end_), referenced to the
+        // frame's last sample like the transport rotation.
+        std::array<Complex, taylorTerms> weight{};
+        weight[0] = std::polar(2.0, region.rotation - whole * binWidth * end_ + epsilon * (middle - end_));
+        for (std::size_t p = 1; p < taylorTerms; ++p) {
+            weight[p] = weight[p - 1] * Complex{0.0, epsilon / static_cast<double>(p)};
         }
+        const auto shift = static_cast<std::ptrdiff_t>(whole);
+        const auto size = static_cast<std::ptrdiff_t>(n);
+        auto destinationOf = [&](std::size_t bin) {
+            auto target = (static_cast<std::ptrdiff_t>(bin) + shift) % size;
+            return static_cast<std::size_t>(target < 0 ? target + size : target);
+        };
+        // shortcut: a component's cell residual below -30 dB of the cell is
+        // dropped, not exact (rendering it moved the warble dyad's IF p-p
+        // 17.7 -> 22.4 c); lower residualFloor if quiet low-band texture goes missing.
+        auto dropResidual = false;
         if (region.kind == Kind::Component) {
-            // A component is an exact windowed sinusoid: the IFFT of its lobe
-            // (positive term plus mirrored image) is 2*a*w[m]*e^{j*w*m}, so
-            // render it as an oscillator instead of an n-point transform.
-            const auto start = static_cast<double>(n - length);
-            const auto step = Complex{std::cos(region.omega), std::sin(region.omega)};
-            const auto scale = 2.0 * static_cast<double>(n);
-            for (auto channel = std::size_t{0}; channel < 2; ++channel) {
-                auto phasor = std::polar(scale, region.omega * start) * region.amplitude[channel];
-                auto destination = frameOutputStart;
-                for (std::size_t q = 0; q < length; ++q) {
-                    if (q % 64 == 0) {  // re-anchor against rounding drift
-                        phasor = std::polar(scale, region.omega * (start + static_cast<double>(q))) *
-                                 region.amplitude[channel];
-                    }
-                    const auto value = phasor * analysis[n - length + q];
-                    const auto& weight = modulation[q];
-                    output[channel][destination] += value.real() * weight.real() - value.imag() * weight.imag();
-                    phasor *= step;
-                    if (++destination == ringSize) {
-                        destination = 0;
-                    }
-                }
-            }
-            // The cell's residual X - model needs a transform only when it
-            // matters (onsets, noise); steady partials are oscillator-only.
-            // shortcut: residuals below -30 dB of the cell are dropped, not exact;
-            // lower residualFloor if quiet low-band texture goes missing.
             auto residual = 0.0, total = 0.0;
             for (auto channel = std::size_t{0}; channel < 2; ++channel) {
                 for (auto bin = std::max<std::size_t>(begin, 1); bin < end; ++bin) {
@@ -1128,45 +1125,59 @@ struct LiveEngine::Impl {
                     total += std::norm(spectrum[channel][bin]);
                 }
             }
-            if (residual <= residualFloor * total) {
-                return;
-            }
+            dropResidual = residual <= residualFloor * total;
         }
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
-            std::fill(inverseSpectrum.begin(), inverseSpectrum.end(), Complex{});
-            if (region.lobe && region.kind != Kind::Component) {
+            auto* terms = &termSpectrum[channel * taylorTerms];
+            auto add = [&](std::size_t bin, Complex value) {
+                const auto target = destinationOf(bin);
+                for (std::size_t p = 0; p < taylorTerms; ++p) {
+                    terms[p][target] += weight[p] * value;
+                }
+            };
+            if (region.lobe) {
                 // The image term conj(a)*A(k+w) is the negative-frequency partial's
-                // leakage: conjugated on the mirrored bins the modulator moves it
-                // by -delta with its partial (as positive content it left f - delta
-                // lines at -31 dB on the warble dyad). Bin 0 carries 2*a*A(-w),
-                // whose real part is the whole bin-0 share.
+                // leakage: conjugated on the mirrored bins the shift moves it by
+                // -delta with its partial (as positive content it left f - delta
+                // lines at -31 dB on the warble dyad). Bin 0 carries a*A(-w)
+                // twice, whose real part is the whole bin-0 share.
                 const auto& a = region.amplitude[channel];
                 for (auto bin = lobeFirst; bin < lobeLast; ++bin) {
                     const auto k = static_cast<double>(bin);
-                    inverseSpectrum[bin] += 2.0 * a * lobeAt(k - centre) * taper[bin];
+                    add(bin, a * lobeAt(k - centre) * taper[bin]);
                     if (bin > 0) {
-                        inverseSpectrum[n - bin] += 2.0 * a * std::conj(lobeAt(k + centre)) * taper[bin];
+                        add(n - bin, a * std::conj(lobeAt(k + centre)) * taper[bin]);
                     }
                 }
             }
             if (region.kind == Kind::Plain && !region.lobe && begin == 0) {
-                inverseSpectrum[0] += 2.0 * region.amplitude[channel] * lobeAt(-centre) * taper[0];
+                add(0, region.amplitude[channel] * lobeAt(-centre) * taper[0]);
             }
-            {
+            if (!dropResidual) {
                 for (auto bin = std::max<std::size_t>(begin, 1); bin < end; ++bin) {
-                    inverseSpectrum[bin] += 2.0 * (spectrum[channel][bin] - model[channel][bin]) * taper[bin];
+                    add(bin, (spectrum[channel][bin] - model[channel][bin]) * taper[bin]);
                 }
             }
-            fft.ifft(inverseSpectrum.data(), inverseTime.data());
-            auto destination = frameOutputStart;
-            for (std::size_t q = 0; q < length; ++q) {
-                const auto& value = inverseTime[n - length + q];
-                const auto& weight = modulation[q];
-                output[channel][destination] += value.real() * weight.real() -
-                                                value.imag() * weight.imag();
-                if (++destination == ringSize) {
-                    destination = 0;
-                }
+        }
+    }
+
+    // One Taylor term of one channel: inverse transform, weight x^p, overlap-add.
+    void renderTerm(std::size_t task) noexcept {
+        const auto channel = task / taylorTerms;
+        const auto power = task % taylorTerms;
+        auto& term = termSpectrum[task];
+        fft.ifft(term.data(), inverseTime.data());
+        std::fill(term.begin(), term.end(), Complex{});
+        auto destination = frameOutputStart;
+        for (std::size_t q = 0; q < length; ++q) {
+            const auto x = static_cast<double>(q) - 0.5 * static_cast<double>(length) + 0.5;
+            auto scale = transportSynthesis[q];
+            for (std::size_t p = 0; p < power; ++p) {
+                scale *= x;
+            }
+            output[channel][destination] += inverseTime[n - length + q].real() * scale;
+            if (++destination == ringSize) {
+                destination = 0;
             }
         }
     }
@@ -1205,9 +1216,8 @@ struct LiveEngine::Impl {
     std::vector<std::size_t> peaks;
     std::vector<Complex> time;
     std::array<std::vector<Complex>, 2> spectrum;
-    std::vector<Complex> inverseSpectrum;
     std::vector<Complex> inverseTime;
-    std::vector<Complex> modulation;
+    std::array<std::vector<Complex>, 2 * taylorTerms> termSpectrum;  // [channel][power]
     std::vector<double> taper;
     std::vector<Complex> lobe;
     std::vector<Complex> longLobe;
@@ -1239,7 +1249,8 @@ struct LiveEngine::Impl {
     std::size_t regionCount = 0;
     std::size_t longPeakCount = 0;
     std::size_t previousRegionCount = 0;
-    std::size_t completedRegions = 0;
+    std::size_t completedTasks = 0;
+    std::size_t taskCount = 0;
     double hopArea = 0.0;
     double frameRatioMinusOne = 0.0;
     bool unitySupport = true;

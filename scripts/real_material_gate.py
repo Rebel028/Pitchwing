@@ -11,13 +11,15 @@ envelope ratio: 5 ms max-abs blocks of the latency-aligned wet over the dry
 maximum within +-25 ms, where that is above -20 dB re the largest (max, p99).
 Fails when the wet peak exceeds 1.25x the dry peak or the envelope ratio max/p99
 exceeds 2/1.5 (steps 4 and 8, the builds the user accepted, reach 1.11, 1.47
-and 1.31; step 10 reached 255x peak).
+and 1.31; step 10 reached 255x peak), or the render needs more than 0.5 CPU
+seconds per audio second (mean load only, WSL; not a deadline test).
 
 Usage: real_material_gate.py --render NAME=BIN [--render ...] --scratch DIR
        --out JSON [--stems DIR]
 """
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -35,6 +37,9 @@ SPREAD = 5  # blocks
 PEAK_LIMIT = 1.25
 ENVELOPE_LIMIT = 2.0
 ENVELOPE_P99_LIMIT = 1.5
+# CPU seconds per audio second (WSL gcc, diagnostic of mean load only): steps
+# 4-11 used 0.8-1.1 on the 06 excerpt and failed live in ShiftKey; step 12 0.27-0.33.
+REALTIME_LIMIT = 0.5
 
 
 def envelope(x):
@@ -81,7 +86,8 @@ def main():
     args.scratch.mkdir(parents=True, exist_ok=True)
     renders = dict(item.split("=", 1) for item in args.render)
     report = {"latency": LATENCY, "peak_limit": PEAK_LIMIT, "envelope_limit": ENVELOPE_LIMIT,
-              "envelope_p99_limit": ENVELOPE_P99_LIMIT, "cases": {}}
+              "envelope_p99_limit": ENVELOPE_P99_LIMIT,
+              "realtime_limit": REALTIME_LIMIT, "cases": {}}
     failed = False
     for name, wav, start, stop, shifts in CASES:
         source = args.scratch / f"{name}.f64"
@@ -99,15 +105,18 @@ def main():
                 jobs.append((label, shift, output, subprocess.Popen(
                     [binary, str(source), str(output), str(RATE), str(shift), "64"], stdout=subprocess.DEVNULL)))
         for label, shift, output, process in jobs:
-            if process.wait() != 0:
+            _, status, usage = os.wait4(process.pid, 0)  # child CPU time, unaffected by parallel jobs
+            if not os.WIFEXITED(status) or os.WEXITSTATUS(status) != 0:
                 raise RuntimeError(f"{label} failed on {name} {shift}")
             result = metrics(dry, np.fromfile(output))
+            result["realtime_factor"] = (usage.ru_utime + usage.ru_stime) / (len(dry) / RATE)
+            result["pass"] = result["pass"] and result["realtime_factor"] <= REALTIME_LIMIT
             report["cases"][f"{label}/{name}/{shift:+d}"] = result
             failed = failed or not result["pass"]
             print(f"{label:10s} {name:5s} {shift:+3d}  peak {result['peak']:8.3f} (dry {result['dry_peak']:.3f})"
                   f"  >1 {result['over_full_scale']:6d}  rms {result['rms_ratio']:.3f}"
                   f"  env max {result['envelope_ratio_max']:7.2f} @{result['envelope_ratio_max_at_s']:6.2f}s"
-                  f" p99 {result['envelope_ratio_p99']:.2f}  {'pass' if result['pass'] else 'FAIL'}")
+                  f" p99 {result['envelope_ratio_p99']:.2f}  cpu {result['realtime_factor']:.2f}  {'pass' if result['pass'] else 'FAIL'}")
     args.out.write_text(json.dumps(report, indent=1) + "\n")
     return 1 if failed else 0
 

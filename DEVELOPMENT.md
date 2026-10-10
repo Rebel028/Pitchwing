@@ -1275,3 +1275,52 @@ excerpts, target well below 30 % on WSL) to the step gate.
 User test material for later quality/CPU work: `/mnt/e/Reaper render/shiftkey test/`
 (44 WAVs: chords / riff / small-arpeggio DIs, Neural DSP pitch-shifter renders
 at ±3/5/7/12 as a commercial reference, ShiftKey renders at ±3).
+
+Shared synthesis (step 12, user-approved design change 2026-10-10). Purpose:
+make the engine run in real time inside ShiftKey (see the live-test diagnosis
+above). Region statistics on the real 06 excerpt at −1 st (instrumented copy):
+203809 rendered entries in 3281 hops (~62 per hop), 29 % with a fitted lobe,
+47 % centred above 2.15 kHz (almost all lobe-less), 40 % below 1.4 kHz (split
+components). Oscillator rendering of lobes alone therefore could not fix the
+cost. Design (`docs/live-engine.md` "Shared synthesis"): per entry, the
+translation is a whole-bin circular shift plus a Taylor-expanded remainder
+(4 terms, −73 dB); all entries accumulate into 4 spectra per channel, 8 inverse
+transforms per hop instead of ~117. The frame uses its mean control; per-hop
+rotation is unchanged, so sub-hop commands still survive (test green).
+
+Debugging: a first version also rendered every component's cell residual (the
+step-10 −30 dB floor dropped those before); that moved warble −7 IF p-p
+13.4 → 22.4 c, +7 2.4 → 5.4 c, bend_model dyad hold −51 → −45.5 dB. Isolation
+in an env-switch copy: 8 Taylor terms identical to 4; lobe span 46 instead of
+24 −0.5 c; the floor restores 17.7 / 2.6 c / −50.1 dB, so the floor stays
+(recorded as a shortcut in the code). The remaining warble −7 difference vs
+step 11 (17.7 vs 13.4 c) is not Taylor order or span; it stays below the dyad's
+17.8 c static two-tone reference and inside this metric's spread across steps
+7–11 (3.8–13.4 c).
+
+Results ([gate](docs/results/2026-10-10-real-gate-step12.json),
+[matrix](docs/results/2026-10-10-live-step12-shared-full.json),
+[fixtures](docs/results/2026-10-10-fixtures-step12-shared.json),
+[timing](docs/results/2026-10-10-timing-step12.txt), WSL diagnostic):
+real-material CPU 0.95 → 0.28 s per audio second (06 at −1/−7, sequential
+wall time 6.2 → 1.8 s for 6.5 s); gate passes with peaks/envelopes equal to
+step 11 within 0.01. Matrix: no metric changed by more than 10 %. Fixtures vs
+step 11: warble −7 13.4 → 17.7 c (+7 2.4 → 2.6 c), unity-transition dips
+within ±0.8 dB (mostly smaller), churn +5 borderline events gone, churn −7
+exceed samples 37 → 93 inside the same single borderline event (flux ratios
+0.88–0.97, pass). chord_fit unchanged (0.89–1.0). Synthetic probe: 48 kHz
+block 64 mean 551 → 345 µs; 96 kHz block 32 still 223/1500 misses (the
+synchronous per-hop analysis in prepareFrame). Profile after the change (gprof,
+06 −1 st): fitPeaks 21 %, accumulation 16 %, FFT 32 %, jointFit 10 %,
+splitRegion 9 %.
+
+The real-material gate now also reports `realtime_factor` (child CPU seconds
+per audio second via `wait4`, so parallel jobs do not inflate it) and fails
+above 0.5: step 11 0.97–1.08, step 12 0.27–0.33.
+
+What the user can provide for live debugging (asked 2026-10-10): the host's
+buffer size and sample rate, and the CPU % REAPER's performance meter shows
+for ShiftKey, to size the remaining headroom on Windows/MSVC (WSL gcc numbers
+are diagnostic only). Remaining CPU work: split prepareFrame's analysis
+(FFTs, fitPeaks, splitRegion/jointFit) across the hop so no callback carries
+the whole analysis (96 kHz small blocks), then cheaper fitPeaks.
