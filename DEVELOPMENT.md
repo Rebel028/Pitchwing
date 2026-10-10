@@ -917,3 +917,11 @@ unchanged (4.4×). Listening renders of the new engine (not yet heard):
 `/tmp/pitchwing-listening-step3/` — `06-dry.wav`, `06-step3--7.wav`,
 `06-step3--2.wav` (the 2026-10-08 excerpt source, 44.1 kHz), and the chord DI
 14–19 s dry/+12/−12. Tests green (ctest, 2 suites).
+
+WSL timing probe (`pitchwing_live_probe timing`, diagnostic only, not a
+target-native result), old frozen build vs new: 48 kHz block 64 mean 302 →
+352 µs (p95 360 → 437), block 128 600 → 698 µs; 96 kHz block 32 mean 159 →
+166 µs with 10–22 deadline misses out of 1500 (0 before, WSL jitter is of the
+same order); 96 kHz block 1 misses unchanged (~4210/48000, pre-existing). The
+frequency fit costs 65 cost evaluations per region per hop; if the native
+budget needs it, reduce the 5 grid rounds to 4 (resolution 0.0056 bin) first.
