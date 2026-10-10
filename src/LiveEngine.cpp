@@ -27,6 +27,7 @@ constexpr std::size_t maxEntries = maxRegions + 96;
 constexpr double minSplitBins = 0.35;      // short-bin spacing below which a split is ill-conditioned
 constexpr std::size_t lobeSpan = 24;       // bins each side a fitted lobe is transported with its partial
 constexpr double lobeQuality = 0.02;       // max residual/energy of a 3-bin fit that earns a lobe
+constexpr double residualFloor = 1e-3;     // cell residual energy (re cell) that earns a component an IFFT
 constexpr double credibleQuality = 0.3;    // ... that is removed from neighbours before their refit
 using Complex = std::complex<double>;
 using Transform = signalsmith::linear::SplitFFT<double>;
@@ -122,10 +123,10 @@ bool validBuffers(const Sample* left, const Sample* right, Sample* outLeft,
 struct LiveEngine::Impl {
     // A transport entry. Well-fitted partials own their whole lobe (+-lobeSpan
     // bins, image on the mirrored bins) so their window skirts move with them;
-    // Plain and Residual entries own their bins minus every lobe there. Plain:
-    // a region (lobe if its fit is good); Residual: a split group's bins, no
-    // lobe; Component: one fitted lobe of a split group, no bins.
-    enum class Kind { Plain, Residual, Component };
+    // every entry owns its bins minus every lobe there. Plain: a region (lobe
+    // if its fit is good); Component: one fitted lobe of a split group (an
+    // oscillator) plus the group's bins nearest to it.
+    enum class Kind { Plain, Component };
     struct Region {
         std::size_t peak = 0;
         std::size_t begin = 0;
@@ -133,7 +134,6 @@ struct LiveEngine::Impl {
         double omega = 0.0;
         double rotation = 0.0;
         Kind kind = Kind::Plain;
-        std::size_t components = 0;          // Residual: count of following components
         std::array<Complex, 2> amplitude{};  // per-channel lobe amplitude
         bool lobe = false;
     };
@@ -616,7 +616,7 @@ struct LiveEngine::Impl {
                 chosen[count++] = longPeaks[j];
             }
         }
-        if (count < 2 || count + 1 > room || end - begin < count + 1) {
+        if (count < 2 || count > room || end - begin < count + 1) {
             return 0;
         }
         // Single fits, then two local refits on bins cleaned of the other
@@ -887,7 +887,7 @@ struct LiveEngine::Impl {
             const auto& fit = fits[index];
             const auto omega = fit.centre * binWidth;
             regions[entries++] = Region{peaks[index], beginOf(index), endOf(index), omega, inherit(omega),
-                                        Kind::Plain, 0, fit.amplitude, fit.good};
+                                        Kind::Plain, fit.amplitude, fit.good};
         };
         for (std::size_t index = 0; index < count;) {
             // An unresolved pair can show as two short peaks (phase dependent);
@@ -914,12 +914,17 @@ struct LiveEngine::Impl {
                 index = last + 1;
                 continue;
             }
+            // Each component owns the group's bins nearest to it: the residual
+            // there (onsets, noise) moves with that component, not with one
+            // merged shift (which put the B0 gate's envelope 12 ms early).
             const auto peak = peaks[strongest];
-            const auto omega = fits[strongest].centre * binWidth;
-            regions[entries++] = Region{peak, begin, end, omega, inherit(omega), Kind::Residual, split, {}, false};
             for (std::size_t c = 0; c < split; ++c) {
                 const auto component = centres[c] * binWidth;
-                regions[entries++] = Region{peak, begin, end, component, inherit(component), Kind::Component, 0,
+                const auto cellBegin = c == 0 ? begin
+                    : static_cast<std::size_t>(0.5 * (centres[c - 1] + centres[c])) + 1;
+                const auto cellEnd = c + 1 == split ? end
+                    : static_cast<std::size_t>(0.5 * (centres[c] + centres[c + 1])) + 1;
+                regions[entries++] = Region{peak, cellBegin, cellEnd, component, inherit(component), Kind::Component,
                                             {amplitudes[0][c], amplitudes[1][c]}, true};
             }
             index = last + 1;
@@ -1106,11 +1111,24 @@ struct LiveEngine::Impl {
                     }
                 }
             }
-            return;
+            // The cell's residual X - model needs a transform only when it
+            // matters (onsets, noise); steady partials are oscillator-only.
+            // shortcut: residuals below -30 dB of the cell are dropped, not exact;
+            // lower residualFloor if quiet low-band texture goes missing.
+            auto residual = 0.0, total = 0.0;
+            for (auto channel = std::size_t{0}; channel < 2; ++channel) {
+                for (auto bin = std::max<std::size_t>(begin, 1); bin < end; ++bin) {
+                    residual += std::norm(spectrum[channel][bin] - model[channel][bin]);
+                    total += std::norm(spectrum[channel][bin]);
+                }
+            }
+            if (residual <= residualFloor * total) {
+                return;
+            }
         }
         for (auto channel = std::size_t{0}; channel < 2; ++channel) {
             std::fill(inverseSpectrum.begin(), inverseSpectrum.end(), Complex{});
-            if (region.lobe) {
+            if (region.lobe && region.kind != Kind::Component) {
                 // The image term conj(a)*A(k+w) is the negative-frequency partial's
                 // leakage: conjugated on the mirrored bins the modulator moves it
                 // by -delta with its partial (as positive content it left f - delta
@@ -1128,7 +1146,7 @@ struct LiveEngine::Impl {
             if (region.kind == Kind::Plain && !region.lobe && begin == 0) {
                 inverseSpectrum[0] += 2.0 * region.amplitude[channel] * lobeAt(-centre) * taper[0];
             }
-            if (region.kind != Kind::Component) {
+            {
                 for (auto bin = std::max<std::size_t>(begin, 1); bin < end; ++bin) {
                     inverseSpectrum[bin] += 2.0 * (spectrum[channel][bin] - model[channel][bin]) * taper[bin];
                 }

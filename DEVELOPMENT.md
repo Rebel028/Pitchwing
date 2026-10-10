@@ -1127,3 +1127,32 @@ gprof: FFT 34 %, renderRegion 15 %, splitRegion 12 %, jointFit 9 %, fitPeaks
 5 %). Fix candidates: give each component the residual bins nearest to it
 (IFFT only when that residual is significant), and split prepareFrame into two
 phases inside the hop (no latency change).
+
+Residual cells (step 10). Tested the step-9 hypothesis for the B0 gate envelope
+(−7 lag −12 ms, NRMSE 0.32): giving each component the residual of its nearest
+bins did **not** change it. Envelope inspection shows why: at −7 B0's
+fundamental is 20.6 Hz (48 ms period, longer than the 20 ms RMS window), so the
+moving RMS follows waveform shape, i.e. inter-harmonic phase, which neither
+build preserves (transport rotations start from inherited values); the new
+build's release is cleaner (0.77 s: 0.10 vs old 0.33, target 0). Relative-phase
+preservation is the θ=0-birth idea the first gauntlet dropped; metric
+limitation recorded, not a regression. The cell change itself was kept: dyad
+bends −7 median −29 → −42…−45 dB, worst −20 → −30…−33 dB; +7 +2…3 dB; warble
+outer sidebands −86 → −106 dB; holds +3 dB. Cost: per-cell IFFT when the cell
+residual exceeds a floor — −50 dB doubled the WSL stress-probe mean (stereo
+detune ×1.003 leaves −30…−50 dB residuals), −30 dB gives 48 kHz block 64 mean
+551 µs (step 9: 389; budget 1333) and 96 kHz small-block spikes
+([timing](docs/results/2026-10-10-timing-step10.txt)). Results
+([matrix](docs/results/2026-10-10-live-step10-cells-full.json),
+[fixtures](docs/results/2026-10-10-fixtures-step10-cells.json)): otherwise
+equivalent to step 9; pure DC −7 ripple 0.005 → 0.015, +7 0.020 → 0.000.
+
+Handoff point (session 3, final): branch `worktree-engine-quality-work` holds
+steps 5–10. Priorities: (1) CPU: split prepareFrame into two phases inside the
+hop (analysis spike at 96 kHz small blocks; no latency change), cheaper
+splitRegion candidate scans and jointFit (banded), then re-check the residual
+floor; (2) listening of `/tmp/pitchwing-listening-step10/` (renders of this
+build, see below); (3) inter-harmonic phase at onsets (θ=0 births for
+components born together, re-gauntlet against caveat 5); (4) dyad bends +7
+still −28 dB median; (5) hf_junk +0.6 dB, churn borderline events; (6) 44.1 kHz
+fixtures, stereo, MSVC.

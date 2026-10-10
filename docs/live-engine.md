@@ -173,6 +173,13 @@ O(m³) per sweep). Components are rendered as oscillators,
 `Re(2a·n·w[n−L+q]·e^{jω(n−L+q)}·modulation[q])` — the exact IFFT of their lobe
 plus mirrored image, untruncated — instead of an n-point IFFT each.
 
+Residual cells (step 10). A split group has no merged residual entry any more:
+each component owns the group's bins nearest to it (midpoints between component
+centres) and renders their residual `X − model` with its own `w` through an
+IFFT, but only when that residual exceeds −30 dB of the cell's energy
+(`residualFloor`); steady partials stay oscillator-only. Below the floor the
+residual is dropped (not exact; noted as a shortcut in the code).
+
 Region ancestry, transport rotation, and modulation are shared. The analytic
 inverse transforms remain separate per channel, preserving signed proportional
 channel relations without mixing samples between channels. A silent channel
